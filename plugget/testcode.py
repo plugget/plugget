@@ -11,4 +11,4 @@ reload(plugget)
 reload(b)
 reload(cmd)
 
-print([x for x in cmd.search()])
+cmd.install("io-xray")

@@ -6,6 +6,7 @@ from pathlib import Path
 import importlib
 import os
 import subprocess
+import json
 
 
 sources = [
@@ -21,34 +22,50 @@ def rmdir(path):
         os.system(f"rmdir /s /q {path}")
 
 
-class plugin(object):
-    app = None
+class Plugin(object):
+    def __init__(self, app=None, name=None, id=None, version=None, description=None, author=None, repo_url=None, license=None, tags=None, dependencies=None, subdir=None):
+        self.app = app
 
-    name = ""  # displayname
-    id = ""  # unique id
-    # version = ""
-    # description = ""
-    # author = ""
-    repo_url = ""
-    # license = ""
-    # tags = []
-    # dependencies = []
+        self.name = name  # displayname
+        self.id = id or name # unique id  # todo for now same as name
+        self.version = version
+        # description = ""
+        # author = ""
+        self.repo_url = repo_url
+        # license = ""
+        # tags = []
+        # dependencies = []
+        self.subdir = subdir
+
 
     @property
     def clone_dir(self):
         """return the path we clone to on install e.g C:/Users/username/AppData/Local/Temp/plugget/bqt/0.1.0"""
-
+        print(self.app, self.id, self.version)
         return TEMP_PLUGGET / self.app / self.id / self.version
 
-    @property
-    def subdir(self):
-        """return the subdirectory of the repo, defined by '?Path=' in the URL e.g bqt"""
-        split = self.repo_url.split("?Path=")
-        if len(split) > 1:
-            return [1]
-        else:
-            return None
+    # @property
+    # def clone_dir_shell(self):
+    #     """return the path we clone to on install e.g C:/Users/username/AppData/Local/Temp/plugget/bqt/0.1.0"""
+    #     return str(self.clone_dir.as_posix()).replace("C:", "/c/")
 
+    # @property
+    # def subdir(self):
+    #     """return the subdirectory of the repo, defined by '?Path=' in the URL e.g bqt"""
+    #     split = self.repo_url.split("?Path=")
+    #     if len(split) > 1:
+    #         return split[1]
+    #     else:
+    #         return None
+
+    @classmethod
+    def from_json(cls, json_path):
+        with open(json_path, "r") as f:
+            json_data = json.load(f)
+
+        app = Path(json_path).parent.parent.name  # e.g. blender/bqt/0.1.0.json -> blender
+        version = Path(json_path).stem  # e.g. blender/bqt/0.1.0.json -> 0.1.0
+        return cls(**json_data, app=app, version=version)
 
     def _clone_repo(self):
         # clone package repo to temp folder
@@ -62,24 +79,58 @@ class plugin(object):
         # git init
         # git remote add -f origin <url>
 
+#         if self.subdir:
+#             command = f"""
+# mkdir "{self.clone_dir}"
+# cd "{self.clone_dir}"
+# git init "{self.clone_dir}"
+# git remote add -f origin "{self.repo_url}"
+# git pull origin master
+#             """
+# # git config core.sparseCheckout true
+# # echo {self.subdir} > .git/info/sparse-checkout
+#
+#             print(command)
+#
+#             result = subprocess.run(command, shell=True, capture_output=True, text=True)
         if self.subdir:
-            command = f"mkdir {self.clone_dir};" \
-                      f"cd {self.clone_dir};" \
-                        "git init;" \
-                        f"git remote add -f origin {self.repo_url};" \
-                        "git config core.sparseCheckout true;" \
-                        f"echo {self.subdir} > .git/info/sparse-checkout;" \
-                        f"git pull origin {self.branch} --depth=1 --single-branch"
+            subprocess.run(
+                ["git", "clone", "--depth", "1", "--progress", self.repo_url, str(self.clone_dir)])
 
-            ret = subprocess.run(command, capture_output=True, shell=True)
+            # delete .git folder
+            rmdir(self.clone_dir / ".git")
+#
+#             command = \
+#             f"""
+#             mkdir "{self.clone_dir}"
+#             cd "{self.clone_dir}"
+#             git init "{self.clone_dir}"
+#             git remote add -f origin "{self.repo_url}"
+#             git config core.sparseCheckout true
+#             echo "{self.subdir}" > .git/info/sparse-checkout
+#             git pull --depth=1"
+#             """
+# # f"git pull origin {self.branch} --depth=1 --single-branch"
+#             print(command)
+#             ret = subprocess.run(command, capture_output=True, shell=True)
+
+            # confirm folder was created
+            if not self.clone_dir.exists():
+                raise Exception(f"Failed to clone repo to {self.clone_dir}")
+
+            print("SUBDIR" , self.clone_dir / self.subdir)
             return self.clone_dir / self.subdir
         else:
             # clone repo
             subprocess.run(
                 ["git", "clone", "--depth", "1", "--single-branch", "--progress", self.repo_url, str(self.clone_dir)])
 
+            # delete .git folder
+            rmdir(self.clone_dir / ".git")
+
             # app_dir = Path("C:/Users/hanne/OneDrive/Documents/repos/plugget-pkgs") / "blender"
             return self.clone_dir
+
 
 def _clone_manifest_repo():
     # if repo doesn't exist, clone it
@@ -91,11 +142,16 @@ def _clone_manifest_repo():
 
         source_dir = TEMP_PLUGGET / source_name
 
+        print("remove dir")
+        rmdir(source_dir)  # todo catch if this failed
 
-        rmdir(source_dir)
+        # check if dir exists
+        if source_dir.exists():
+            raise Exception(f"Failed to remove source_dir {source_dir}")
 
         # print(source_dir)
         # if not source_dir.exists():
+        print("clone repo")
         subprocess.run(["git", "clone", "--depth", "1", "--progress", source_url, str(source_dir)])
          # todo single branch
         # # if repo exists, pull it
@@ -137,7 +193,7 @@ def get_app_module():
     return module
 
 
-def search(name=None):
+def search_iter(name=None):
     """search if package is in sources"""
 
     source_dirs = _clone_manifest_repo()
@@ -148,7 +204,12 @@ def search(name=None):
             print("plugin_manifest", plugin_manifest)
             source_name = plugin_manifest.parent.name
             if name is None or name.lower() in source_name.lower():
+                # todo yield plugin object
+                # l;oad json
+                plugin = Plugin.from_json(plugin_manifest)
+
                 yield plugin_manifest
+
 
 
 def list():
@@ -168,16 +229,22 @@ def install(name):
     # copy package to blender package folder
     module = get_app_module()
 
-    packages = search(name)
+    packages = []
+    for package in search_iter(name):
+        packages.append(package)
+
+        if len(packages) > 1:
+            print(f"Multiple packages found for {name}")
+            return
+
     if len(packages) == 0:
         print(f"Package {name} not found")
         return
-    if len(packages) > 1:
-        print(f"Multiple packages found for {name}")
-        return
 
-    module.install_plugin(name)
-    pass
+    plugin = Plugin.from_json(packages[0])
+    repo_path = plugin._clone_repo()
+    # get latest version from plugin
+    module.install_plugin(repo_path)
 
 
 def uninstall():
