@@ -11,4 +11,4 @@ reload(plugget)
 reload(b)
 reload(cmd)
 
-cmd.install("io-xray")
+cmd.install("textools")

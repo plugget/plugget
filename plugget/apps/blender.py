@@ -2,6 +2,7 @@ import bpy
 import addon_utils
 from pathlib import Path
 import shutil
+import logging
 
 
 # TODO uninstal/remove vs deactivate/disable
@@ -18,9 +19,11 @@ def installed_plugins():
 
 
 def disable_plugin(name):
+    logging.info(f"Disabling plugin {name}")
     bpy.ops.preferences.addon_disable(module=name)
 
 def enable_plugin(name):
+    logging.info(f"Enabling plugin {name}")
     bpy.ops.preferences.addon_enable(module=name)
 
 def install_plugin(plugin_path: Path, force=False, enable=True):
@@ -31,7 +34,7 @@ def install_plugin(plugin_path: Path, force=False, enable=True):
     # resulting in clashes. we cant just rename the subdir, might break code inside.
     # so we need to track the "name"
 
-
+    logging.info(f"Installing plugin from {plugin_path}")
     local_script_dir = bpy.utils.script_path_user()
     local_addons_dir = Path(local_script_dir) / "addons"
     new_plugin_path = local_addons_dir / plugin_path.name
@@ -46,6 +49,7 @@ def install_plugin(plugin_path: Path, force=False, enable=True):
     #     enable_plugin(name)
 
 def uninstall_plugin(name):
+    logging.info(f"Uninstalling plugin {name}")
     if not name:
         print("No plugin name given")
         return

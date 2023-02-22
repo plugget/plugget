@@ -7,6 +7,7 @@ import importlib
 import os
 import subprocess
 import json
+import logging
 
 
 sources = [
@@ -28,6 +29,7 @@ def plugin_name_from_manifest(manifest_name):
 
 
 def rmdir(path):
+    logging.debug(f"rmdir {path}")
     # delete folder on windows
     if os.path.exists(path):
         # remove folder and all content
@@ -35,27 +37,39 @@ def rmdir(path):
 
 
 class Plugin(object):
-    def __init__(self, app=None, name=None, display_name=None, plugin_name=None, id=None, version=None, description=None, author=None, repo_url=None, license=None, tags=None, dependencies=None, subdir=None):
+    # change representation when printed
+    def __repr__(self):
+        return f"Plugin({self.name} {self.version})"
+
+
+    def __init__(self, app=None, name=None, display_name=None, plugin_name=None, id=None, version=None,
+                 description=None, author=None, repo_url=None, package_url=None, license=None, tags=None,
+                 dependencies=None, subdir=None,):
         self.app = app
 
-        self.name = name  # displayname
-        self.plugin_name = plugin_name
-        self.id = id or name # unique id  # todo for now same as name
+        self.repo_url = repo_url
+        self.plugin_name = plugin_name or self.default_plugin_name()
+        self.name = name or self.plugin_name
+        # self.id = id or plugin_name  # unique id  # todo for now same as name
         self.version = version
         # description = ""
         # author = ""
-        self.repo_url = repo_url
         # license = ""
         # tags = []
         # dependencies = []
         self.subdir = subdir
 
+    def default_plugin_name(self):
+        # "https://github.com/SavMartin/TexTools-Blender" -> "TexTools-Blender"
+        return self.repo_url.rsplit("/", 1)
+
+
+
 
     @property
     def clone_dir(self):
         """return the path we clone to on install e.g C:/Users/username/AppData/Local/Temp/plugget/bqt/0.1.0"""
-        print(self.app, self.id, self.version)
-        return TEMP_PLUGGET / self.app / self.id / self.version
+        return TEMP_PLUGGET / self.app / self.plugin_name / self.version / self.plugin_name
 
     # @property
     # def clone_dir_shell(self):
@@ -107,6 +121,7 @@ class Plugin(object):
 #
 #             result = subprocess.run(command, shell=True, capture_output=True, text=True)
         if self.subdir:
+            logging.debug(f"cloning {self.repo_url} to {self.clone_dir}")
             subprocess.run(
                 ["git", "clone", "--depth", "1", "--progress", self.repo_url, str(self.clone_dir)])
 
@@ -246,6 +261,11 @@ def search_single(name):
     return plugin
 
 
+def search(name=None):
+    return [x for x in search_iter(name)]
+
+
+# we overwrite build in type list here, carefull when using list in this module!
 def list():
     """list installed packages"""
 
