@@ -23,10 +23,11 @@ def rmdir(path):
 
 
 class Plugin(object):
-    def __init__(self, app=None, name=None, id=None, version=None, description=None, author=None, repo_url=None, license=None, tags=None, dependencies=None, subdir=None):
+    def __init__(self, app=None, name=None, display_name=None, plugin_name=None, id=None, version=None, description=None, author=None, repo_url=None, license=None, tags=None, dependencies=None, subdir=None):
         self.app = app
 
         self.name = name  # displayname
+        self.plugin_name = plugin_name
         self.id = id or name # unique id  # todo for now same as name
         self.version = version
         # description = ""
@@ -194,7 +195,10 @@ def get_app_module():
 
 
 def search_iter(name=None):
-    """search if package is in sources"""
+    """
+    search if package is in sources
+    if name is None, return all packages
+    """
 
     source_dirs = _clone_manifest_repo()
 
@@ -208,7 +212,25 @@ def search_iter(name=None):
                 # l;oad json
                 plugin = Plugin.from_json(plugin_manifest)
 
-                yield plugin_manifest
+                yield plugin
+
+
+def search_single(name):
+    plugins = []
+    for plugin in search_iter(name):
+        plugins.append(plugin)
+
+        if len(plugins) > 1:
+            print(f"Multiple packages found for {name}")
+            return
+
+    if len(plugins) == 0:
+        print(f"Package {name} not found")
+        return
+
+    plugin = plugins[0]
+    return plugin
+
 
 
 
@@ -229,31 +251,39 @@ def install(name):
     # copy package to blender package folder
     module = get_app_module()
 
-    packages = []
-    for package in search_iter(name):
-        packages.append(package)
-
-        if len(packages) > 1:
-            print(f"Multiple packages found for {name}")
-            return
-
-    if len(packages) == 0:
-        print(f"Package {name} not found")
+    plugins = []
+    plugin = search_single(name)
+    if not plugin:
+        print("Package not found, cancelling install")
         return
 
-    plugin = Plugin.from_json(packages[0])
-    repo_path = plugin._clone_repo()
+    repo_path = plugin._clone_repo()  # we install the plugin with the repo name, not the manifest name!
+
     # get latest version from plugin
     module.install_plugin(repo_path)
 
     # enable
-    module.enable_plugin(plugin.name)
+    module.enable_plugin(plugin.plugin_name)
 
 
-def uninstall(name):
+def uninstall(manifest_name=None, plugin_name=None):
+    """
+    uninstall package
+    :param name: name of the manifest folder in the manifest repo
+    """
+    # todo, a user might expect to do install(pluginname") instead of install("manifestname"),
+    #  since this would also work with non plugget plugins
+    #  check repos for (matching) manifest, uninstall? vs check local isntalled plugins, uninstall. much easier but name is diff from install
+
+    # get plugin_name from manifest
+    if manifest_name:
+        print("provided manifest, searching for plugin")
+        plugin = search_single(manifest_name)
+        print("found plugin name from manifest", plugin.plugin_name)
+        plugin_name = plugin.plugin_name
 
     module = get_app_module()
-    module.uninstall_plugin(name)
+    module.uninstall_plugin(plugin_name)
 
 
 def update():
@@ -264,7 +294,7 @@ def update():
     pass
 
 
-# open pacakge manager
+# open package manager
 def list():
     """list installed packages"""
 
