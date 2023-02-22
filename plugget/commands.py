@@ -15,6 +15,18 @@ sources = [
 
 TEMP_PLUGGET = Path(os.getenv("TEMP")) / "plugget"
 
+
+def plugin_name_from_manifest(manifest_name):
+    # get plugin_name from manifest
+    if manifest_name:
+        print("provided manifest, searching for plugin")
+        plugin = search_single(manifest_name)
+        print("found plugin name from manifest", plugin.plugin_name)
+        plugin_name = plugin.plugin_name
+
+        return plugin_name
+
+
 def rmdir(path):
     # delete folder on windows
     if os.path.exists(path):
@@ -178,6 +190,7 @@ def _add_repo(repo_url):
     sources.append(repo_url)
     # TODO save to config file
 
+
 def _detect_app():
     # detect application
 
@@ -185,6 +198,7 @@ def _detect_app():
     module = importlib.import_module(f"plugget.apps.{dcc}")
 
     pass
+
 
 def get_app_module():
     # detect application
@@ -232,8 +246,6 @@ def search_single(name):
     return plugin
 
 
-
-
 def list():
     """list installed packages"""
 
@@ -245,14 +257,19 @@ def list():
     module.installed_plugins()
 
 
-def install(name):
-    """install package"""
+#    plugin_name = plugin_name or plugin_name_from_manifest(manifest_name)
+def install(manifest_name, enable=True):
+    """
+    install package
+    :param name: name of the manifest folder in the manifest repo
+    :param enable: enable plugin after install
+    """
     # get package from package repo
     # copy package to blender package folder
     module = get_app_module()
 
     plugins = []
-    plugin = search_single(name)
+    plugin = search_single(manifest_name)
     if not plugin:
         print("Package not found, cancelling install")
         return
@@ -262,8 +279,8 @@ def install(name):
     # get latest version from plugin
     module.install_plugin(repo_path)
 
-    # enable
-    module.enable_plugin(plugin.plugin_name)
+    if enable:
+        module.enable_plugin(plugin.plugin_name)
 
 
 def uninstall(manifest_name=None, plugin_name=None):
@@ -275,15 +292,32 @@ def uninstall(manifest_name=None, plugin_name=None):
     #  since this would also work with non plugget plugins
     #  check repos for (matching) manifest, uninstall? vs check local isntalled plugins, uninstall. much easier but name is diff from install
 
-    # get plugin_name from manifest
-    if manifest_name:
-        print("provided manifest, searching for plugin")
-        plugin = search_single(manifest_name)
-        print("found plugin name from manifest", plugin.plugin_name)
-        plugin_name = plugin.plugin_name
+    plugin_name = plugin_name or plugin_name_from_manifest(manifest_name)
 
     module = get_app_module()
     module.uninstall_plugin(plugin_name)
+
+
+def disable(manifest_name=None, plugin_name=None):
+    """
+    disable package
+    :param name: name of the manifest folder in the manifest repo
+    """
+    plugin_name = plugin_name or plugin_name_from_manifest(manifest_name)
+
+    module = get_app_module()
+    module.disable_plugin(plugin_name)
+
+
+def enable(manifest_name=None, plugin_name=None):
+    """
+    enable package
+    :param name: name of the manifest folder in the manifest repo
+    """
+    plugin_name = plugin_name or plugin_name_from_manifest(manifest_name)
+
+    module = get_app_module()
+    module.enable_plugin(plugin_name)
 
 
 def update():
@@ -308,3 +342,8 @@ def list():
 
 # aliases
 upgrade = update
+
+
+
+
+

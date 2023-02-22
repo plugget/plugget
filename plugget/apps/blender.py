@@ -46,5 +46,8 @@ def install_plugin(plugin_path: Path, force=False, enable=True):
     #     enable_plugin(name)
 
 def uninstall_plugin(name):
+    if not name:
+        print("No plugin name given")
+        return
     bpy.ops.preferences.addon_remove(module=name)
 
