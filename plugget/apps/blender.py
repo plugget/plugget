@@ -7,16 +7,14 @@ import shutil
 # TODO uninstal/remove vs deactivate/disable
 
 
-def installed_plugins():
+def enabled_plugins():
     """return list of installed plugins"""
     # TODO get list of installed plugins
     return bpy.context.preferences.addons.keys()
 
 
-def available_plugins():
-    for mod in addon_utils.modules():
-        print(mod.bl_info.get("name"))
-        # print(mod.bl_info)
+def installed_plugins():
+    return [mod.bl_info.get("name") for mod in addon_utils.modules()]
 
 
 def disable_plugin(name):
@@ -30,14 +28,8 @@ def install_plugin(plugin_path: Path, force=False, enable=True):
 
     local_script_dir = bpy.utils.script_path_user()
     local_addons_dir = Path(local_script_dir) / "addons"
-    # copy plugin_path to local_addons_dir
     new_plugin_path = local_addons_dir / plugin_path.name
-    # # create dir if not exists
-    # if not new_plugin_path.exists():
-    #     new_plugin_path.mkdir(parents=True)
-
-    print(new_plugin_path, plugin_path)
-    shutil.move(str(plugin_path), str(new_plugin_path.parent))  # todo permission error
+    shutil.move(str(plugin_path), str(new_plugin_path.parent))  # copy plugin_path to local_addons_dir
 
     # get user path from bpy
 
@@ -49,3 +41,4 @@ def install_plugin(plugin_path: Path, force=False, enable=True):
 
 def uninstall_plugin(name):
     bpy.ops.preferences.addon_remove(module=name)
+

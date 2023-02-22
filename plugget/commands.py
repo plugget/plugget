@@ -246,12 +246,14 @@ def install(name):
     # get latest version from plugin
     module.install_plugin(repo_path)
 
+    # enable
+    module.enable_plugin(plugin.name)
 
-def uninstall():
+
+def uninstall(name):
 
     module = get_app_module()
-    module.uninstall_plugin()
-    pass
+    module.uninstall_plugin(name)
 
 
 def update():
@@ -263,8 +265,15 @@ def update():
 
 
 # open pacakge manager
+def list():
+    """list installed packages"""
 
+    # detect plugins from dcc,
+    #   detect dcc
+    #   load dcc plugin
 
+    module = get_app_module()
+    return module.installed_plugins()
 
 
 # aliases
