@@ -44,7 +44,22 @@ class Plugin(object):
 
     def __init__(self, app=None, name=None, display_name=None, plugin_name=None, id=None, version=None,
                  description=None, author=None, repo_url=None, package_url=None, license=None, tags=None,
-                 dependencies=None, subdir=None,):
+                 dependencies=None, subdir=None, docs_url=None):
+        """
+        :param app: the application this plugin is for e.g. blender
+
+        :param name: the name of the plugin e.g. bqt (currently same as display_name)
+        :param display_name: the display name of the plugin e.g. BQT (not used)
+
+        :param plugin_name: the (unique) name of the plugin used by the app e.g. bqt
+        :param id: the unique id of the plugin e.g. bqt (not used)
+
+        :param subdir: the subdirectory of the repo where the plugin is located, this becomes pluginname in blender todo change?
+
+        :param version: the version of the plugin e.g. 0.1.0, derived from manifest name
+
+
+        """
         self.app = app
 
         self.repo_url = repo_url
@@ -52,6 +67,8 @@ class Plugin(object):
         self.name = name or self.plugin_name
         # self.id = id or plugin_name  # unique id  # todo for now same as name
         self.version = version
+        self.docs_url = None
+        self.package_url = package_url
         # description = ""
         # author = ""
         # license = ""
@@ -60,11 +77,14 @@ class Plugin(object):
         self.subdir = subdir
 
     def default_plugin_name(self):
-        # "https://github.com/SavMartin/TexTools-Blender" -> "TexTools-Blender"
-        return self.repo_url.rsplit("/", 1)
-
-
-
+        """
+        use the repo name as the default plugin name
+        e.g. https://github.com/SavMartin/TexTools-Blender -> TexTools-Blender
+        """
+        if self.package_url:
+            return self.package_url.rsplit("/", 1)[1].split(".")[0]
+        else:
+            return self.repo_url.rsplit("/", 1).split(".")[0]
 
     @property
     def clone_dir(self):
