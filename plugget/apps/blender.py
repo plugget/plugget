@@ -19,12 +19,14 @@ def installed_plugins():
 
 
 def disable_plugin(name):
-    logging.info(f"Disabling plugin {name}")
+    # logging.info(f"Disabling plugin {name}")
     bpy.ops.preferences.addon_disable(module=name)
 
+
 def enable_plugin(name):
-    logging.info(f"Enabling plugin {name}")
+    # logging.info(f"Enabling plugin {name}")
     bpy.ops.preferences.addon_enable(module=name)
+
 
 def install_plugin(plugin_path: Path, force=False, enable=True):
     # If the “overwrite” parameter is True, the add-on will be reinstalled, even if it has not been previously removed.
@@ -34,22 +36,15 @@ def install_plugin(plugin_path: Path, force=False, enable=True):
     # resulting in clashes. we cant just rename the subdir, might break code inside.
     # so we need to track the "name"
 
-    logging.info(f"Installing plugin from {plugin_path}")
+    # logging.info(f"Installing plugin from {plugin_path}")
     local_script_dir = bpy.utils.script_path_user()
     local_addons_dir = Path(local_script_dir) / "addons"
     new_plugin_path = local_addons_dir / plugin_path.name
     shutil.move(str(plugin_path), str(new_plugin_path.parent))  # copy plugin_path to local_addons_dir
 
-    # get user path from bpy
-
-
-
-    # bpy.ops.preferences.addon_install(filepath=path, overwrite=force)
-    # if enable:
-    #     enable_plugin(name)
 
 def uninstall_plugin(name):
-    logging.info(f"Uninstalling plugin {name}")
+    # logging.info(f"Uninstalling plugin {name}")
     if not name:
         print("No plugin name given")
         return

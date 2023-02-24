@@ -29,7 +29,7 @@ def plugin_name_from_manifest(manifest_name):
 
 
 def rmdir(path):
-    logging.debug(f"rmdir {path}")
+    # logging.debug(f"rmdir {path}")
     # delete folder on windows
     if os.path.exists(path):
         # remove folder and all content
@@ -144,7 +144,7 @@ class Plugin(object):
 #
 #             result = subprocess.run(command, shell=True, capture_output=True, text=True)
         if self.subdir:
-            logging.debug(f"cloning {self.repo_url} to {self.clone_dir}")
+            # logging.debug(f"cloning {self.repo_url} to {self.clone_dir}")
             subprocess.run(
                 ["git", "clone", "--depth", "1", "--progress", self.repo_url, str(self.clone_dir)])
 
@@ -285,19 +285,45 @@ def search_single(name):
 
 
 def search(name=None):
-    return [x for x in search_iter(name)]
+    plugins = [x for x in search_iter(name)]
+
+    print(f"{len(plugins)} plugins found in repo:")
+    print(f"{'-' * 20}")
+    for plugin in plugins:
+        print(f"{plugin}")
+
+    return plugins
 
 
-# we overwrite build in type list here, carefull when using list in this module!
-def list():
-    """list installed packages"""
+# # we overwrite build in type list here, carefull when using list in this module!
+# open package manager
+def list(enabled=False, disabled=False, source=None):
+    """
+    list installed packages
+    :param enabled: list enabled packages
+    :param disabled: list disabled packages
+    :param source: list packages from specific source
+    """
 
     # detect plugins from dcc,
     #   detect dcc
     #   load dcc plugin
 
     module = get_app_module()
-    module.installed_plugins()
+
+    if enabled:
+        plugins = module.enabled_plugins()
+    elif disabled:
+        plugins = module.disabled_plugins()
+    else:  # list all installed
+        plugins = module.installed_plugins()
+
+    print(f"{len(plugins)} installed plugins")
+    print(f"{'-' * 20}")
+    for plugin in plugins:
+        print(f"{plugin}")
+
+    return plugins
 
 
 #    plugin_name = plugin_name or plugin_name_from_manifest(manifest_name)
@@ -370,17 +396,6 @@ def update():
 
     pass
 
-
-# open package manager
-def list():
-    """list installed packages"""
-
-    # detect plugins from dcc,
-    #   detect dcc
-    #   load dcc plugin
-
-    module = get_app_module()
-    return module.installed_plugins()
 
 def open_install_dir():
     module = get_app_module()
