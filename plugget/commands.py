@@ -382,6 +382,10 @@ def list():
     module = get_app_module()
     return module.installed_plugins()
 
+def open_install_dir():
+    module = get_app_module()
+    module.open_install_dir()
+
 
 # aliases
 upgrade = update

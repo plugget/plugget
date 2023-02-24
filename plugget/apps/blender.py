@@ -55,3 +55,9 @@ def uninstall_plugin(name):
         return
     bpy.ops.preferences.addon_remove(module=name)
 
+
+def open_install_dir():
+    """Open the directory where plugins are installed"""
+    local_script_dir = bpy.utils.script_path_user()
+    local_addons_dir = Path(local_script_dir) / "addons"
+    bpy.ops.wm.path_open(filepath=str(local_addons_dir))
