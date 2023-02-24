@@ -18,6 +18,11 @@ def installed_plugins():
     return [mod.bl_info.get("name") for mod in addon_utils.modules()]
 
 
+def disabled_plugins():
+    """return list of disabled plugins"""
+    return [p for p in installed_plugins() if p not in enabled_plugins()]
+
+
 def disable_plugin(name):
     # logging.info(f"Disabling plugin {name}")
     bpy.ops.preferences.addon_disable(module=name)
