@@ -44,7 +44,7 @@ class Plugin(object):
 
     def __init__(self, app=None, name=None, display_name=None, plugin_name=None, id=None, version=None,
                  description=None, author=None, repo_url=None, package_url=None, license=None, tags=None,
-                 dependencies=None, subdir=None, docs_url=None):
+                 dependencies=None, subdir=None, docs_url=None, **kwargs):
         """
         :param app: the application this plugin is for e.g. blender
 
@@ -60,15 +60,18 @@ class Plugin(object):
 
 
         """
+
+        logging.warning("unused kwargs on Plugin init:", kwargs)
+
         self.app = app
 
-        self.repo_url = repo_url
+        self.repo_url = repo_url  # set before plugin name
+        self.package_url = package_url  # set before plugin name
         self.plugin_name = plugin_name or self.default_plugin_name()
         self.name = name or self.plugin_name
         # self.id = id or plugin_name  # unique id  # todo for now same as name
         self.version = version
         self.docs_url = None
-        self.package_url = package_url
         # description = ""
         # author = ""
         # license = ""
@@ -84,7 +87,7 @@ class Plugin(object):
         if self.package_url:
             return self.package_url.rsplit("/", 1)[1].split(".")[0]
         else:
-            return self.repo_url.rsplit("/", 1).split(".")[0]
+            return self.repo_url.rsplit("/", 1)[1].split(".")[0]
 
     @property
     def clone_dir(self):
