@@ -60,8 +60,8 @@ class Plugin(object):
 
 
         """
-
-        logging.warning("unused kwargs on Plugin init:", kwargs)
+        if kwargs:
+            logging.warning("unused kwargs on Plugin init:", kwargs)
 
         self.app = app
 
