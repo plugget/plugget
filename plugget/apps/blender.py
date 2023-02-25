@@ -21,18 +21,21 @@ def is_installed(name):
 def installed_plugins():
     """return list of installed plugins"""
     # Blender names returned are from the operator, but plugin_name in the manifest refers to the blender folder name
+    # todo ideally we return a name thats useable in the pluggest install commands
     return [mod.bl_info.get("name") for mod in addon_utils.modules()]
 
 
 def enabled_plugins() -> list[str]:
     """return list of enabled plugins"""
     # Blender names returned are from the operator, but plugin_name in the manifest refers to the blender folder name
+    # todo ideally we return a name thats useable in the pluggest install commands
     return bpy.context.preferences.addons.keys()
 
 
 def disabled_plugins() -> list[str]:
     """return list of disabled plugins"""
     # Blender names returned are from the operator, but plugin_name in the manifest refers to the blender folder name
+    # todo ideally we return a name thats useable in the pluggest install commands
     return [p for p in installed_plugins() if p not in enabled_plugins()]
 
 

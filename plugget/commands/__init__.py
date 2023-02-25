@@ -104,7 +104,7 @@ def search(name=None, verbose=True):
 
 # # we overwrite build in type list here, carefull when using list in this module!
 # open package manager
-def list(enabled=False, disabled=False):  # , source=None):
+def list(enabled=False, disabled=False, verbose=True):  # , source=None):
     """
     list all installed packages by default
     :param enabled: list enabled packages only if True
@@ -121,10 +121,11 @@ def list(enabled=False, disabled=False):  # , source=None):
     else:  # list all installed
         plugins = module.installed_plugins()
 
-    print(f"{len(plugins)} installed plugins")
-    print(f"{'-' * 20}")
-    for plugin in plugins:
-        print(f"{plugin}")
+    if verbose:
+        print(f"{len(plugins)} installed plugins")
+        print(f"{'-' * 20}")
+        for plugin in plugins:
+            print(f"{plugin}")
 
     return plugins
 
