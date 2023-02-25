@@ -4,6 +4,7 @@ Plugget is a plugin-manager for various applications.
 import importlib
 import logging
 import subprocess
+import datetime
 
 from plugget.utils import rmdir
 from plugget.data import Plugin
@@ -21,46 +22,41 @@ def _plugin_name_from_manifest(manifest_name):
         return plugin_name
 
 
-def _clone_manifest_repo():
+def _clone_manifest_repo(source_url):
+    source_name = source_url.split("/")[-1].split(".")[0]
+    source_dir = settings.TEMP_PLUGGET / source_name
+
+    # CACHING: check when repo was last updated
+    if (source_dir / "_LAST_UPDATED").exists():
+        with open(source_dir / "_LAST_UPDATED", "r") as f:
+            last_updated = datetime.datetime.strptime(f.read(), "%Y-%m-%d %H:%M:%S")
+        if last_updated > datetime.datetime.now() - datetime.timedelta(days=1):
+            print("using cached manifest repo, last updated less than a day ago")
+            return source_dir
+
+    rmdir(source_dir)  # todo catch if this failed
+
+    # check if dir exists
+    if source_dir.exists():
+        raise Exception(f"Failed to remove source_dir {source_dir}")
+
+    # clone repo
+    subprocess.run(["git", "clone", "--depth", "1", "--progress", source_url, str(source_dir)])
+
+    # CACHING: make a file inside named _LAST_UPDATED with the current date
+    with open(source_dir / "_LAST_UPDATED", "w") as f:
+        f.write(datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S"))
+
+    return source_dir
+
+
+def _clone_manifest_repos():
     # if repo doesn't exist, clone it
     source_dirs = []
     for source_url in settings.sources:
-
-        source_name = source_url.split("/")[-1].split(".")[0]
-        print(source_name)
-
-        source_dir = settings.TEMP_PLUGGET / source_name
-
-        print("remove dir")
-        rmdir(source_dir)  # todo catch if this failed
-
-        # check if dir exists
-        if source_dir.exists():
-            raise Exception(f"Failed to remove source_dir {source_dir}")
-
-        # print(source_dir)
-        # if not source_dir.exists():
-        print("clone repo")
-        subprocess.run(["git", "clone", "--depth", "1", "--progress", source_url, str(source_dir)])
-         # todo single branch
-        # # if repo exists, pull it
-        # else:
-        #
-        #     source_dir_shell = source_dir.as_posix().replace("\\", "/").replace("C:", "/c")
-        #     print(source_dir_shell)
-        #     command = f"cd {source_dir_shell}; " \
-        #               "git pull"
-        #
-        #
-        #     ret = subprocess.run(command, capture_output=True, shell=True)
-        #
-        #     print("command \n", command)
-        #
-        #
-        #     # subprocess.run(["git", "pull", "--depth", "1", "--single-branch", "--progress", source_url, str(source_dir)])
+        source_dir = _clone_manifest_repo(source_url)
         source_dirs.append(source_dir)
     return source_dirs
-
 
 def _add_repo(repo_url):
     settings.sources.append(repo_url)
@@ -88,7 +84,7 @@ def _search_iter(name=None):  # todo can we merge with search?
     search if package is in sources
     if name is None, return all packages
     """
-    source_dirs = _clone_manifest_repo()
+    source_dirs = _clone_manifest_repos()
     for source_dir in source_dirs:
         for plugin_manifest in source_dir.rglob("*.json"):
             source_name = plugin_manifest.parent.name
@@ -173,7 +169,6 @@ def uninstall(manifest_name=None, plugin_name=None):
     #  check repos for (matching) manifest, uninstall? vs check local isntalled plugins, uninstall. much easier but name is diff from install
 
     plugin_name = plugin_name or _plugin_name_from_manifest(manifest_name)
-
     module = _get_app_module()
     module.uninstall_plugin(plugin_name)
 
@@ -185,7 +180,6 @@ def disable(manifest_name=None, plugin_name=None):
     :param name: name of the manifest folder in the manifest repo
     """
     plugin_name = plugin_name or _plugin_name_from_manifest(manifest_name)
-
     module = _get_app_module()
     module.disable_plugin(plugin_name)
 
@@ -196,7 +190,6 @@ def enable(manifest_name=None, plugin_name=None):
     :param name: name of the manifest folder in the manifest repo
     """
     plugin_name = plugin_name or _plugin_name_from_manifest(manifest_name)
-
     module = _get_app_module()
     module.enable_plugin(plugin_name)
 

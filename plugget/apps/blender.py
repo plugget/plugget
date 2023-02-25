@@ -7,6 +7,7 @@ import logging
 
 """
 Blender plugins are named addons
+addons in Blender are folders of scripts, and can be enabled/disabled
 """
 
 
@@ -14,7 +15,6 @@ def is_installed(name):
     """check if plugin is installed, use plugin_name from manifest, checking folder name in addons"""
     local_script_dir = bpy.utils.script_path_user()
     local_addons_dir = Path(local_script_dir) / "addons"
-    print((local_addons_dir / name).exists())
     return (local_addons_dir / name).exists()
 
 
