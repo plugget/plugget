@@ -49,7 +49,7 @@ def enable_plugin(name):
     bpy.ops.preferences.addon_enable(module=name)
 
 
-def install_plugin(plugin_path: Path) -> bool:  # todo , force=False, enable=True):
+def install_plugin(plugin_paths: list[Path]) -> bool:  # todo , force=False, enable=True):
     """install plugin from path"""
     # If the “overwrite” parameter is True, the add-on will be reinstalled, even if it has not been previously removed.
 
@@ -57,6 +57,11 @@ def install_plugin(plugin_path: Path) -> bool:  # todo , force=False, enable=Tru
     # but subdir is io_scene_xray
     # resulting in clashes. we cant just rename the subdir, might break code inside.
     # so we need to track the "name" with plugin_name in the manifest
+
+    # todo fix only support 1 plugin
+    plugin_path = plugin_paths[0]
+    if len(plugin_paths) > 1:
+        raise NotImplemented("Only 1 plugin can be installed at a time for now")
 
     local_script_dir = bpy.utils.script_path_user()
     local_addons_dir = Path(local_script_dir) / "addons"

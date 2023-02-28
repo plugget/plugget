@@ -151,10 +151,11 @@ def install(manifest_name, enable=True):
         logging.warning(f"Plugin {plugin.plugin_name} is already installed, skipping install")
         return
 
-    repo_path = plugin._clone_repo()  # we install the plugin with the repo name, not the manifest name!
+
+    repo_paths = plugin.get_content()  # we install the plugin with the repo name, not the manifest name!
 
     # get latest version from plugin
-    module.install_plugin(repo_path)
+    module.install_plugin(repo_paths)
 
     if enable:
         module.enable_plugin(plugin.plugin_name)

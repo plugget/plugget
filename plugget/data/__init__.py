@@ -13,7 +13,7 @@ class Plugin(object):
 
     def __init__(self, app=None, name=None, display_name=None, plugin_name=None, id=None, version=None,
                  description=None, author=None, repo_url=None, package_url=None, license=None, tags=None,
-                 dependencies=None, subdir=None, docs_url=None, **kwargs):
+                 dependencies=None, repo_paths=None, docs_url=None, **kwargs):
         """
         :param app: the application this plugin is for e.g. blender
 
@@ -23,7 +23,7 @@ class Plugin(object):
         :param plugin_name: the (unique) name of the plugin used by the app e.g. bqt
         :param id: the unique id of the plugin e.g. bqt (not used)
 
-        :param subdir: the subdirectory of the repo where the plugin is located, this becomes pluginname in blender todo change?
+        :param repo_paths: a list containing the subdirectory of the repo where the plugin is located, this becomes pluginname in blender, can contain multiple paths or files
 
         :param version: the version of the plugin e.g. 0.1.0, derived from manifest name
 
@@ -46,7 +46,7 @@ class Plugin(object):
         # license = ""
         # tags = []
         # dependencies = []
-        self.subdir = subdir
+        self.repo_paths = repo_paths
 
     def default_plugin_name(self):
         """
@@ -73,12 +73,16 @@ class Plugin(object):
         version = Path(json_path).stem  # e.g. blender/bqt/0.1.0.json -> 0.1.0
         return cls(**json_data, app=app, version=version)
 
-    def _clone_repo(self):
+    def get_content(self) -> list[Path]:
+        """download the plugin content from the repo, and return the paths to the files"""
+        return self._clone_repo()
+
+    def _clone_repo(self) -> list[Path]:
         # clone package repo to temp folder
         rmdir(self.clone_dir)
 
-        # todo sparse checkout
-        if self.subdir:
+        # todo sparse checkout, support multiple entries in self.repo_paths
+        if self.repo_paths:
             # logging.debug(f"cloning {self.repo_url} to {self.clone_dir}")
             subprocess.run(["git", "clone", "--depth", "1", "--progress", self.repo_url, str(self.clone_dir)])
 
@@ -89,8 +93,7 @@ class Plugin(object):
             if not self.clone_dir.exists():
                 raise Exception(f"Failed to clone repo to {self.clone_dir}")
 
-            print("SUBDIR" , self.clone_dir / self.subdir)
-            return self.clone_dir / self.subdir
+            return [self.clone_dir / p for p in self.repo_paths]
         else:
             # clone repo
             subprocess.run(
@@ -100,4 +103,4 @@ class Plugin(object):
             rmdir(self.clone_dir / ".git")
 
             # app_dir = Path("C:/Users/hanne/OneDrive/Documents/repos/plugget-pkgs") / "blender"
-            return self.clone_dir
+            return [self.clone_dir]
