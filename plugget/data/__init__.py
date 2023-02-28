@@ -13,7 +13,7 @@ class Plugin(object):
 
     def __init__(self, app=None, name=None, display_name=None, plugin_name=None, id=None, version=None,
                  description=None, author=None, repo_url=None, package_url=None, license=None, tags=None,
-                 dependencies=None, repo_paths=None, docs_url=None, **kwargs):
+                 dependencies=None, repo_paths=None, docs_url=None, manifest_name=None, **kwargs):
         """
         :param app: the application this plugin is for e.g. blender
 
@@ -32,7 +32,8 @@ class Plugin(object):
         if kwargs:
             logging.warning("unused kwargs on Plugin init:", kwargs)
 
-        self.app = app
+        self.app = app  # derived from the folder
+        self.manifest_name = manifest_name  # derived from the folder
 
         self.repo_url = repo_url  # set before plugin name
         self.package_url = package_url  # set before plugin name
@@ -70,8 +71,9 @@ class Plugin(object):
             json_data = json.load(f)
 
         app = Path(json_path).parent.parent.name  # e.g. blender/bqt/0.1.0.json -> blender
+        manifest_name = Path(json_path).parent.name  # e.g. blender/bqt/0.1.0.json -> bqt
         version = Path(json_path).stem  # e.g. blender/bqt/0.1.0.json -> 0.1.0
-        return cls(**json_data, app=app, version=version)
+        return cls(**json_data, app=app, version=version, manifest_name=manifest_name)
 
     def get_content(self) -> list[Path]:
         """download the plugin content from the repo, and return the paths to the files"""
