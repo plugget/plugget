@@ -150,3 +150,7 @@ class Plugin(object):
 
             # app_dir = Path("C:/Users/hanne/OneDrive/Documents/repos/plugget-pkgs") / "blender"
             return [self.clone_dir]
+
+    def is_installed(self):
+        # plugin is installed, if the manifest is in the installed packages folder, settings.INSTALLED_DIR
+        return (settings.INSTALLED_DIR / self.app / self.package_name).exists()

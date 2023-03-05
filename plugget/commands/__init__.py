@@ -5,6 +5,9 @@ import importlib
 import logging
 import subprocess
 import datetime
+import os
+from pathlib import Path
+import shutil
 
 from plugget.utils import rmdir
 from plugget.data import Plugin
@@ -160,6 +163,10 @@ def install(manifest_name, enable=True):
     if enable:
         module.enable_plugin(plugin.plugin_name)
 
+
+    # copy manifest to installed packages dir
+    # todo check if install was successful
+    shutil.copy(src=plugin.manifest_path, dst=settings.INSTALLED_DIR / plugin.manifest_path.name)
 
 def uninstall(manifest_name=None, plugin_name=None):
     """
