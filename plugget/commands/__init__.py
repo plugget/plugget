@@ -54,12 +54,16 @@ def _clone_manifest_repo(source_url):
 
 
 def _clone_manifest_repos():
+    """
+    clone the manifest repos that are registered, defaults to ['github.com/hannesdelbeke/plugget-pkgs']
+    """
     # if repo doesn't exist, clone it
     source_dirs = []
     for source_url in settings.sources:
         source_dir = _clone_manifest_repo(source_url)
         source_dirs.append(source_dir)
     return source_dirs
+
 
 def _add_repo(repo_url):
     settings.sources.append(repo_url)
@@ -88,7 +92,8 @@ def _search_iter(name=None):  # todo can we merge with search?
     if name is None, return all packages
     """
     source_dirs = _clone_manifest_repos()
-    for source_dir in source_dirs:
+    for source_dir in source_dirs:  # go through all cloned manifest repos
+        # todo filter by app
         for plugin_manifest in source_dir.rglob("*.json"):
             source_name = plugin_manifest.parent.name
             if name is None or name.lower() in source_name.lower():
@@ -133,8 +138,9 @@ def list(enabled=False, disabled=False, verbose=True):  # , source=None):
     return plugins
 
 
+
 #    plugin_name = plugin_name or plugin_name_from_manifest(manifest_name)
-def install(manifest_name, enable=True):
+def install(manifest_name, enable=True, app=None):
     """
     install package
     :param name: name of the manifest folder in the manifest repo
@@ -146,7 +152,7 @@ def install(manifest_name, enable=True):
 
     plugin = search(manifest_name, verbose=False)[0]
     if not plugin:
-        print("Package not found, cancelling install")
+        logging.warning("Package not found, cancelling install")
         return
 
     # before install, check if plugin is already installed
