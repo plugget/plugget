@@ -13,7 +13,7 @@ class Plugin(object):
 
     def __init__(self, app=None, name=None, display_name=None, plugin_name=None, id=None, version=None,
                  description=None, author=None, repo_url=None, package_url=None, license=None, tags=None,
-                 dependencies=None, repo_paths=None, docs_url=None, manifest_name=None, **kwargs):
+                 dependencies=None, repo_paths=None, docs_url=None, package_name=None, manifest_path=None, **kwargs):
         """
         :param app: the application this plugin is for e.g. blender
 
@@ -32,15 +32,19 @@ class Plugin(object):
         if kwargs:
             logging.warning("unused kwargs on Plugin init:", kwargs)
 
-        self.app = app  # derived from the folder
-        self.manifest_name = manifest_name  # derived from the folder
+        # attributes derived from the manifest path
+        self._app = app
+        self._package_name = package_name
+        self._version = version
+        # stores a reference where the config was loaded from, and sets app, package_name, version
+        self.manifest_path = Path(manifest_path)
 
+        # manifest settings
         self.repo_url = repo_url  # set before plugin name
         self.package_url = package_url  # set before plugin name
         self.plugin_name = plugin_name or self.default_plugin_name()
         self.name = name or self.plugin_name
         # self.id = id or plugin_name  # unique id  # todo for now same as name
-        self.version = version
         self.docs_url = None
         # description = ""
         # author = ""
@@ -48,6 +52,42 @@ class Plugin(object):
         # tags = []
         # dependencies = []
         self.repo_paths = repo_paths
+
+    @property
+    def app(self):
+        return self._app
+
+    @app.setter
+    def app(self, value):
+        self._app = value
+
+    @property
+    def package_name(self):
+        return self._package_name
+
+    @manifest_name.setter
+    def package_name(self, value):
+        self._package_name = value
+
+    @property
+    def version(self):
+        return self._version
+
+    @version.setter
+    def version(self, value):
+        self._version = value
+
+    @property
+    def manifest_path(self):
+        return self._manifest_path
+
+    @manifest_path.setter
+    def manifest_path(self, value):
+        # expects a path from the folder structure: app_name/package_name/version.json
+        self._manifest_path = Path(value)
+        self.version = self._manifest_path.stem
+        self.app = self._manifest_path.parent.parent.name  # todo change this to be more robust
+        self.package_name = self._manifest_path.parent.name
 
     def default_plugin_name(self):
         """
@@ -67,13 +107,17 @@ class Plugin(object):
     @classmethod
     def from_json(cls, json_path):
         """create a plugin from a json file"""
+        manifest_path = Path(json_path)
+
         with open(json_path, "r") as f:
             json_data = json.load(f)
 
-        app = Path(json_path).parent.parent.name  # e.g. blender/bqt/0.1.0.json -> blender
-        manifest_name = Path(json_path).parent.name  # e.g. blender/bqt/0.1.0.json -> bqt
-        version = Path(json_path).stem  # e.g. blender/bqt/0.1.0.json -> 0.1.0
-        return cls(**json_data, app=app, version=version, manifest_name=manifest_name)
+        # todo this is a bit hacky, currently assumes you install from the plugget repo
+        app = manifest_path.parent.parent.name  # e.g. blender/bqt/0.1.0.json -> blender
+
+        # manifest_name = manifest_path.parent.name  # e.g. blender/bqt/0.1.0.json -> bqt
+        version = manifest_path.stem  # e.g. blender/bqt/0.1.0.json -> 0.1.0
+        return cls(**json_data, app=app, version=version, manifest_path=manifest_path)  #manifest_name=manifest_name
 
     def get_content(self) -> list[Path]:
         """download the plugin content from the repo, and return the paths to the files"""
