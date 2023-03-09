@@ -124,7 +124,7 @@ class Package(object):
     @property
     def is_installed(self):
         """a plugin is installed, if the manifest is in the installed packages folder"""
-        return (settings.INSTALLED_DIR / self.app / self.package_name).exists()
+        return (settings.INSTALLED_DIR / self.app / self.package_name / f"{self.version}.json").exists()
 
     @property
     def default_action(self):

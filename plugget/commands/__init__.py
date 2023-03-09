@@ -98,7 +98,7 @@ def _search_iter(name=None):  # todo can we merge with search?
     for source_dir in source_dirs:  # go through all cloned manifest repos
         # todo filter by app
         for plugin_manifest in source_dir.rglob("*.json"):
-            source_name = plugin_manifest.parent.name
+            source_name = plugin_manifest.parent.name  # this checks for manifest name, not name in package todo
             if name is None or name.lower() in source_name.lower():
                 yield Package.from_json(plugin_manifest)
 
@@ -203,7 +203,9 @@ def install(manifest_name, enable=True, app=None):
 
     # copy manifest to installed packages dir
     # todo check if install was successful
-    shutil.copy(src=plugin.manifest_path, dst=settings.INSTALLED_DIR / plugin.manifest_path.name)
+    install_dir = settings.INSTALLED_DIR / plugin.app / plugin.package_name  # / plugin.manifest_path.name
+    install_dir.mkdir(exist_ok=True, parents=True)
+    shutil.copy(src=plugin.manifest_path, dst=install_dir)
 
 
 
