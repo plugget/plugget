@@ -141,7 +141,6 @@ def list(enabled=False, disabled=False, verbose=True):  # , source=None):
     return plugins
 
 
-
 #    plugin_name = plugin_name or plugin_name_from_manifest(manifest_name)
 def install(manifest_name, enable=True, app=None):
     """
@@ -149,33 +148,65 @@ def install(manifest_name, enable=True, app=None):
     :param name: name of the manifest folder in the manifest repo
     :param enable: enable plugin after install
     """
-    # get package from package repo
-    # copy package to blender package folder
-    module = _get_app_module()
+    # todo
+    #  get package (manifest)
+    #  check if package is already installed
+    #  install package, by running action(s) from manifest
+    #  save manifest to installed packages dir
 
+
+
+
+    # copy package to blender package folder
+    # module = _get_app_module()
+
+
+
+    # get package manifest from package repo
     plugin = search(manifest_name, verbose=False)[0]
     if not plugin:
         logging.warning("Package not found, cancelling install")
         return
 
-    # before install, check if plugin is already installed
-    if module.is_installed(plugin.plugin_name):
+
+    # check if plugin is already installed
+    if plugin.is_installed:
         logging.warning(f"Plugin {plugin.plugin_name} is already installed, skipping install")
         return
 
+    # TODO get install action from manifest, or default isntall action from app
+    # TODO run action on package
+
+    plugin.install(enable=enable)
 
     repo_paths = plugin.get_content()  # we install the plugin with the repo name, not the manifest name!
+    # # get latest version from plugin
+    # module.install_plugin(repo_paths)
+    # if enable:
+    #     module.enable_plugin(plugin.plugin_name)
 
-    # get latest version from plugin
-    module.install_plugin(repo_paths)
+    # uninstall if unsuccessful?
 
-    if enable:
-        module.enable_plugin(plugin.plugin_name)
+
+
+    # if install wass successfull,
+    # todo save config to a folder in the user folder, to track installed packages
+    # lets say user fodler is appdata/roaming/plugget
+    # get appdata folder
+    appdata = os.getenv("APPDATA")
+    config_dir = Path(appdata) / "plugget"
+    app_name = "blender"  # todo get_app_name
+    app_config_dir = config_dir / app_name
+    app_config_dir.mkdir(exist_ok=True, parents=True)
+
 
 
     # copy manifest to installed packages dir
     # todo check if install was successful
     shutil.copy(src=plugin.manifest_path, dst=settings.INSTALLED_DIR / plugin.manifest_path.name)
+
+
+
 
 def uninstall(manifest_name=None, plugin_name=None):
     """
