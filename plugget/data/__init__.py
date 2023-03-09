@@ -19,7 +19,7 @@ class Package(object):
     """
 
     def __repr__(self):
-        return f"Package({self.name} {self.version})"
+        return f"Package({self.package_name} {self.version})"
 
     def __init__(self, app=None, name=None, display_name=None, plugin_name=None, id=None, version=None,
                  description=None, author=None, repo_url=None, package_url=None, license=None, tags=None,
@@ -44,12 +44,11 @@ class Package(object):
             logging.warning("unused kwargs on Package init:", kwargs)
 
         # attributes derived from the manifest path
-        self.app = app
-        self.package_name = package_name
-        self.version = version
-        # stores a reference where the config was loaded from, and sets app, package_name, version
-        self.manifest_path = Path(manifest_path)
-        self._set_data_from_manifest_path()
+        self.app = app  # set from app folder containing the manifest, todo currently is app name, swap to app object
+        self.package_name = package_name  # set from folder name containing the manifests
+        self.version = version  # set from manifest name
+        self.manifest_path = Path(manifest_path)  # set before _set_data_from_manifest_path()
+        self._set_data_from_manifest_path()  # populate above attributes to their default values
 
         # manifest settings
         self.repo_url = repo_url  # set before plugin name
@@ -101,6 +100,7 @@ class Package(object):
         self._manifest_path = Path(value)
 
     def _set_data_from_manifest_path(self):
+        """set app_name, package_name, version from the manifest path"""
         self.version = self._manifest_path.stem
         self.app = self._manifest_path.parent.parent.name  # todo change this to be more robust
         self.package_name = self._manifest_path.parent.name
