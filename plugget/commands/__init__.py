@@ -10,9 +10,12 @@ from pathlib import Path
 import shutil
 
 from plugget.utils import rmdir
-from plugget.data import Plugin
+from plugget.data import Package
 from plugget import settings
 
+
+# plugget / cache
+# plugget / installed / blender / io_xray.
 
 def _plugin_name_from_manifest(manifest_name):
     # get plugin_name from manifest
@@ -97,7 +100,7 @@ def _search_iter(name=None):  # todo can we merge with search?
         for plugin_manifest in source_dir.rglob("*.json"):
             source_name = plugin_manifest.parent.name
             if name is None or name.lower() in source_name.lower():
-                yield Plugin.from_json(plugin_manifest)
+                yield Package.from_json(plugin_manifest)
 
 
 def search(name=None, verbose=True):

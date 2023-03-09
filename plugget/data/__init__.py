@@ -6,10 +6,19 @@ from plugget.utils import rmdir
 from plugget import settings
 
 
-class Plugin(object):
-    # change representation when printed
+# app plugin / addon: a plugin for a specific app
+# (plugget) package, a wrapper for distributing files, e.g. plugin (zip or repo), icon packs, ...
+# (plugget) package manifest: a json file with the data to get the correct (plugget) package
+# manifest repo: a repo containing (plugget) package manifests
+
+
+class Package(object):
+    """
+    manifest & package wrapper
+    """
+
     def __repr__(self):
-        return f"Plugin({self.name} {self.version})"
+        return f"Package({self.name} {self.version})"
 
     def __init__(self, app=None, name=None, display_name=None, plugin_name=None, id=None, version=None,
                  description=None, author=None, repo_url=None, package_url=None, license=None, tags=None,
@@ -30,7 +39,7 @@ class Plugin(object):
 
         """
         if kwargs:
-            logging.warning("unused kwargs on Plugin init:", kwargs)
+            logging.warning("unused kwargs on Package init:", kwargs)
 
         # attributes derived from the manifest path
         self._app = app
