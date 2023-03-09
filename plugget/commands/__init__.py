@@ -170,11 +170,6 @@ def install(package_name, enable=True, app=None):
         return
 
 
-    # check if plugin is already installed
-    if plugin.is_installed:
-        logging.warning(f"Plugin {plugin.plugin_name} is already installed, skipping install")
-        return
-
     # TODO get install action from manifest, or default isntall action from app
     # TODO run action on package
 

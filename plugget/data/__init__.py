@@ -213,8 +213,10 @@ class Package(object):
             # app_dir = Path("C:/Users/hanne/OneDrive/Documents/repos/plugget-pkgs") / "blender"
             return [self.clone_dir]
 
-    def install(self, *args, **kwargs):
-        self.action.install(self, *args, **kwargs)
+    def install(self, force=False, *args, **kwargs):
+        if self.is_installed and not force:
+            raise Exception(f"{self.package_name} is already installed")
+        self.action.install(self, *args, force=force, **kwargs)
 
     def uninstall(self):
-        pass
+        self.action.uninstall(self)
