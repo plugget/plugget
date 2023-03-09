@@ -17,11 +17,12 @@ from plugget import settings
 # plugget / cache
 # plugget / installed / blender / io_xray.
 
-def _plugin_name_from_manifest(manifest_name):
+
+def _plugin_name_from_manifest(package_name):
     # get plugin_name from manifest
-    if manifest_name:
+    if package_name:
         print("provided manifest, searching for plugin")
-        plugin = search(manifest_name, verbose=False)[0]
+        plugin = search(package_name, verbose=False)[0]
         print("found plugin name from manifest", plugin.plugin_name)
         plugin_name = plugin.plugin_name
 
@@ -141,8 +142,8 @@ def list(enabled=False, disabled=False, verbose=True):  # , source=None):
     return plugins
 
 
-#    plugin_name = plugin_name or plugin_name_from_manifest(manifest_name)
-def install(manifest_name, enable=True, app=None):
+#    plugin_name = plugin_name or plugin_name_from_manifest(package_name)
+def install(package_name, enable=True, app=None):
     """
     install package
     :param name: name of the manifest folder in the manifest repo
@@ -163,7 +164,7 @@ def install(manifest_name, enable=True, app=None):
 
 
     # get package manifest from package repo
-    plugin = search(manifest_name, verbose=False)[0]
+    plugin = search(package_name, verbose=False)[0]
     if not plugin:
         logging.warning("Package not found, cancelling install")
         return
@@ -210,7 +211,7 @@ def install(manifest_name, enable=True, app=None):
 
 
 
-def uninstall(manifest_name=None, plugin_name=None):
+def uninstall(package_name=None, plugin_name=None):
     """
     uninstall package
     :param name: name of the manifest folder in the manifest repo
@@ -219,33 +220,33 @@ def uninstall(manifest_name=None, plugin_name=None):
     #  since this would also work with non plugget plugins
     #  check repos for (matching) manifest, uninstall? vs check local isntalled plugins, uninstall. much easier but name is diff from install
 
-    plugin_name = plugin_name or _plugin_name_from_manifest(manifest_name)
+    plugin_name = plugin_name or _plugin_name_from_manifest(package_name)
     module = _get_app_module()
     module.uninstall_plugin(plugin_name)
 
 
 # todo this is a plugin command, exposed to plugget. maybe we want to do this for all commands?
-def disable(manifest_name=None, plugin_name=None):
+def disable(package_name=None, plugin_name=None):
     """
     disable package
     :param name: name of the manifest folder in the manifest repo
     """
-    plugin_name = plugin_name or _plugin_name_from_manifest(manifest_name)
+    plugin_name = plugin_name or _plugin_name_from_manifest(package_name)
     module = _get_app_module()
     module.disable_plugin(plugin_name)
 
 
-def enable(manifest_name=None, plugin_name=None):
+def enable(package_name=None, plugin_name=None):
     """
     enable package
     :param name: name of the manifest folder in the manifest repo
     """
-    plugin_name = plugin_name or _plugin_name_from_manifest(manifest_name)
+    plugin_name = plugin_name or _plugin_name_from_manifest(package_name)
     module = _get_app_module()
     module.enable_plugin(plugin_name)
 
 
-# def update(manifest_name=None, plugin_name=None, all=False):
+# def update(package_name=None, plugin_name=None, all=False):
 #     """
 #     update a plugin, identify by either:
 #     TODO :param name: name of the manifest folder in the manifest repo

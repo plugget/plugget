@@ -176,9 +176,9 @@ class Package(object):
         # todo this is a bit hacky, currently assumes you install from the plugget repo
         app = manifest_path.parent.parent.name  # e.g. blender/bqt/0.1.0.json -> blender
 
-        # manifest_name = manifest_path.parent.name  # e.g. blender/bqt/0.1.0.json -> bqt
+        # package_name = manifest_path.parent.name  # e.g. blender/bqt/0.1.0.json -> bqt
         version = manifest_path.stem  # e.g. blender/bqt/0.1.0.json -> 0.1.0
-        return cls(**json_data, app=app, version=version, manifest_path=manifest_path)  #manifest_name=manifest_name
+        return cls(**json_data, app=app, version=version, manifest_path=manifest_path)  #package_name=package_name
 
 
     def get_content(self) -> list[Path]:
