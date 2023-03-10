@@ -22,9 +22,9 @@ def _plugin_name_from_manifest(package_name):
     # get plugin_name from manifest
     if package_name:
         print("provided manifest, searching for plugin")
-        plugin = search(package_name, verbose=False)[0]
-        print("found plugin name from manifest", plugin.plugin_name)
-        plugin_name = plugin.plugin_name
+        package = search(package_name, verbose=False)[0]
+        print("found plugin name from manifest", package.plugin_name)
+        plugin_name = package.plugin_name
 
         return plugin_name
 
@@ -164,8 +164,8 @@ def install(package_name, enable=True, app=None):
 
 
     # get package manifest from package repo
-    plugin = search(package_name, verbose=False)[0]
-    if not plugin:
+    package = search(package_name, verbose=False)[0]
+    if not package:
         logging.warning("Package not found, cancelling install")
         return
 
@@ -173,9 +173,9 @@ def install(package_name, enable=True, app=None):
     # TODO get install action from manifest, or default isntall action from app
     # TODO run action on package
 
-    plugin.install(enable=enable)
+    package.install(enable=enable)
 
-    repo_paths = plugin.get_content()  # we install the plugin with the repo name, not the manifest name!
+    repo_paths = package.get_content()  # we install the plugin with the repo name, not the manifest name!
     # # get latest version from plugin
     # module.install_plugin(repo_paths)
     # if enable:
@@ -199,9 +199,9 @@ def install(package_name, enable=True, app=None):
 
     # copy manifest to installed packages dir
     # todo check if install was successful
-    install_dir = settings.INSTALLED_DIR / plugin.app / plugin.package_name  # / plugin.manifest_path.name
+    install_dir = settings.INSTALLED_DIR / package.app / package.package_name  # / plugin.manifest_path.name
     install_dir.mkdir(exist_ok=True, parents=True)
-    shutil.copy(src=plugin.manifest_path, dst=install_dir)
+    shutil.copy(src=package.manifest_path, dst=install_dir)
 
 
 
