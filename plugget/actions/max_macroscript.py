@@ -12,14 +12,16 @@ def install(package: "plugget.data.Package", **kwargs) -> bool:
     macro_folder_path = rt.getDir(rt.name('userMacros'))  #"#userMacros")
 
     # move it to folder
-    repo_path = package.get_content()[0]
-    sub_paths = package.repo_paths or [p.relative_to(repo_path) for p in repo_path.glob("*")]
-    for sub_path in sub_paths:
-        sub_path = repo_path / sub_path
+    repo_paths = package.get_content()
+    # sub_paths = package.repo_paths or [p.relative_to(repo_path) for p in repo_path.glob("*")]
+    for sub_path in repo_paths:
+        # sub_path = repo_path / sub_path
         # rename file to end in .mcr
         if sub_path.is_file() and sub_path.suffix != ".mcr":
-            sub_path.rename(sub_path.with_suffix(".mcr"))
+            new_path = sub_path.with_suffix(".mcr")
+            sub_path = sub_path.rename(new_path)
         # copy files (and folders) to the macroscript folder
+        print("copying", sub_path, "to", macro_folder_path)
         shutil.copy(sub_path, macro_folder_path)
 
     # refresh macroscript folder to load the new macros in max
@@ -29,3 +31,7 @@ def install(package: "plugget.data.Package", **kwargs) -> bool:
 def uninstall(package: "plugget.data.Package", **kwargs):
     # get plugin name from manifest
     pass
+
+def run():
+    #macros.run <category_string> <name_string>
+    rt.macros.run("Plugget", "test")
