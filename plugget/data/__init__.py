@@ -131,7 +131,7 @@ class Package(object):
         """get the default action for the app"""
         DefaultActions = {
             "blender": "blender_addon",
-            "max": "max_maxscript",
+            "max": "max_macroscript",
             # "maya": "maya_module",
         }
         return DefaultActions.get(self.app)
