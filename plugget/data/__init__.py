@@ -192,6 +192,7 @@ class Package(object):
         # clone package repo to temp folder
         rmdir(self.clone_dir)
 
+        print("cloning", self.repo_url, "to", self.clone_dir)
         # todo sparse checkout, support multiple entries in self.repo_paths
         if self.repo_paths:
             # logging.debug(f"cloning {self.repo_url} to {self.clone_dir}")
@@ -207,8 +208,7 @@ class Package(object):
             return [self.clone_dir / p for p in self.repo_paths]
         else:
             # clone repo
-            subprocess.run(
-                ["git", "clone", "--depth", "1", "--single-branch", "--progress", self.repo_url, str(self.clone_dir)])
+            subprocess.run(["git", "clone", "--depth", "1", "--progress", self.repo_url, str(self.clone_dir)])
 
             # delete .git folder
             rmdir(self.clone_dir / ".git")
