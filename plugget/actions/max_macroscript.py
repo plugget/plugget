@@ -9,11 +9,10 @@ from pathlib import Path
 
 def install(package: "plugget.data.Package", **kwargs) -> bool:
     # get macroscript folder
-    macro_folder_path = rt.getDir(rt.name('userMacros'))  #"#userMacros")
+    macro_folder_path = rt.getDir(rt.name('userMacros'))
 
     # move it to folder
     repo_paths = package.get_content()
-    # sub_paths = package.repo_paths or [p.relative_to(repo_path) for p in repo_path.glob("*")]
     for sub_path in repo_paths:
         # sub_path = repo_path / sub_path
         # rename file to end in .mcr
@@ -30,8 +29,26 @@ def install(package: "plugget.data.Package", **kwargs) -> bool:
 
 def uninstall(package: "plugget.data.Package", **kwargs):
     # get plugin name from manifest
-    pass
 
-def run():
-    #macros.run <category_string> <name_string>
-    rt.macros.run("Plugget", "test")
+    # get macroscript folder
+    macro_folder_path = rt.getDir(rt.name('userMacros'))
+
+    for sub_path in package.repo_paths:
+        sub_path = Path(sub_path)
+        if sub_path.suffix != ".mcr":
+            sub_path = sub_path.with_suffix(".mcr")
+        # delete files (and folders) from the macroscript folder
+        sub_path = macro_folder_path / sub_path
+        print("deleting", sub_path, "from", macro_folder_path)
+        if sub_path.is_file():
+            sub_path.unlink()
+        else:
+            sub_path.rmdir()
+
+    # refresh macroscript folder to unload the uninstalled macros in max
+    # pymxs.runtime.macros.load(macro_folder_path)
+    # todo this doesn't unload the macro, so it will still be available untill we restart max
+
+# def run():
+#     #macros.run <category_string> <name_string>
+#     rt.macros.run("Plugget", "test")
