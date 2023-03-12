@@ -149,11 +149,14 @@ class Package(object):
         if isinstance(action, str):
             print("action is a string, finding action", action)
             module = importlib.import_module("plugget.actions")
+            action_module = None
             for file in Path(module.__path__[0]).glob("*.py"):
                 if file.stem == action:  # todo action name
-                    action = importlib.import_module(f"plugget.actions.{file.stem}")
+                    action_module = importlib.import_module(f"plugget.actions.{file.stem}")
+                    action = action_module
+                    print("action_module", action_module)
                     break
-            if not action:
+            if not action_module:
                 raise Exception(f"action {action} not found")
 
         # if action is a module, it's the action itself
