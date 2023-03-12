@@ -197,8 +197,22 @@ def uninstall(package_name=None, plugin_name=None):
     #  check repos for (matching) manifest, uninstall? vs check local isntalled plugins, uninstall. much easier but name is diff from install
 
     plugin_name = plugin_name or _plugin_name_from_manifest(package_name)
-    module = _get_app_module()
-    module.uninstall_plugin(plugin_name)
+    # module = _get_app_module()  # todo remove
+    # module.uninstall_plugin(plugin_name)
+
+    package = search(package_name, verbose=False)[0]
+    if not package:
+        logging.warning("Package not found, cancelling install")
+        return
+
+    package.uninstall()
+
+    # remove manifest from installed packages dir
+    # todo check if uninstall was successful
+    install_dir = settings.INSTALLED_DIR / package.app / package.package_name  # / plugin.manifest_path.name
+    shutil.rmtree(install_dir)
+
+    # todo uninstall dependencies if they are not used by other plugins
 
 
 # todo this is a plugin command, exposed to plugget. maybe we want to do this for all commands?
