@@ -19,6 +19,7 @@ from plugget import settings
 
 
 def _plugin_name_from_manifest(package_name):
+    # todo rename plugin name to resource name
     # get plugin_name from manifest
     if package_name:
         print("provided manifest, searching for plugin")
@@ -114,24 +115,36 @@ def search(name=None, verbose=True):
     return plugins
 
 
-# # we overwrite build in type list here, carefull when using list in this module!
+# # WARNING we overwrite build in type list here, carefull when using list in this module!
 # open package manager
-def list(enabled=False, disabled=False, verbose=True):  # , source=None):
+def list(enabled=False, disabled=False, verbose=True, app=None):  # , source=None):
     """
-    list all installed packages by default
+    list all installed packages
+    if run from an app, only list the apps installed packages, with option to list all app installed packages
+
     :param enabled: list enabled packages only if True
     :param disabled: list disabled packages only if True
     TODO :param source: list packages from specific source only if set
     """
+    # todo print installed packages in INSTALLED_DIR, instead of app plugins
 
-    module = _get_app_module()
+    # module = _get_app_module()
 
-    if enabled:
-        plugins = module.enabled_plugins()
-    elif disabled:
-        plugins = module.disabled_plugins()
-    else:  # list all installed
-        plugins = module.installed_plugins()
+    # if enabled:
+    #     plugins = module.enabled_plugins()
+    # elif disabled:
+    #     plugins = module.disabled_plugins()
+    # else:  # list all installed
+    #     plugins = module.installed_plugins()
+
+    # list all installed in settings.INSTALLED_DIR
+    plugins = []
+    if app and app != "all":
+        app_manifest_dir = settings.INSTALLED_DIR / app
+    else:
+        app_manifest_dir = settings.INSTALLED_DIR
+    for plugin_manifest in app_manifest_dir.rglob("*.json"):
+        plugins.append(Package.from_json(plugin_manifest))
 
     if verbose:
         print(f"{len(plugins)} installed plugins")
@@ -155,13 +168,8 @@ def install(package_name, enable=True, app=None):
     #  install package, by running action(s) from manifest
     #  save manifest to installed packages dir
 
-
-
-
     # copy package to blender package folder
     # module = _get_app_module()
-
-
 
     # get package manifest from package repo
     package = search(package_name, verbose=False)[0]
@@ -169,41 +177,14 @@ def install(package_name, enable=True, app=None):
         logging.warning("Package not found, cancelling install")
         return
 
-
-    # TODO get install action from manifest, or default isntall action from app
-    # TODO run action on package
-
     package.install(enable=enable)
-
-    repo_paths = package.get_content()  # we install the plugin with the repo name, not the manifest name!
-    # # get latest version from plugin
-    # module.install_plugin(repo_paths)
-    # if enable:
-    #     module.enable_plugin(plugin.plugin_name)
-
     # uninstall if unsuccessful?
-
-
-
-    # if install wass successfull,
-    # todo save config to a folder in the user folder, to track installed packages
-    # lets say user fodler is appdata/roaming/plugget
-    # get appdata folder
-    appdata = os.getenv("APPDATA")
-    config_dir = Path(appdata) / "plugget"
-    app_name = "blender"  # todo get_app_name
-    app_config_dir = config_dir / app_name
-    app_config_dir.mkdir(exist_ok=True, parents=True)
-
-
 
     # copy manifest to installed packages dir
     # todo check if install was successful
     install_dir = settings.INSTALLED_DIR / package.app / package.package_name  # / plugin.manifest_path.name
     install_dir.mkdir(exist_ok=True, parents=True)
     shutil.copy(src=package.manifest_path, dst=install_dir)
-
-
 
 
 def uninstall(package_name=None, plugin_name=None):
