@@ -183,12 +183,6 @@ def install(package_name, enable=True, app=None, **kwargs):
     package.install(enable=enable, **kwargs)
     # uninstall if unsuccessful?
 
-    # copy manifest to installed packages dir
-    # todo check if install was successful
-    install_dir = settings.INSTALLED_DIR / package.app / package.package_name  # / plugin.manifest_path.name
-    install_dir.mkdir(exist_ok=True, parents=True)
-    shutil.copy(src=package.manifest_path, dst=install_dir)
-
 
 def uninstall(package_name=None, plugin_name=None, **kwargs):
     """

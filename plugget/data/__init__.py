@@ -5,6 +5,7 @@ import logging
 from plugget.utils import rmdir
 from plugget import settings
 import importlib
+import shutil
 
 
 # app plugin / addon: a plugin for a specific app
@@ -222,6 +223,12 @@ class Package(object):
         if self.is_installed and not force:
             raise Exception(f"{self.package_name} is already installed")
         self.action.install(self, *args, force=force, **kwargs)
+
+        # copy manifest to installed packages dir
+        # todo check if install was successful
+        install_dir = settings.INSTALLED_DIR / self.app / self.package_name  # / plugin.manifest_path.name
+        install_dir.mkdir(exist_ok=True, parents=True)
+        shutil.copy(src=self.manifest_path, dst=install_dir)
 
         i = 0
         for d in self.dependencies:
