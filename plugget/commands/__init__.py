@@ -18,16 +18,16 @@ from plugget import settings
 # plugget / installed / blender / io_xray.
 
 
-def _plugin_name_from_manifest(package_name):
-    # todo rename plugin name to resource name
-    # get plugin_name from manifest
-    if package_name:
-        print("provided manifest, searching for plugin")
-        package = search(package_name, verbose=False)[0]
-        print("found plugin name from manifest", package.plugin_name)
-        plugin_name = package.plugin_name
-
-        return plugin_name
+# def _plugin_name_from_manifest(package_name):
+#     # todo rename plugin name to resource name
+#     # get plugin_name from manifest
+#     if package_name:
+#         print("provided manifest, searching for plugin")
+#         package = search(package_name, verbose=False)[0]
+#         print("found plugin name from manifest", package.package_name)
+#         plugin_name = package.plugin_name
+#
+#         return plugin_name
 
 
 def _clone_manifest_repo(source_url):
@@ -193,7 +193,7 @@ def uninstall(package_name=None, plugin_name=None, **kwargs):
     #  since this would also work with non plugget plugins
     #  check repos for (matching) manifest, uninstall? vs check local isntalled plugins, uninstall. much easier but name is diff from install
 
-    plugin_name = plugin_name or _plugin_name_from_manifest(package_name)
+    # plugin_name = plugin_name or _plugin_name_from_manifest(package_name)
     # module = _get_app_module()  # todo remove
     # module.uninstall_plugin(plugin_name)
 

@@ -4,27 +4,34 @@ import shutil
 import bpy
 
 
-def install(package: "plugget.data.Package", enable=True, **kwargs) -> bool:  # todo , force=False, enable=True):
-    # If the “overwrite” parameter is True, the add-on will be reinstalled, even if it has not been previously removed.
+def default_plugin_name(package_url, repo_url):
+    """
+    use the repo name as the default plugin name
+    e.g. https://github.com/SavMartin/TexTools-Blender -> TexTools-Blender
+    """
+    if package_url:
+        return package_url.rsplit("/", 1)[1].split(".")[0]
+    else:
+        return repo_url.rsplit("/", 1)[1].split(".")[0]
 
-    # manifest is named io_xray
-    # but subdir is io_scene_xray
-    # resulting in clashes. we cant just rename the subdir, might break code inside.
-    # so we need to track the "name" with plugin_name in the manifest
+def install(package: "plugget.data.Package", force=False, enable=True, **kwargs) -> bool:  # todo , force=False, enable=True):
+    # If the “force” parameter is True, the add-on will be reinstalled, even if it has not been previously removed.
+
+    # foldername and addon (operator) name are different!
+    # operator name is tracked in plugin_name in manifest
 
     plugin_paths = package.get_content()  # get paths to plugin files
 
     plugin_paths: list[Path]
-
-    # todo fix only support 1 plugin
-    plugin_path = plugin_paths[0]
-    if len(plugin_paths) > 1:
-        raise NotImplemented("Only 1 plugin can be installed at a time for now")
+    plugin_path = plugin_paths[0].parent  # todo get top parent, not first parent
 
     local_script_dir = bpy.utils.script_path_user()
     local_addons_dir = Path(local_script_dir) / "addons"
     new_plugin_path = local_addons_dir / plugin_path.name
-    shutil.move(str(plugin_path), str(new_plugin_path.parent))  # copy plugin_path to local_addons_dir
+    if force:
+        from plugget.utils import rmdir
+        rmdir(new_plugin_path)
+    shutil.move(str(plugin_path), str(new_plugin_path.parent), )  # copy plugin_path to local_addons_dir
 
     # check if plugin folder was copied, by checking if any files are in new_plugin_path
     if not any(new_plugin_path.iterdir()):
@@ -34,9 +41,13 @@ def install(package: "plugget.data.Package", enable=True, **kwargs) -> bool:  # 
         return True
 
     if enable:
-        bpy.ops.preferences.addon_enable(module=package.plugin_name)
+        plugin_name = default_plugin_name(package.package_url, package.repo_url)
+        bpy.ops.preferences.addon_enable(module=plugin_name)
 
 
 def uninstall(package: "plugget.data.Package", **kwargs):
     """uninstall plugin by name"""
-    bpy.ops.preferences.addon_remove(module=package.plugin_name)
+    # todo make plugin name an action kwarg
+    plugin_name = package.plugin_name or default_plugin_name(package.package_url, package.repo_url)
+    bpy.ops.preferences.addon_remove(module=plugin_name)
+    print("PLUGGET uninstalled plugin_name ", plugin_name)
