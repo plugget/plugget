@@ -54,8 +54,8 @@ class Package(object):
         self.repo_url = repo_url  # set before plugin name
         self.repo_paths = repo_paths  # subdir(s)
         self.package_url = package_url  # set before self.plugin_name
-        self.plugin_name = plugin_name or self.default_plugin_name
-        self.name = name or self.plugin_name
+        # self.plugin_name = plugin_name or self.default_plugin_name # todo content_name(s)
+        # self.name = name #or self.plugin_name
         self.docs_url = None
         self._action = None  # todo default app action
         self.dependencies = dependencies or []  # todo
@@ -119,7 +119,7 @@ class Package(object):
     @property
     def clone_dir(self):
         """return the path we clone to on install e.g C:/Users/username/AppData/Local/Temp/plugget/bqt/0.1.0"""
-        return settings.TEMP_PLUGGET / self.app / self.plugin_name / self.version / self.plugin_name
+        return settings.TEMP_PLUGGET / self.app / self.package_name / self.version / self.package_name
 
     @property
     def is_installed(self):
