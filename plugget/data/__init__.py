@@ -149,14 +149,12 @@ class Package(object):
 
         # if action is a string, it's the name of the action
         if isinstance(action, str):
-            print("action is a string, finding action", action)
             module = importlib.import_module("plugget.actions")
             action_module = None
             for file in Path(module.__path__[0]).glob("*.py"):
                 if file.stem == action:  # todo action name
                     action_module = importlib.import_module(f"plugget.actions.{file.stem}")
                     action = action_module
-                    print("action_module", action_module)
                     break
             if not action_module:
                 raise Exception(f"action {action} not found")
@@ -261,10 +259,19 @@ class Package(object):
             package.install(force=force, *args, **kwargs)
 
         # if requirements.txt exists in self.repo_paths, install requirements
-        for p in self.repo_paths:
-            if p.endswith("requirements.txt"):
+        requirements_paths = []
+        if (self.clone_dir / "requirements.txt").exists():
+            requirements_paths.append(self.clone_dir / "requirements.txt")
+        if self.repo_paths:
+            for p in self.repo_paths:
+                if p.endswith("requirements.txt"):
+                    requirements_paths.append(self.clone_dir / p)
+        for p in requirements_paths:
+            if p.exists():
                 print("requirements.txt found, installing requirements")
                 subprocess.run(["pip", "install", "-r", self.clone_dir / p])
+            else:
+                logging.warning(f"expected requirements.txt not found: '{p}'")
 
     def uninstall(self):
         self.action.uninstall(self)
