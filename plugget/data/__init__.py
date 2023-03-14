@@ -268,3 +268,11 @@ class Package(object):
 
     def uninstall(self):
         self.action.uninstall(self)
+
+        # remove manifest from installed packages dir
+        # todo check if uninstall was successful
+        install_dir = settings.INSTALLED_DIR / self.app / self.package_name  # / plugin.manifest_path.name
+        shutil.rmtree(install_dir, ignore_errors=True)
+
+        # todo uninstall dependencies if they are not used by other plugins
+

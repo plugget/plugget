@@ -204,13 +204,6 @@ def uninstall(package_name=None, plugin_name=None, **kwargs):
 
     package.uninstall(**kwargs)
 
-    # remove manifest from installed packages dir
-    # todo check if uninstall was successful
-    install_dir = settings.INSTALLED_DIR / package.app / package.package_name  # / plugin.manifest_path.name
-    shutil.rmtree(install_dir)
-
-    # todo uninstall dependencies if they are not used by other plugins
-
 
 # # todo this is a plugin command, exposed to plugget. maybe we want to do this for all commands?
 # def disable(package_name=None, plugin_name=None):
