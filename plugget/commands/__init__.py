@@ -84,11 +84,11 @@ def _detect_app():
     pass
 
 
-def _get_app_module():
-    # detect application
-    dcc = 'blender'
-    module = importlib.import_module(f"plugget.apps.{dcc}")
-    return module
+# def _get_app_module():
+#     # detect application
+#     dcc = 'blender'
+#     module = importlib.import_module(f"plugget.apps.{dcc}")
+#     return module
 
 
 def _search_iter(name=None, app=None):  # todo can we merge with search?
@@ -159,7 +159,7 @@ def list(enabled=False, disabled=False, verbose=True, app=None):  # , source=Non
 
 
 #    plugin_name = plugin_name or plugin_name_from_manifest(package_name)
-def install(package_name, enable=True, app=None):
+def install(package_name, enable=True, app=None, **kwargs):
     """
     install package
     :param name: name of the manifest folder in the manifest repo
@@ -180,7 +180,7 @@ def install(package_name, enable=True, app=None):
         logging.warning("Package not found, cancelling install")
         return
 
-    package.install(enable=enable)
+    package.install(enable=enable, **kwargs)
     # uninstall if unsuccessful?
 
     # copy manifest to installed packages dir
@@ -190,7 +190,7 @@ def install(package_name, enable=True, app=None):
     shutil.copy(src=package.manifest_path, dst=install_dir)
 
 
-def uninstall(package_name=None, plugin_name=None):
+def uninstall(package_name=None, plugin_name=None, **kwargs):
     """
     uninstall package
     :param name: name of the manifest folder in the manifest repo
@@ -208,7 +208,7 @@ def uninstall(package_name=None, plugin_name=None):
         logging.warning("Package not found, cancelling install")
         return
 
-    package.uninstall()
+    package.uninstall(**kwargs)
 
     # remove manifest from installed packages dir
     # todo check if uninstall was successful
@@ -218,25 +218,25 @@ def uninstall(package_name=None, plugin_name=None):
     # todo uninstall dependencies if they are not used by other plugins
 
 
-# todo this is a plugin command, exposed to plugget. maybe we want to do this for all commands?
-def disable(package_name=None, plugin_name=None):
-    """
-    disable package
-    :param name: name of the manifest folder in the manifest repo
-    """
-    plugin_name = plugin_name or _plugin_name_from_manifest(package_name)
-    module = _get_app_module()
-    module.disable_plugin(plugin_name)
-
-
-def enable(package_name=None, plugin_name=None):
-    """
-    enable package
-    :param name: name of the manifest folder in the manifest repo
-    """
-    plugin_name = plugin_name or _plugin_name_from_manifest(package_name)
-    module = _get_app_module()
-    module.enable_plugin(plugin_name)
+# # todo this is a plugin command, exposed to plugget. maybe we want to do this for all commands?
+# def disable(package_name=None, plugin_name=None):
+#     """
+#     disable package
+#     :param name: name of the manifest folder in the manifest repo
+#     """
+#     plugin_name = plugin_name or _plugin_name_from_manifest(package_name)
+#     module = _get_app_module()  # todo remove
+#     module.disable_plugin(plugin_name)
+#
+#
+# def enable(package_name=None, plugin_name=None):
+#     """
+#     enable package
+#     :param name: name of the manifest folder in the manifest repo
+#     """
+#     plugin_name = plugin_name or _plugin_name_from_manifest(package_name)
+#     module = _get_app_module()  # todo remove
+#     module.enable_plugin(plugin_name)
 
 
 # def update(package_name=None, plugin_name=None, all=False):
@@ -253,9 +253,9 @@ def enable(package_name=None, plugin_name=None):
 #     pass
 
 
-def open_install_dir():
-    module = _get_app_module()
-    module.open_install_dir()
+# def open_install_dir():
+#     module = _get_app_module()  # todo remove
+#     module.open_install_dir()
 
 
 # aliases

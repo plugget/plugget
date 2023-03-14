@@ -12,6 +12,7 @@ import importlib
 # (plugget) package manifest: a json file with the data to get the correct (plugget) package
 # manifest repo: a repo containing (plugget) package manifests
 
+# the content of a package: plugin or resource
 
 class Package(object):
     """
