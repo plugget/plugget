@@ -54,7 +54,7 @@ class Package(object):
 
         # manifest settings
         self.repo_url = repo_url  # set before plugin name
-        self.repo_paths = repo_paths  # subdir(s)
+        self.repo_paths: "list[str]" = repo_paths  # subdir(s)
         self.package_url = package_url  # set before self.plugin_name
         # self.plugin_name = plugin_name or self.default_plugin_name # todo content_name(s)
         # self.name = name #or self.plugin_name
@@ -259,6 +259,12 @@ class Package(object):
                 package = Package(**d)
 
             package.install(force=force, *args, **kwargs)
+
+        # if requirements.txt exists in self.repo_paths, install requirements
+        for p in self.repo_paths:
+            if p.endswith("requirements.txt"):
+                print("requirements.txt found, installing requirements")
+                subprocess.run(["pip", "install", "-r", self.clone_dir / p])
 
     def uninstall(self):
         self.action.uninstall(self)
