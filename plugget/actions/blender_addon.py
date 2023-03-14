@@ -4,7 +4,7 @@ import shutil
 import bpy
 
 
-def install(package: "plugget.data.Package", enable=True) -> bool:  # todo , force=False, enable=True):
+def install(package: "plugget.data.Package", enable=True, **kwargs) -> bool:  # todo , force=False, enable=True):
     # If the “overwrite” parameter is True, the add-on will be reinstalled, even if it has not been previously removed.
 
     # manifest is named io_xray
@@ -37,9 +37,6 @@ def install(package: "plugget.data.Package", enable=True) -> bool:  # todo , for
         bpy.ops.preferences.addon_enable(module=package.plugin_name)
 
 
-def uninstall(name):
+def uninstall(package: "plugget.data.Package", **kwargs):
     """uninstall plugin by name"""
-    if not name:
-        logging.warning("No plugin name given")
-        return
-    bpy.ops.preferences.addon_remove(module=name)
+    bpy.ops.preferences.addon_remove(module=package.plugin_name)
