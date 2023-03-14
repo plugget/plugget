@@ -101,9 +101,9 @@ class Package(object):
 
     def _set_data_from_manifest_path(self):
         """set app_name, package_name, version from the manifest path"""
-        self.version = self._manifest_path.stem
-        self.app = self._manifest_path.parent.parent.name  # todo change this to be more robust
-        self.package_name = self._manifest_path.parent.name
+        self.version = self.version or self._manifest_path.stem
+        self.app = self.app or self._manifest_path.parent.parent.name  # todo change this to be more robust
+        self.package_name = self.package_name or self._manifest_path.parent.name
 
     @property
     def default_plugin_name(self):
@@ -183,7 +183,6 @@ class Package(object):
         version = manifest_path.stem  # e.g. blender/bqt/0.1.0.json -> 0.1.0
         return cls(**json_data, app=app, version=version, manifest_path=manifest_path)  #package_name=package_name
 
-
     def get_content(self) -> list[Path]:
         """download the plugin content from the repo, and return the paths to the files"""
         return self._clone_repo()
@@ -217,9 +216,41 @@ class Package(object):
             return [p for p in self.clone_dir.glob("*")]
 
     def install(self, force=False, *args, **kwargs):
+        from plugget import commands
+
         if self.is_installed and not force:
             raise Exception(f"{self.package_name} is already installed")
         self.action.install(self, *args, force=force, **kwargs)
+
+        i = 0
+        for d in self.dependencies:
+            i += 1
+
+            package = None
+
+            # if dependency is a string, it's a package name, e.g. "blender:my-exporter",
+            if isinstance(d, str):
+                result = d.split(":")
+                if len(result) == 1:
+                    # if no app is specified, use the same app as the current package
+                    package_name = result[0]
+                    app_name = self.app
+                elif len(result) == 2:
+                    app_name, package_name = result
+                else:
+                    raise Exception(f"expected only 1 ':', got {len(result)-1}. Invalid dependency: {d}")
+                package = commands.search(package_name, app=app_name)[0]
+
+            # if dependency is a dict, it's a package object, e.g. {"name": "my-exporter", "app": "blender"}
+            elif isinstance(d, dict):
+                # overwrite attrs set in _set_data_from_manifest_path
+                d.setdefault("manifest_path", self.manifest_path)
+                d.setdefault("app", self.app)
+                d.setdefault("version", self.version)
+                d.setdefault("package_name", f"{self.package_name}_dependency_{i}")
+                package = Package(**d)
+
+            package.install(force=force, *args, **kwargs)
 
     def uninstall(self):
         self.action.uninstall(self)

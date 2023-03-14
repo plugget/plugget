@@ -91,22 +91,25 @@ def _get_app_module():
     return module
 
 
-def _search_iter(name=None):  # todo can we merge with search?
+def _search_iter(name=None, app=None):  # todo can we merge with search?
     """
     search if package is in sources
     if name is None, return all packages
     """
     source_dirs = _clone_manifest_repos()
     for source_dir in source_dirs:  # go through all cloned manifest repos
-        # todo filter by app
+
+        if app:  # filter by app
+            source_dir = source_dir / app
+
         for plugin_manifest in source_dir.rglob("*.json"):
             source_name = plugin_manifest.parent.name  # this checks for manifest name, not name in package todo
             if name is None or name.lower() in source_name.lower():
                 yield Package.from_json(plugin_manifest)
 
 
-def search(name=None, verbose=True):
-    plugins = [x for x in _search_iter(name)]
+def search(name=None, app=None, verbose=True):
+    plugins = [x for x in _search_iter(name, app=app)]
     if verbose:
         print(f"{len(plugins)} plugins found in repo:")
         print(f"{'-' * 20}")
