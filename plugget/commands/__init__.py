@@ -52,6 +52,7 @@ def _clone_manifest_repo(source_url):
     subprocess.run(["git", "clone", "--depth", "1", "--progress", source_url, str(source_dir)])
 
     # CACHING: make a file inside named _LAST_UPDATED with the current date
+    source_dir.mkdir(parents=True, exist_ok=True)
     with open(source_dir / "_LAST_UPDATED", "w") as f:
         f.write(datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S"))
 
