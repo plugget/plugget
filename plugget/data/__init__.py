@@ -132,41 +132,42 @@ class Package(object):
     def default_action(self):
         """get the default action for the app"""
         DefaultActions = {
-            "blender": "blender_addon",
-            "max": "max_macroscript",
+            "blender": ["blender_addon", "blender_pip"],
+            "max": ["max_macroscript"],  # todo pip
             # "maya": "maya_module",
         }
         return DefaultActions.get(self.app)
 
     @property
-    def action(self):
+    def actions(self):
         """
         get the action for the plugin, used for install, uninstall
         if the manifest doesn't specify an action, get the default action for the app
         """
         # get install action from manifest,
-        action = self._action or self.default_action
+        actions_raw = self._action or self.default_action
+        actions = []
+        for action in actions_raw:
+            # if action is a string, it's the name of the action
+            if isinstance(action, str):
+                module = importlib.import_module("plugget.actions")
+                action_module = None
+                for file in Path(module.__path__[0]).glob("*.py"):
+                    if file.stem == action:  # todo action name
+                        action_module = importlib.import_module(f"plugget.actions.{file.stem}")
+                        action = action_module
+                        break
+                if not action_module:
+                    raise Exception(f"action {action} not found")
 
-        # if action is a string, it's the name of the action
-        if isinstance(action, str):
-            module = importlib.import_module("plugget.actions")
-            action_module = None
-            for file in Path(module.__path__[0]).glob("*.py"):
-                if file.stem == action:  # todo action name
-                    action_module = importlib.import_module(f"plugget.actions.{file.stem}")
-                    action = action_module
-                    break
-            if not action_module:
-                raise Exception(f"action {action} not found")
+            # if action is a module, it's the action itself
+            # elif inspect.ismodule(self._action):
+            # else:
+            #     action = self._action
 
-        # if action is a module, it's the action itself
-        # elif inspect.ismodule(self._action):
-        # else:
-        #     action = self._action
+            actions.append(action)
 
-        print("action", action)
-
-        return action
+        return actions
 
     @classmethod
     def from_json(cls, json_path):
@@ -220,7 +221,8 @@ class Package(object):
 
         if self.is_installed and not force:
             raise Exception(f"{self.package_name} is already installed")
-        self.action.install(self, *args, force=force, **kwargs)
+        for action in self.actions:
+            action.install(self, *args, force=force, **kwargs)
 
         # copy manifest to installed packages dir
         # todo check if install was successful
@@ -258,23 +260,24 @@ class Package(object):
 
             package.install(force=force, *args, **kwargs)
 
-        # if requirements.txt exists in self.repo_paths, install requirements
-        requirements_paths = []
-        if (self.clone_dir / "requirements.txt").exists():
-            requirements_paths.append(self.clone_dir / "requirements.txt")
-        if self.repo_paths:
-            for p in self.repo_paths:
-                if p.endswith("requirements.txt"):
-                    requirements_paths.append(self.clone_dir / p)
-        for p in requirements_paths:
-            if p.exists():
-                print("requirements.txt found, installing requirements")
-                subprocess.run(["pip", "install", "-r", self.clone_dir / p])
-            else:
-                logging.warning(f"expected requirements.txt not found: '{p}'")
+        # # if requirements.txt exists in self.repo_paths, install requirements
+        # requirements_paths = []
+        # if (self.clone_dir / "requirements.txt").exists():
+        #     requirements_paths.append(self.clone_dir / "requirements.txt")
+        # if self.repo_paths:
+        #     for p in self.repo_paths:
+        #         if p.endswith("requirements.txt"):
+        #             requirements_paths.append(self.clone_dir / p)
+        # for p in requirements_paths:
+        #     if p.exists():
+        #         print("requirements.txt found, installing requirements")
+        #         subprocess.run(["pip", "install", "-r", self.clone_dir / p])
+        #     else:
+        #         logging.warning(f"expected requirements.txt not found: '{p}'")
 
     def uninstall(self):
-        self.action.uninstall(self)
+        for action in self.actions:
+            action.uninstall(self)
 
         # remove manifest from installed packages dir
         # todo check if uninstall was successful
