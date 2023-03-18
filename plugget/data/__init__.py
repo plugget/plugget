@@ -224,12 +224,6 @@ class Package(object):
         for action in self.actions:
             action.install(self, *args, force=force, **kwargs)
 
-        # copy manifest to installed packages dir
-        # todo check if install was successful
-        install_dir = settings.INSTALLED_DIR / self.app / self.package_name  # / plugin.manifest_path.name
-        install_dir.mkdir(exist_ok=True, parents=True)
-        shutil.copy(src=self.manifest_path, dst=install_dir)
-
         i = 0
         for d in self.dependencies:
             i += 1
@@ -247,7 +241,7 @@ class Package(object):
                     app_name, package_name = result
                 else:
                     raise Exception(f"expected only 1 ':', got {len(result)-1}. Invalid dependency: {d}")
-                package = commands.search(package_name, app=app_name)[0]
+                package = commands.search(package_name)[0]  #app=app_name, also support python app dependencies
 
             # if dependency is a dict, it's a package object, e.g. {"name": "my-exporter", "app": "blender"}
             elif isinstance(d, dict):
@@ -274,6 +268,14 @@ class Package(object):
         #         subprocess.run(["pip", "install", "-r", self.clone_dir / p])
         #     else:
         #         logging.warning(f"expected requirements.txt not found: '{p}'")
+
+        # copy manifest to installed packages dir
+        # todo check if install was successful
+        install_dir = settings.INSTALLED_DIR / self.app / self.package_name  # / plugin.manifest_path.name
+        install_dir.mkdir(exist_ok=True, parents=True)
+        shutil.copy(src=self.manifest_path, dst=install_dir)
+
+
 
     def uninstall(self, dependencies=False, **kwargs):
         for action in self.actions:
