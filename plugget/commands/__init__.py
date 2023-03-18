@@ -78,39 +78,28 @@ def _add_repo(repo_url):
 
 def _detect_app():
     # detect application
-
     dcc = 'blender'
     module = importlib.import_module(f"plugget.apps.{dcc}")
 
-    pass
 
-
-# def _get_app_module():
-#     # detect application
-#     dcc = 'blender'
-#     module = importlib.import_module(f"plugget.apps.{dcc}")
-#     return module
-
-
-def _search_iter(name=None, app=None):  # todo can we merge with search?
+def search(name=None, app=None, verbose=True):
     """
     search if package is in sources
-    if name is None, return all packages
+    :param name: pacakge name to search in manifest repo, return all packages if not set
+    :param app: app name to search in, return all apps if not set
+    :param verbose: print results if True
     """
+
+    plugins = []
     source_dirs = _clone_manifest_repos()
     for source_dir in source_dirs:  # go through all cloned manifest repos
-
         if app:  # filter by app
             source_dir = source_dir / app
-
         for plugin_manifest in source_dir.rglob("*.json"):
             source_name = plugin_manifest.parent.name  # this checks for manifest name, not name in package todo
             if name is None or name.lower() in source_name.lower():
-                yield Package.from_json(plugin_manifest)
+                plugins.append(Package.from_json(plugin_manifest))
 
-
-def search(name=None, app=None, verbose=True):
-    plugins = [x for x in _search_iter(name, app=app)]
     if verbose:
         print(f"{len(plugins)} plugins found in repo:")
         print(f"{'-' * 20}")
