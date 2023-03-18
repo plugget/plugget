@@ -214,7 +214,7 @@ class Package(object):
             rmdir(self.clone_dir / ".git")
 
             # app_dir = Path("C:/Users/hanne/OneDrive/Documents/repos/plugget-pkgs") / "blender"
-            return [p for p in self.clone_dir.glob("*")]
+            return [self.clone_dir]
 
     def install(self, force=False, *args, **kwargs):
         from plugget import commands

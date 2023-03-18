@@ -21,34 +21,36 @@ def install(package: "plugget.data.Package", force=False, enable=True, **kwargs)
     # foldername and addon (operator) name are different!
     # operator name is tracked in plugin_name in manifest
 
-    plugin_paths = package.get_content()  # get paths to plugin files
+    # if a repo has plugin in root. we get the repo files content
+    # if the repo has plugin in subdir, that file lives in repo_paths
 
-    plugin_paths: list[Path]
-    plugin_path = plugin_paths[0].parent  # todo get top parent, not first parent
 
+    addon_paths: list[Path] = package.get_content()  # get paths to plugin files in cloned repo
+    # copy addons to local addons dir
     local_script_dir = bpy.utils.script_path_user()
     local_addons_dir = Path(local_script_dir) / "addons"
-    new_plugin_path = local_addons_dir / plugin_path.name
     # if force:
     #     from plugget.utils import rmdir
     #     rmdir(new_plugin_path)
     # shutil.move(str(plugin_path), str(new_plugin_path.parent), )  # copy plugin_path to local_addons_dir
     # todo filter repo paths
-    for p in plugin_paths:
-        new_plugin_path.mkdir(parents=True, exist_ok=True)
-        shutil.move(str(p), str(new_plugin_path))
+    for addon_path in addon_paths:
+        new_addon_path = local_addons_dir / addon_path.name
+        # new_addon_path.mkdir(parents=True, exist_ok=True)
+        shutil.move(str(addon_path), str(local_addons_dir))
 
-    # todo clean up empty folders
+        # todo clean up empty folders
 
-    # check if plugin folder was copied, by checking if any files are in new_plugin_path
-    if not any(new_plugin_path.iterdir()):
-        logging.warning(f"Failed to install plugin {plugin_path.name}")
-        return False
+        # check if plugin folder was copied, by checking if any files are in new_plugin_path
+        if not any(new_addon_path.iterdir()):
+            logging.warning(f"Failed to install plugin {addon_path.name}")
+            return False
 
     if enable:
-        plugin_name = package.plugin_name or default_plugin_name(package.package_url, package.repo_url)
-        # print("PLUGGET enabling plugin_name ", plugin_name)
-        bpy.ops.preferences.addon_enable(module=plugin_name)
+        addon_name = package.plugin_name or default_plugin_name(package.package_url, package.repo_url)
+        if not addon_name:
+            raise ValueError(f"No plugin name found for package '{package.package_name}'")
+        bpy.ops.preferences.addon_enable(module=addon_name)
 
     return True
 
