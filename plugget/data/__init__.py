@@ -275,14 +275,15 @@ class Package(object):
         #     else:
         #         logging.warning(f"expected requirements.txt not found: '{p}'")
 
-    def uninstall(self):
+    def uninstall(self, dependencies=False, **kwargs):
         for action in self.actions:
-            action.uninstall(self)
+            action.uninstall(self, dependencies=False, **kwargs)
+
+        # todo uninstall dependencies
+        # todo move pip action to dependencies
 
         # remove manifest from installed packages dir
         # todo check if uninstall was successful
         install_dir = settings.INSTALLED_DIR / self.app / self.package_name  # / plugin.manifest_path.name
         shutil.rmtree(install_dir, ignore_errors=True)
-
-        # todo uninstall dependencies if they are not used by other plugins
 

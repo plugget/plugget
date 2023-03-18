@@ -29,9 +29,12 @@ def install(package: "plugget.data.Package", **kwargs):
             logging.warning(f"expected requirements.txt not found: '{p}'")
 
 
-def uninstall(package: "plugget.data.Package", **kwargs):
+def uninstall(package: "plugget.data.Package", dependencies=False, **kwargs):
     # this method runs on uninstall, then the manifest is removed from installed packages
     # ideally uninstall removes files from a folder,
+
+    if not dependencies:
+        return
 
     blender_user_site_packages = Path(str(bpy.utils.script_path_user())) / "modules"  # appdata
 

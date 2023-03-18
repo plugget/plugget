@@ -119,7 +119,7 @@ def search(name=None, app=None, verbose=True):
     return plugins
 
 
-# # WARNING we overwrite build in type list here, carefull when using list in this module!
+# # WARNING we overwrite build in type list here, careful when using list in this module!
 # open package manager
 def list(enabled=False, disabled=False, verbose=True, app=None):  # , source=None):
     """
@@ -176,7 +176,7 @@ def install(package_name, enable=True, app=None, **kwargs):
     # module = _get_app_module()
 
     # get package manifest from package repo
-    package = search(package_name, verbose=False)[0]
+    package = search(name=package_name, app=app, verbose=False)[0]
     if not package:
         logging.warning("Package not found, cancelling install")
         return
@@ -185,7 +185,7 @@ def install(package_name, enable=True, app=None, **kwargs):
     # uninstall if unsuccessful?
 
 
-def uninstall(package_name=None, plugin_name=None, **kwargs):
+def uninstall(package_name=None, plugin_name=None, dependencies=False, **kwargs):
     """
     uninstall package
     :param name: name of the manifest folder in the manifest repo
@@ -203,7 +203,7 @@ def uninstall(package_name=None, plugin_name=None, **kwargs):
         logging.warning("Package not found, cancelling install")
         return
 
-    package.uninstall(**kwargs)
+    package.uninstall(dependencies=dependencies, **kwargs)
 
 
 # # todo this is a plugin command, exposed to plugget. maybe we want to do this for all commands?
