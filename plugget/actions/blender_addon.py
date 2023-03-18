@@ -15,6 +15,16 @@ def default_plugin_name(package_url, repo_url):
         return repo_url.rsplit("/", 1)[1].split(".")[0]
 
 
+def __clash_import_name(name):
+    """check there isn't a py module with the same name as our addon"""
+    try:
+        __import__(name)
+        logging.warning(f"Failed to install addon {name}, a py module with same name exists")
+        return True
+    except ImportError:
+        return False
+
+
 def install(package: "plugget.data.Package", force=False, enable=True, **kwargs) -> bool:  # todo , force=False, enable=True):
     # If the “force” parameter is True, the add-on will be reinstalled, even if it has not been previously removed.
 
@@ -23,6 +33,7 @@ def install(package: "plugget.data.Package", force=False, enable=True, **kwargs)
 
     # if a repo has plugin in root. we get the repo files content
     # if the repo has plugin in subdir, that file lives in repo_paths
+
 
 
     addon_paths: list[Path] = package.get_content()  # get paths to plugin files in cloned repo
@@ -35,6 +46,10 @@ def install(package: "plugget.data.Package", force=False, enable=True, **kwargs)
     # shutil.move(str(plugin_path), str(new_plugin_path.parent), )  # copy plugin_path to local_addons_dir
     # todo filter repo paths
     for addon_path in addon_paths:
+
+        if __clash_import_name(addon_path.name):
+            continue
+
         new_addon_path = local_addons_dir / addon_path.name
         # new_addon_path.mkdir(parents=True, exist_ok=True)
         shutil.move(str(addon_path), str(local_addons_dir))
