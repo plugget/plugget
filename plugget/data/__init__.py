@@ -26,7 +26,7 @@ class Package(object):
     def __init__(self, app=None, name=None, display_name=None, plugin_name=None, id=None, version=None,
                  description=None, author=None, repo_url=None, package_url=None, license=None, tags=None,
                  dependencies=None, repo_paths=None, docs_url=None, package_name=None, manifest_path=None,
-                 action=None, **kwargs):
+                 actions=None, **kwargs):
         """
         :param app: the application this plugin is for e.g. blender
 
@@ -59,7 +59,7 @@ class Package(object):
         self.plugin_name = plugin_name  #or self.default_plugin_name # todo move this to blender action input
         # self.name = name #or self.plugin_name
         self.docs_url = None
-        self._action = None  # todo default app action
+        self._actions = actions  # todo default app action
         self.dependencies = dependencies or []  # todo
         # self.id = id or plugin_name  # unique id  # todo for now same as name
         # description = ""
@@ -129,7 +129,7 @@ class Package(object):
         return (settings.INSTALLED_DIR / self.app / self.package_name / f"{self.version}.json").exists()
 
     @property
-    def default_action(self):
+    def default_actions(self):
         """get the default action for the app"""
         DefaultActions = {
             "blender": ["blender_addon", "blender_pip"],
@@ -145,7 +145,7 @@ class Package(object):
         if the manifest doesn't specify an action, get the default action for the app
         """
         # get install action from manifest,
-        actions_raw = self._action or self.default_action
+        actions_raw = self._actions or self.default_actions
         actions = []
         for action in actions_raw:
             # if action is a string, it's the name of the action
