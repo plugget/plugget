@@ -24,6 +24,16 @@ def __clash_import_name(name):
     except ImportError:
         return False
 
+def __make_modules_importable(addon_path):
+    """
+    if addon_path is a folder containing python files,
+    ensure the folder has an __init__.py, so it imports correctly in Blender
+    """
+    if addon_path.is_dir():
+        if not any(addon_path.rglob("*.py")):
+            return
+        addon_path.joinpath("__init__.py").touch(exist_ok=True)
+
 
 def install(package: "plugget.data.Package", force=False, enable=True, **kwargs) -> bool:  # todo , force=False, enable=True):
     # If the “force” parameter is True, the add-on will be reinstalled, even if it has not been previously removed.
@@ -51,6 +61,7 @@ def install(package: "plugget.data.Package", force=False, enable=True, **kwargs)
             continue
 
         new_addon_path = local_addons_dir / addon_path.name
+        __make_modules_importable(addon_path)  # todo do we still need this? 
         # new_addon_path.mkdir(parents=True, exist_ok=True)
         shutil.move(str(addon_path), str(local_addons_dir))
 
