@@ -72,11 +72,16 @@ def install(package: "plugget.data.Package", force=False, enable=True, **kwargs)
             logging.warning(f"Failed to install plugin {addon_path.name}")
             return False
 
-    if enable:
-        addon_name = package.plugin_name or default_plugin_name(package.package_url, package.repo_url)
-        if not addon_name:
-            raise ValueError(f"No plugin name found for package '{package.package_name}'")
-        bpy.ops.preferences.addon_enable(module=addon_name)
+    try:
+        if enable:
+            addon_name = package.plugin_name or default_plugin_name(package.package_url, package.repo_url)
+            if not addon_name:
+                raise ValueError(f"No plugin name found for package '{package.package_name}'")
+            bpy.ops.preferences.addon_enable(module=addon_name)
+    except Exception as e:
+        logging.warning(f"Failed to enable plugin '{addon_name}'")
+        import traceback
+        traceback.print_exc()
 
     return True
 
