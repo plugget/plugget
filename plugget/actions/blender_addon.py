@@ -44,8 +44,6 @@ def install(package: "plugget.data.Package", force=False, enable=True, **kwargs)
     # if a repo has plugin in root. we get the repo files content
     # if the repo has plugin in subdir, that file lives in repo_paths
 
-
-
     addon_paths: list[Path] = package.get_content()  # get paths to plugin files in cloned repo
     # copy addons to local addons dir
     local_script_dir = bpy.utils.script_path_user()
@@ -60,17 +58,19 @@ def install(package: "plugget.data.Package", force=False, enable=True, **kwargs)
         if __clash_import_name(addon_path.name):
             continue
 
-        new_addon_path = local_addons_dir / addon_path.name
         __make_modules_importable(addon_path)  # todo do we still need this? 
+
         # new_addon_path.mkdir(parents=True, exist_ok=True)
+        print(f"copy addon to {local_addons_dir}")
         shutil.move(str(addon_path), str(local_addons_dir))
 
         # todo clean up empty folders
 
         # check if plugin folder was copied, by checking if any files are in new_plugin_path
-        if not any(new_addon_path.iterdir()):
-            logging.warning(f"Failed to install plugin {addon_path.name}")
-            return False
+        # new_addon_path = local_addons_dir / addon_path.name
+        # if not any(new_addon_path.iterdir()):
+        #     logging.warning(f"Failed to install plugin {addon_path.name}")
+        #     return False
 
     try:
         if enable:
