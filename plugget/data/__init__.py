@@ -177,6 +177,26 @@ class Package(object):
         json_data.setdefault("manifest_path", manifest_path)
         return cls(**json_data)  #package_name=package_name
 
+    def to_json(self, json_path):
+        """save the plugin to a json file"""
+        output = {'app': self.app,
+                  'package_name': self.package_name,
+                  'version': self.version,
+                  'repo_url': self.repo_url,
+                  'repo_paths': self.repo_paths,
+                  'package_url': self.package_url,
+                  'docs_url': self.docs_url,
+                  'actions': self._actions,
+                  'dependencies': self.dependencies,
+                  'installed_paths': [str(x) for x in self.installed_paths]
+                  }
+        for key, value in output.items():
+            if value is None:
+                del output[key]
+        json_path.mkdir(exist_ok=True, parents=True)
+        with open(json_path, "w") as f:
+            json.dump(output, f, indent=4)
+
     def get_content(self) -> list[Path]:
         """download the plugin content from the repo, and return the paths to the files"""
         return self._clone_repo()
@@ -265,10 +285,8 @@ class Package(object):
 
         # copy manifest to installed packages dir
         # todo check if install was successful
-        install_dir = settings.INSTALLED_DIR / self.app / self.package_name  # / plugin.manifest_path.name
-        install_dir.mkdir(exist_ok=True, parents=True)
-        shutil.copy(src=self.manifest_path, dst=install_dir)
-
+        manifest_path = settings.INSTALLED_DIR / self.app / self.package_name / self.manifest_path.name
+        self.to_json(manifest_path)
 
 
     def uninstall(self, dependencies=False, **kwargs):
