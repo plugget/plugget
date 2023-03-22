@@ -15,7 +15,7 @@ def __clash_import_name(name):
         return False
 
 
-def _get_addon_names() -> set[str]:
+def _get_all_addon_names() -> set[str]:
     bpy.ops.preferences.addon_refresh()
     return {a.__name__ for a in addon_utils.modules()}
 
@@ -37,9 +37,9 @@ def _enable_addons(names: set[str], enable=True):
 
 def install(package: "plugget.data.Package", force=False, enable=True, **kwargs) -> bool:  # todo , force=False, enable=True):
     # If the “force” parameter is True, the add-on will be reinstalled, even if it has not been previously removed.
-    addon_names_before = _get_addon_names()
+    addon_names_before = _get_all_addon_names()
     _install_addon(package)
-    addon_names_after = _get_addon_names()
+    addon_names_after = _get_all_addon_names()
     new_addons = addon_names_after - addon_names_before
     _enable_addons(new_addons, enable=enable)
     return True
