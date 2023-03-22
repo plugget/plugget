@@ -190,10 +190,14 @@ class Package(object):
                   'dependencies': self.dependencies,
                   'installed_paths': [str(x) for x in self.installed_paths]
                   }
+        empty_keys = []
         for key, value in output.items():
             if value is None:
-                del output[key]
-        json_path.mkdir(exist_ok=True, parents=True)
+                empty_keys.append(key)
+        for key in empty_keys:
+            del output[key]
+
+        Path(json_path).parent.mkdir(exist_ok=True, parents=True)
         with open(json_path, "w") as f:
             json.dump(output, f, indent=4)
 
