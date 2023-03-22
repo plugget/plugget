@@ -215,6 +215,7 @@ class Package(object):
         if self.is_installed and not force:
             raise Exception(f"{self.package_name} is already installed")
         for action in self.actions:
+            # action install implicitly adds to self.install_paths
             action.install(self, *args, force=force, **kwargs)
 
         i = 0
