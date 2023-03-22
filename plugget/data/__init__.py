@@ -56,8 +56,7 @@ class Package(object):
         self.repo_url = repo_url  # set before plugin name
         self.repo_paths: "list[str]" = repo_paths  # subdir(s)
         self.package_url = package_url  # set before self.plugin_name
-        self.plugin_name = plugin_name  #or self.default_plugin_name # todo move this to blender action input
-        # self.name = name #or self.plugin_name
+         # self.name = name #or self.plugin_name
         self.docs_url = None
         self._actions = actions  # todo default app action
         self.dependencies = dependencies or []  # todo
@@ -106,17 +105,6 @@ class Package(object):
         self.version = self.version or self._manifest_path.stem
         self.app = self.app or self._manifest_path.parent.parent.name  # todo change this to be more robust
         self.package_name = self.package_name or self._manifest_path.parent.name
-
-    # @property
-    # def default_plugin_name(self):
-    #     """
-    #     use the repo name as the default plugin name
-    #     e.g. https://github.com/SavMartin/TexTools-Blender -> TexTools-Blender
-    #     """
-    #     if self.package_url:
-    #         return self.package_url.rsplit("/", 1)[1].split(".")[0]
-    #     else:
-    #         return self.repo_url.rsplit("/", 1)[1].split(".")[0]
 
     @property
     def clone_dir(self):

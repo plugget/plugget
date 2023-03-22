@@ -28,7 +28,6 @@ def install(package: "plugget.data.Package", **kwargs) -> bool:
 
 
 def uninstall(package: "plugget.data.Package", **kwargs):
-    # get plugin name from manifest
 
     # get macroscript folder
     macro_folder_path = rt.getDir(rt.name('userMacros'))

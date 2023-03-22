@@ -5,17 +5,6 @@ import bpy
 import addon_utils
 
 
-def default_plugin_name(package_url, repo_url):
-    """
-    use the repo name as the default plugin name
-    e.g. https://github.com/SavMartin/TexTools-Blender -> TexTools-Blender
-    """
-    if package_url:
-        return package_url.rsplit("/", 1)[1].split(".")[0]
-    else:
-        return repo_url.rsplit("/", 1)[1].split(".")[0]
-
-
 def __clash_import_name(name):
     """check there isn't a py module with the same name as our addon"""
     try:
@@ -92,6 +81,5 @@ def _install_addon(package):
 def uninstall(package: "plugget.data.Package", **kwargs):
     """uninstall plugin by name"""
     # todo make plugin name an action kwarg
-    plugin_name = package.plugin_name or default_plugin_name(package.package_url, package.repo_url)
     bpy.ops.preferences.addon_remove(module=plugin_name)
     print("PLUGGET uninstalled plugin_name ", plugin_name)
