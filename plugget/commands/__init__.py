@@ -110,7 +110,7 @@ def search(name=None, app=None, verbose=True):
 
 # # WARNING we overwrite build in type list here, careful when using list in this module!
 # open package manager
-def list(enabled=False, disabled=False, verbose=True, app=None):  # , source=None):
+def list(package_name:str = None, enabled=False, disabled=False, verbose=True, app=None):  # , source=None):
     """
     list all installed packages
     if run from an app, only list the apps installed packages, with option to list all app installed packages
@@ -136,8 +136,12 @@ def list(enabled=False, disabled=False, verbose=True, app=None):  # , source=Non
         app_manifest_dir = settings.INSTALLED_DIR / app
     else:
         app_manifest_dir = settings.INSTALLED_DIR
+
     for plugin_manifest in app_manifest_dir.rglob("*.json"):
-        plugins.append(Package.from_json(plugin_manifest))
+        package = Package.from_json(plugin_manifest)
+        if package_name and package_name.lower() not in package.package_name:  #  plugin_manifest.parent.name.lower():
+            continue
+        plugins.append(package)
 
     if verbose:
         print(f"{len(plugins)} installed plugins")
@@ -187,7 +191,7 @@ def uninstall(package_name=None, plugin_name=None, dependencies=False, **kwargs)
     # module = _get_app_module()  # todo remove
     # module.uninstall_plugin(plugin_name)
 
-    package = search(package_name, verbose=False)[0]
+    package = list(package_name, verbose=False)[0]
     if not package:
         logging.warning("Package not found, cancelling install")
         return
