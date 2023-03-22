@@ -26,17 +26,6 @@ def __clash_import_name(name):
         return False
 
 
-def __make_modules_importable(addon_path):
-    """
-    if addon_path is a folder containing python files,
-    ensure the folder has an __init__.py, so it imports correctly in Blender
-    """
-    if addon_path.is_dir():
-        if not any(addon_path.rglob("*.py")):
-            return
-        addon_path.joinpath("__init__.py").touch(exist_ok=True)
-
-
 def _get_addon_names() -> set[str]:
     bpy.ops.preferences.addon_refresh()
     return {a.bl_info.get("name", "") for a in addon_utils.modules()}
@@ -85,8 +74,6 @@ def _install_addon(package):
 
         if __clash_import_name(addon_path.name):
             continue
-
-        __make_modules_importable(addon_path)  # todo do we still need this?
 
         # new_addon_path.mkdir(parents=True, exist_ok=True)
         print(f"copy addon to {local_addons_dir}")
