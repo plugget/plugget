@@ -6,6 +6,7 @@ import logging
 import subprocess
 import datetime
 import os
+import pprint
 from pathlib import Path
 import shutil
 
@@ -197,6 +198,23 @@ def uninstall(package_name=None, plugin_name=None, dependencies=False, **kwargs)
         return
 
     package.uninstall(dependencies=dependencies, **kwargs)
+
+
+def info(package_name=None, verbose=True):
+    """
+    show info about package
+    :param name: name of the manifest folder in the manifest repo
+    """
+
+    packages = list(package_name, verbose=False) or search(package_name, verbose=False)
+    if not packages:
+        logging.warning("Package not found")
+        return
+    if len(packages) > 1:
+        logging.warning(f"Multiple packages found: {packages}")
+        return
+    package = packages[0]
+    pprint.pp(package.to_dict())
 
 
 # # todo this is a plugin command, exposed to plugget. maybe we want to do this for all commands?

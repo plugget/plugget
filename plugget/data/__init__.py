@@ -177,8 +177,11 @@ class Package(object):
         json_data.setdefault("manifest_path", manifest_path)
         return cls(**json_data)  #package_name=package_name
 
-    def to_json(self, json_path):
-        """save the plugin to a json file"""
+    def to_dict(self, empty_keys=False):
+        """
+        convert the package to a dict, e.g. used for manifest files
+        :param empty_keys: if True, include keys with None values
+        """
         output = {'app': self.app,
                   'package_name': self.package_name,
                   'version': self.version,
@@ -190,13 +193,16 @@ class Package(object):
                   'dependencies': self.dependencies,
                   'installed_paths': [str(x) for x in self.installed_paths]
                   }
-        empty_keys = []
-        for key, value in output.items():
-            if value is None:
-                empty_keys.append(key)
-        for key in empty_keys:
-            del output[key]
+        if not empty_keys:
+            empty_keys = [k for k, v in output.items() if not v]
+            for key in empty_keys:
+                del output[key]
+        return output
 
+    def to_json(self, json_path):
+        """save the plugin to a json file"""
+
+        output = self.to_dict()
         Path(json_path).parent.mkdir(exist_ok=True, parents=True)
         with open(json_path, "w") as f:
             json.dump(output, f, indent=4)
