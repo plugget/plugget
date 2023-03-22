@@ -28,7 +28,7 @@ def __clash_import_name(name):
 
 def _get_addon_names() -> set[str]:
     bpy.ops.preferences.addon_refresh()
-    return {a.bl_info.get("name", "") for a in addon_utils.modules()}
+    return {a.__name__ for a in addon_utils.modules()}
 
 
 def _enable_addons(names: set[str], enable=True):
@@ -70,13 +70,14 @@ def _install_addon(package):
     #     rmdir(new_plugin_path)
     # shutil.move(str(plugin_path), str(new_plugin_path.parent), )  # copy plugin_path to local_addons_dir
     # todo filter repo paths
+    print(f"copy files to {local_addons_dir}")
     for addon_path in addon_paths:
+        print(addon_path)
 
         if __clash_import_name(addon_path.name):
             continue
 
         # new_addon_path.mkdir(parents=True, exist_ok=True)
-        print(f"copy addon to {local_addons_dir}")
         shutil.move(str(addon_path), str(local_addons_dir))
 
         # todo clean up empty folders
