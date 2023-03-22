@@ -26,7 +26,7 @@ class Package(object):
     def __init__(self, app=None, name=None, display_name=None, plugin_name=None, id=None, version=None,
                  description=None, author=None, repo_url=None, package_url=None, license=None, tags=None,
                  dependencies=None, repo_paths=None, docs_url=None, package_name=None, manifest_path=None,
-                 actions=None, **kwargs):
+                 actions=None, installed_paths=None, **kwargs):
         """
         :param app: the application this plugin is for e.g. blender
 
@@ -66,6 +66,8 @@ class Package(object):
         # license = ""
         # tags = []
         # dependencies = []
+
+        self.installed_paths = set() if installed_paths is None else set(installed_paths)   # list of files cloned locally
 
     # @property
     # def app(self):

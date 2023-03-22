@@ -77,6 +77,8 @@ def _install_addon(package):
         #     logging.warning(f"Failed to install plugin {addon_path.name}")
         #     return False
 
+    package.installed_paths |= set(addon_paths)  # todo might want a dict later
+
 
 def uninstall(package: "plugget.data.Package", **kwargs):
     """uninstall plugin by name"""
