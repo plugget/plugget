@@ -83,5 +83,17 @@ def _install_addon(package):
 def uninstall(package: "plugget.data.Package", **kwargs):
     """uninstall plugin by name"""
     # todo make plugin name an action kwarg
-    bpy.ops.preferences.addon_remove(module=plugin_name)
-    print("PLUGGET uninstalled plugin_name ", plugin_name)
+
+    for p in package.installed_paths:
+        p = Path(p)
+        print("remove", p)
+        # delete all paths,. p can be folder or file. force delete and children
+        if p.is_dir():
+            shutil.rmtree(p, ignore_errors=True)
+        else:
+            p.unlink(missing_ok=True)
+
+    bpy.ops.preferences.addon_refresh()
+
+    # bpy.ops.preferences.addon_remove(module=plugin_name)
+    print("PLUGGET uninstalled plugin_name ", package.package_name)
