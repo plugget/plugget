@@ -5,6 +5,9 @@ import plugget
 plugget.install("my_package")
 ```
 
+![machinetoolsinstall](https://user-images.githubusercontent.com/3758308/227316999-adf32b7f-4232-46f5-b0db-1b3dbe26d755.gif)
+
+
 not to confuse with 
 - [PluGeth](https://github.com/openrelayxyz/plugeth) The extensible Geth fork, ethereum, golang
 - [pluGET](https://github.com/Neocky/pluGET) A package manager to update minecraft server plugin & software
