@@ -13,6 +13,7 @@ import shutil
 from plugget.utils import rmdir
 from plugget.data import Package
 from plugget import settings
+import detect_app
 
 
 # plugget / cache
@@ -77,10 +78,11 @@ def _add_repo(repo_url):
     # TODO save to config file
 
 
-def _detect_app():
-    # detect application
-    dcc = 'blender'
-    module = importlib.import_module(f"plugget.apps.{dcc}")
+def _detect_app_id():
+    app = None
+    if not app:
+        app_found = detect_app.detect_app()
+        return app_found.id if app_found else None
 
 
 def search(name=None, app=None, verbose=True):
@@ -91,10 +93,12 @@ def search(name=None, app=None, verbose=True):
     :param verbose: print results if True
     """
 
+    app = _detect_app_id() if not app else app
+
     plugins = []
     source_dirs = _clone_manifest_repos()
     for source_dir in source_dirs:  # go through all cloned manifest repos
-        if app:  # filter by app
+        if app and app != 'all':  # filter by app
             source_dir = source_dir / app
         for plugin_manifest in source_dir.rglob("*.json"):
             source_name = plugin_manifest.parent.name  # this checks for manifest name, not name in package todo
@@ -133,6 +137,8 @@ def list(package_name:str = None, enabled=False, disabled=False, verbose=True, a
 
     # list all installed in settings.INSTALLED_DIR
     plugins = []
+    app = _detect_app_id() if not app else app
+
     if app and app != "all":
         app_manifest_dir = settings.INSTALLED_DIR / app
     else:
