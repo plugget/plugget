@@ -13,7 +13,7 @@ plugget.install("my_package")
 - git installed
 (aim to auto handle requirements in future)
 
-not to confuse with 
+## not to confuse with 
 - [PluGeth](https://github.com/openrelayxyz/plugeth) The extensible Geth fork, ethereum, golang
 - [pluGET](https://github.com/Neocky/pluGET) A package manager to update minecraft server plugin & software
 
