@@ -1,6 +1,7 @@
 """
-This submodule contains the app-specific implementations of the menu setup.
+Detect which app the python interpreter is running in. use detect_app()
 """
+
 import types
 import contextlib
 from typing import Optional
