@@ -124,6 +124,7 @@ class Package(object):
         DefaultActions = {
             "blender": ["blender_addon", "blender_pip"],
             "max": ["max_macroscript"],  # todo pip
+            "krita": ["krita_plugin", "krita_pip"],
             # "maya": "maya_module",
         }
         return DefaultActions.get(self.app)
@@ -207,11 +208,14 @@ class Package(object):
         with open(json_path, "w") as f:
             json.dump(output, f, indent=4)
 
-    def get_content(self) -> list[Path]:
+    def get_content(self) -> "list[Path]":
         """download the plugin content from the repo, and return the paths to the files"""
         return self._clone_repo()
 
-    def _clone_repo(self) -> list[Path]:
+    def _clone_repo(self) -> "list[Path]":
+        """
+        returns either the files in repo (sparse) or the folder containing the repo
+        """
         # clone package repo to temp folder
         rmdir(self.clone_dir)
 
@@ -265,7 +269,7 @@ class Package(object):
                     app_name, package_name = result
                 else:
                     raise Exception(f"expected only 1 ':', got {len(result)-1}. Invalid dependency: {d}")
-                package = commands.search(package_name)[0]  #app=app_name, also support python app dependencies
+                package = commands.search(package_name)[0]  # app=app_name, also support python app dependencies
 
             # if dependency is a dict, it's a package object, e.g. {"name": "my-exporter", "app": "blender"}
             elif isinstance(d, dict):
@@ -297,7 +301,6 @@ class Package(object):
         # todo check if install was successful
         manifest_path = settings.INSTALLED_DIR / self.app / self.package_name / self.manifest_path.name
         self.to_json(manifest_path)
-
 
     def uninstall(self, dependencies=False, **kwargs):
         for action in self.actions:
