@@ -8,6 +8,7 @@ import sys
 import subprocess
 import logging
 from pathlib import Path
+import importlib
 
 
 if os.name == 'posix':  # Linux or macOS
@@ -62,16 +63,7 @@ def install(package: "plugget.data.Package", **kwargs):
             subprocess.run(["pip", "install", "-r", package.clone_dir / p, '-t', path])
         else:
             logging.warning(f"expected requirements.txt not found: '{p}'")
-
-
-def install(package: "plugget.data.Package", **kwargs):
-
-    for p in get_requirements(package):
-        if p.exists():
-            print("requirements.txt found, installing requirements")
-            subprocess.run(["pip", "install", "-r", package.clone_dir / p, '-t', path])
-        else:
-            logging.warning(f"expected requirements.txt not found: '{p}'")
+    importlib.invalidate_caches()
 
 
 # def install(package: "plugget.data.Package", **kwargs):
@@ -102,4 +94,5 @@ def uninstall(package: "plugget.data.Package", dependencies=False, **kwargs):
             subprocess.run(["pip", "uninstall", "-r", package.clone_dir / p, "-y"])
         else:
             logging.warning(f"expected requirements.txt not found: '{p}'")
+    importlib.invalidate_caches()
 

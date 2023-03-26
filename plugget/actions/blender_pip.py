@@ -2,6 +2,7 @@ import logging
 import subprocess
 from pathlib import Path
 import bpy
+import importlib
 
 
 def get_requirements(package: "plugget.data.Package", **kwargs) -> list[Path]:
@@ -27,6 +28,7 @@ def install(package: "plugget.data.Package", **kwargs):
             subprocess.run(["pip", "install", "-r", package.clone_dir / p, '-t', blender_user_site_packages])
         else:
             logging.warning(f"expected requirements.txt not found: '{p}'")
+    importlib.invalidate_caches()
 
 
 def uninstall(package: "plugget.data.Package", dependencies=False, **kwargs):
@@ -45,6 +47,8 @@ def uninstall(package: "plugget.data.Package", dependencies=False, **kwargs):
             subprocess.run(["pip", "uninstall", "-r", package.clone_dir / p, "-y"])
         else:
             logging.warning(f"expected requirements.txt not found: '{p}'")
+
+    importlib.invalidate_caches()
 
 
 
