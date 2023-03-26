@@ -20,7 +20,7 @@ keywords = ["plugin", "addon", "add-on", "extension", "package", "manager", "res
 classifiers = [
     "Programming Language :: Python :: 3.7",
 ]
-dynamic = ["dependencies"]
+#dynamic = ["dependencies"]
 dependencies = ['importlib-metadata; python_version<"3.7"',]
 #dynamic = ["version"]
 version = "0.0.2"
