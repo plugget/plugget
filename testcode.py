@@ -3,15 +3,20 @@
 # sys.path.append("C:\\Users\\hanne\\OneDrive\\Documents\\repos\\plugget")
 import site
 site.addsitedir("C:\\Users\\hanne\\OneDrive\\Documents\\repos\\plugget")
+site.addsitedir("C:\\Users\\hanne\\OneDrive\\Documents\\repos\\plugget")
 
 import plugget
 import plugget.commands as cmd
+import plugget.data as da
+import plugget.actions.blender_addon as ba
 import plugget.apps.blender as b
 
 from importlib import reload
 reload(plugget)
 reload(b)
 reload(cmd)
+reload(da)
+reload(ba)
 
 cmd.install("textools")
 
