@@ -146,7 +146,7 @@ def list(package_name:str = None, enabled=False, disabled=False, verbose=True, a
 
     for plugin_manifest in app_manifest_dir.rglob("*.json"):
         package = Package.from_json(plugin_manifest)
-        if package_name and package_name.lower() not in package.package_name:  #  plugin_manifest.parent.name.lower():
+        if package_name and package_name.lower() not in package.package_name.lower():  #  plugin_manifest.parent.name.lower():
             continue
         plugins.append(package)
 
@@ -185,7 +185,7 @@ def install(package_name, enable=True, app=None, **kwargs):
     # uninstall if unsuccessful?
 
 
-def uninstall(package_name=None, plugin_name=None, dependencies=False, **kwargs):
+def uninstall(package_name=None, dependencies=False, **kwargs):
     """
     uninstall package
     :param name: name of the manifest folder in the manifest repo
