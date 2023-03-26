@@ -8,11 +8,13 @@ import addon_utils
 def __clash_import_name(name):
     """check there isn't a py module with the same name as our addon"""
     try:
-        __import__(name)
-        logging.warning(f"Failed to install addon {name}, a py module with same name exists")
-        return True
+        module = __import__(name)
+        if Path(module.__file__).exists():
+            logging.warning(f"Failed to install addon {name}, a py module with same name exists")
+            return True
     except ImportError:
-        return False
+        pass
+    return False
 
 
 def _get_all_addon_names() -> set[str]:
