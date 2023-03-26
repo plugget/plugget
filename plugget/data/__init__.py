@@ -61,7 +61,7 @@ class Package(object):
         self._actions = actions  # todo default app action
         self.dependencies = dependencies or []  # todo
         # self.id = id or plugin_name  # unique id  # todo for now same as name
-        # description = ""
+        description = ""
         # author = ""
         # license = ""
         # tags = []
