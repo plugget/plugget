@@ -10,6 +10,9 @@ plugget.install("my_package")
 
 ![machinetoolsinstall](https://user-images.githubusercontent.com/3758308/227316999-adf32b7f-4232-46f5-b0db-1b3dbe26d755.gif)
 
+also check out
+- [plugget blender addon](https://github.com/hannesdelbeke/plugget-blender-addon)
+- [plugget manifest repo](https://github.com/hannesdelbeke/plugget-pkgs)
 
 ## requirements
 - pip installed
