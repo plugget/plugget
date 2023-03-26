@@ -1,4 +1,7 @@
 # PlugGet
+
+[![PyPI Downloads](https://img.shields.io/pypi/v/plugget?color=0)](https://pypi.org/project/plugget/)
+
 Install app packages (plugins, addons, icons, ...) from a repo with a single Python command: 
 ```python
 import plugget
