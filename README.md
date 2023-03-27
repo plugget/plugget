@@ -32,3 +32,8 @@ WinGet, chocolatey, etc. install apps, Plugget installs plugins for apps.
 
 ## manifest repo
 - package manifests live in the [manifest repo](https://github.com/hannesdelbeke/plugget-pkgs)
+
+## issues
+If the install fails. It likely is a bad manifest, a bad install, or a bug with Plugget.
+Report the issue in issues.
+There's a small chance the GitHub servers are down, you can check the [github status](https://www.githubstatus.com/).
