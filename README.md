@@ -1,4 +1,7 @@
-# PlugGet
+<h1>
+<img src="https://user-images.githubusercontent.com/3758308/231004489-25ce30d9-c534-4d10-8773-8e6f80f36dd2.png" data-canonical-src="https://user-images.githubusercontent.com/3758308/231004489-25ce30d9-c534-4d10-8773-8e6f80f36dd2.png" width="70" />
+Plugget
+</h1>
 
 [![PyPI Downloads](https://img.shields.io/pypi/v/plugget?color=0)](https://pypi.org/project/plugget/)
 
