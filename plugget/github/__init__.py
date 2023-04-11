@@ -1,37 +1,35 @@
 from plugget import settings
-import requests
+try:
+    import requests
+except ImportError:
+    print("requests not installed, github info won't be available")
 import json
 
 
 # todo make this a plugin based setup. so we can add github, gitlab, ...
-
+# todo make requests optional, if it's not installed, use urllib
 
 def get_starred_repos(username=None):
     """
-    gGt starred repos from github
+    get starred repos from GitHub
 
     Returns:
     a list of dicts, with full_name as key, and value user/my-repo
     """
     # todo cache?
     username = username or settings.GITHUB_USER
+    # token = settings.github_token
 
-    # token = prefs.github_token
-
-    # headers = {
-    #     "Authorization": f"token {token}"
-    # }
+    headers = {}
+    # headers["Authorization"] = f"token {token}"
 
     url = f"https://api.github.com/users/{username}/starred"
 
     try:
-        response = requests.get(url)  # , headers=headers)
+        response = requests.get(url, headers=headers)
         if response.ok:
             favorites = json.loads(response.text)
             return favorites
-            print(favorites)
-            for favorite in favorites:
-                print(favorite["full_name"])
         else:
             print(f"Error: {response.status_code}")
     except Exception as e:
