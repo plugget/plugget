@@ -123,11 +123,14 @@ class Package(object):
         """get the default action for the app"""
         DefaultActions = {
             "blender": ["blender_addon", "blender_pip"],
-            "max": ["max_macroscript"],  # todo pip
+            "max3ds": ["max_macroscript"],  # todo pip
             "krita": ["krita_plugin", "krita_pip"],
             # "maya": "maya_module",
         }
-        return DefaultActions.get(self.app)
+        actions = DefaultActions.get(self.app)
+        if not actions:
+            raise Exception(f"no default action for app {self.app}")
+        return actions
 
     @property
     def actions(self):
