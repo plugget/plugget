@@ -3,7 +3,7 @@
 # sys.path.append("C:\\Users\\hanne\\OneDrive\\Documents\\repos\\plugget")
 import site
 site.addsitedir("C:\\Users\\hanne\\OneDrive\\Documents\\repos\\plugget")
-site.addsitedir("C:\\Users\\hanne\\OneDrive\\Documents\\repos\\plugget")
+site.addsitedir("C:\\Users\\hanne\\OneDrive\\Documents\\repos\\detect-app")
 
 import plugget
 import plugget.commands as cmd
