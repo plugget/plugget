@@ -221,6 +221,10 @@ def info(package_name=None, verbose=True):
         return
     package = packages[0]
     pprint.pp(package.to_dict())
+    import plugget.github as github
+    favorited = github.is_starred(package.repo_url)
+    star_count = github.get_repo_stars(package.repo_url)
+    print(f"starred by hannes: {favorited}, star-count ⭐:", star_count)
 
 
 # # todo this is a plugin command, exposed to plugget. maybe we want to do this for all commands?

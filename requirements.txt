@@ -1,1 +1,2 @@
 detect-app
+requests
