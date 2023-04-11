@@ -14,3 +14,5 @@ PLUGGET_DIR = Path(os.getenv("APPDATA")) / "plugget"
 INSTALLED_DIR = PLUGGET_DIR / "installed"
 
 INSTALLED_DIR.mkdir(exist_ok=True, parents=True)
+
+GITHUB_USER = "hannesdelbeke"
