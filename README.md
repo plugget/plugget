@@ -16,6 +16,7 @@ plugget.install("my_package")
 also check out
 - [plugget blender addon](https://github.com/hannesdelbeke/plugget-blender-addon)
 - [plugget manifest repo](https://github.com/hannesdelbeke/plugget-pkgs)
+- [plugget unreal plugin](https://github.com/hannesdelbeke/plugget-unreal)
 
 ## requirements
 - pip installed
