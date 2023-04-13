@@ -1,5 +1,6 @@
 import aiohttp
 import asyncio
+import logging
 
 
 async def get_repo_stars_async(repo_url, username=None):
@@ -10,6 +11,10 @@ async def get_repo_stars_async(repo_url, username=None):
     :param username: Optional username to use for authentication.
     :return: The number of stars for the repository.
     """
+
+    if not repo_url:
+        logging.error("No repository URL provided to get_repo_stars")
+        return 0
 
     # Split the repo URL into its components
     parts = repo_url.strip("/").split("/")

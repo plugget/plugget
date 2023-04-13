@@ -4,6 +4,7 @@ try:
 except ImportError:
     print("requests not installed, github info won't be available")
 import json
+import logging
 
 
 # todo make this a plugin based setup. so we can add github, gitlab, ...
@@ -34,6 +35,7 @@ def get_starred_repos(username=None):
             print(f"Error: {response.status_code}")
     except Exception as e:
         print(f"Error: {e}")
+    return []
 
 
 def is_starred(repo_url, username=None):
@@ -42,7 +44,7 @@ def is_starred(repo_url, username=None):
     """
     favorites = get_starred_repos(username=username)
     for favorite in favorites:
-        if favorite["full_name"] in repo_url:
+        if repo_url and favorite["full_name"] in repo_url:
             return True
     return False
 
@@ -59,6 +61,10 @@ def get_repo_stars(repo_url, username=None):
     :param username: Optional username to use for authentication.
     :return: The number of stars for the repository.
     """
+
+    if not repo_url:
+        logging.error("No repository URL provided to get_repo_stars")
+        return 0
 
     # Split the repo URL into its components
     parts = repo_url.strip("/").split("/")
