@@ -1,4 +1,5 @@
 from plugget import settings
+
 try:
     import requests
 except ImportError:
@@ -7,8 +8,19 @@ import json
 import logging
 
 
+settings_data = settings.load_settings("github")
+# todo enforce required vs optional settings
+settings_data.setdefault("GITHUB_USER", None)
+settings_data.setdefault("GITHUB_TOKEN", None)
+settings.save_settings("github", settings_data)
+
+GITHUB_TOKEN = settings_data["GITHUB_TOKEN"]
+GITHUB_USER = settings_data["GITHUB_USER"]
+
+
 # todo make this a plugin based setup. so we can add github, gitlab, ...
 # todo make requests optional, if it's not installed, use urllib
+
 
 def get_starred_repos(username=None):
     """
@@ -18,11 +30,11 @@ def get_starred_repos(username=None):
     a list of dicts, with full_name as key, and value user/my-repo
     """
     # todo cache?
-    username = username or settings.GITHUB_USER
-    # token = settings.github_token
+    username = username or GITHUB_USER
+    token = GITHUB_TOKEN
 
     headers = {}
-    # headers["Authorization"] = f"token {token}"
+    headers["Authorization"] = f"token {token}"
 
     url = f"https://api.github.com/users/{username}/starred"
 
