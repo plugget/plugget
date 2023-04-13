@@ -4,9 +4,6 @@ import tempfile
 import json
 
 
-sources = [
-    "https://github.com/hannesdelbeke/plugget-pkgs.git",
-]
 
 # paths
 TEMP_PLUGGET = Path(tempfile.gettempdir()) / "plugget"
@@ -20,7 +17,7 @@ INSTALLED_DIR.mkdir(exist_ok=True, parents=True)
 # get settings for the actions etc, requires unique name for each action
 # todo support duplicates of the same settings for each app (blender, blender2, maya, etc)
 # actions request plugget for their settings
-# plugget manages & saves the settings and justs returns them
+# plugget manages & saves the settings and returns them
 
 def _settings_name(name):
     return PLUGGET_DIR / f"settings_{name}.json"
@@ -41,6 +38,25 @@ def save_settings(name, settings):
     with open(_settings_name(name), "w") as f:
         json.dump(settings, f, indent=4)
         print("saved settings:", _settings_name(name))
+
+
+sources = [
+    "https://github.com/hannesdelbeke/plugget-pkgs.git",
+]
+
+
+def add_source(source):
+    sources.append(source)
+    save_settings("plugget", {"sources": sources})
+
+
+def remove_source(source):
+    sources.remove(source)
+    save_settings("plugget", {"sources": sources})
+
+
+def list_sources():
+    return sources
 
 
 # todo in settings we need a add_repo, remove_repo, list_repos.
