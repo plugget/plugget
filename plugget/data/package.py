@@ -125,6 +125,7 @@ class Package(object):
             "blender": ["blender_addon", "blender_pip"],
             "max3ds": ["max_macroscript"],  # todo pip
             "krita": ["krita_plugin", "krita_pip"],
+            "unreal": ["unreal_plugin", "unreal_pip"],
             # "maya": "maya_module",
         }
         actions = DefaultActions.get(self.app)
