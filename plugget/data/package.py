@@ -65,10 +65,10 @@ class Package(object):
         # author = ""
         # license = ""
         # tags = []
-        # dependencies = []
 
         self.installed_paths = set() if installed_paths is None else set(installed_paths)   # list of files cloned locally
-
+        self._starred = None
+        self._stars = None
     # @property
     # def app(self):
     #     return self._app
@@ -132,6 +132,21 @@ class Package(object):
         if not actions:
             raise Exception(f"no default action for app {self.app}")
         return actions
+
+    def get_stars(self):
+        """get the number of stars on the repo"""
+        import plugget.github
+        if self._stars is None:
+            self._stars = plugget.github.get_repo_stars(self.repo_url)
+        return self._stars
+
+    def is_starred(self):
+        """get the number of stars on the repo"""
+
+        import plugget.github
+        if self._starred is None:
+            self._starred = plugget.github.is_starred(self.repo_url)
+        return self._starred
 
     @property
     def actions(self):
