@@ -17,6 +17,7 @@ import unreal
 #     project_path = unreal.Paths.convert_relative_path_to_full(project_path)
 #     return Path(project_path)
 
+
 def project_site_dir():
     content_path = unreal.Paths.project_content_dir()  # '../../../Users/USER/MyProject/Content/'
     content_path = unreal.Paths.convert_relative_path_to_full(content_path)  # 'C:/Users/USER/MyProject/Content/'
@@ -44,19 +45,6 @@ def get_requirements(package: "plugget.data.Package", **kwargs) -> "list[Path]":
     return requirements_paths
 
 
-# def get_python():
-#     python_exe = os.environ.get("PLUGGET_KRITA_PYTHON")  # set to same version as python in krita!
-#
-#     # Verify that the provided Python executable matches the current Python version
-#     if not os.path.isfile(python_exe):
-#         raise ValueError("Python executable not found at {}".format(python_exe))
-#     if subprocess.check_output(
-#             [python_exe, "-c", "import sys; print(sys.version_info[:2])"]).decode().strip() != python_version:
-#         raise ValueError(
-#             "Python executable {} does not match current Python version {}".format(python_exe, python_version))
-#     return python_exe
-
-
 def install(package: "plugget.data.Package", **kwargs):
     print("check for requirements")
 
@@ -67,6 +55,11 @@ def install(package: "plugget.data.Package", **kwargs):
         else:
             logging.warning(f"expected requirements.txt not found: '{p}'")
     importlib.invalidate_caches()
+
+    # # check if files were copied: package.clone_dir / p
+    # if not (package.clone_dir / p).exists():
+    #     raise FileNotFoundError(f"expected file not found: '{p}'")
+
 
 
 # def install(package: "plugget.data.Package", **kwargs):
