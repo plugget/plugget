@@ -15,6 +15,10 @@ def install(package: "plugget.data.Package", max_folder=None, **kwargs) -> bool:
 
     # move it to target folder
     repo_paths = package.get_content(target_dir=plugin_dir / package.package_name)
+    # todo cloning directly in plugin dir works since unreal recursively searches for plugins.
+    #  but it's not the way it should be done.
+    #  e.g. it will install 2 plugins, if 2 plugins are in same repo (e.g. blendertools repo from epic)
+
     # for sub_path in repo_paths:
     #     print("copying", sub_path, "to", plugin_dir)
     #
