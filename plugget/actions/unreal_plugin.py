@@ -1,6 +1,7 @@
 import unreal
 from pathlib import Path
 import shutil
+import os
 
 
 def project_plugins_dir():
@@ -13,25 +14,35 @@ def install(package: "plugget.data.Package", max_folder=None, **kwargs) -> bool:
     plugin_dir = project_plugins_dir()
 
     # move it to target folder
-    repo_paths = package.get_content(target_dir=plugin_dir)
+    repo_paths = package.get_content(target_dir=plugin_dir / package.package_name)
     # for sub_path in repo_paths:
     #     print("copying", sub_path, "to", plugin_dir)
+    #
+    #     sub_path = os.path.realpath(sub_path)
+    #     plugin_dir = os.path.realpath(plugin_dir)
     #     shutil.copy(sub_path, plugin_dir)  # PermissionError install unreal
-    #     #PermissionError: [Errno 13] Permission denied: 'C:\\Users\\hanne\\AppData\\Local\\Temp\\plugget\\unreal\\VaRest\\latest\\VaRest'
-    #     # permis denied to source.
+    # #     #PermissionError: [Errno 13] Permission denied: 'C:\\Users\\hanne\\AppData\\Local\\Temp\\plugget\\unreal\\VaRest\\latest\\VaRest'
+    # #     # permis denied to source.
+    #
+    # # # check if files were copied: package.clone_dir / p
+    # # if not (package.clone_dir / p).exists():
+    # #     raise FileNotFoundError(f"expected file not found: '{p}'")
+    #
+    # # delete plugin_dir / "temp"
+    # shutil.rmtree(plugin_dir / "temp", ignore_errors=True)
+
+    # package.installed_paths |= {local_addons_dir / x.name for x in addon_paths}  # todo might want a dict later
 
 
 def uninstall(package: "plugget.data.Package", **kwargs):
 
-    plugin_dir = project_plugins_dir()
+    # plugin_dir = project_plugins_dir()
 
-    for sub_path in package.repo_paths:
-        sub_path = Path(sub_path)
-
-        # delete files (and folders) from the plugin folder
-        sub_path = plugin_dir / sub_path
-        print("deleting", sub_path, "from", plugin_dir)
-        if sub_path.is_file():
-            sub_path.unlink()
+    for p in package.installed_paths:
+        p = Path(p)
+        print("remove", p)
+        # delete all paths,. p can be folder or file. force delete and children
+        if p.is_dir():
+            shutil.rmtree(p, ignore_errors=True)
         else:
-            sub_path.rmdir()
+            p.unlink(missing_ok=True)
