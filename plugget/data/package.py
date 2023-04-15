@@ -230,6 +230,9 @@ class Package(object):
     def get_content(self, target_dir=None) -> "list[Path]":
         """download the plugin content from the repo, and return the paths to the files"""
         return self._clone_repo(target_dir=target_dir)
+    # todo instead of clone can we download the files directly?
+    # cant clone to non empty folder, so we need to move files instead. but unreal had permission issues with that
+
 
     def _clone_repo(self, target_dir=None) -> "list[Path]":
         """
@@ -244,27 +247,25 @@ class Package(object):
 
         print("cloning", self.repo_url, "to", target_dir)
         # todo sparse checkout, support multiple entries in self.repo_paths
+
+        # logging.debug(f"cloning {self.repo_url} to {target_dir}")
+        subprocess.run(["git", "clone", "--depth", "1", "--progress", self.repo_url, str(target_dir)])
+        # todo this doesnt always print the error, see unreal plugget for example with errors
+
+        # delete .git folder
+        rmdir(target_dir / ".git")
+
+        # confirm folder was created
+        # todo check if target_dir / repo file or foldername(s) exist
+        #  target dir always exists
+        # if not target_dir.exists():
+        #     raise Exception(f"Failed to clone repo to {target_dir}")
+
         if self.repo_paths:
-            # logging.debug(f"cloning {self.repo_url} to {target_dir}")
-            subprocess.run(["git", "clone", "--depth", "1", "--progress", self.repo_url, str(target_dir)])
-
-            # delete .git folder
-            rmdir(target_dir / ".git")
-
-            # confirm folder was created
-            if not target_dir.exists():
-                raise Exception(f"Failed to clone repo to {target_dir}")
-
             return [target_dir / p for p in self.repo_paths]
         else:
-            # clone repo
-            subprocess.run(["git", "clone", "--depth", "1", "--progress", self.repo_url, str(target_dir)])
-
-            # delete .git folder
-            rmdir(target_dir / ".git")
-
-            # app_dir = Path("C:/Users/hanne/OneDrive/Documents/repos/plugget-pkgs") / "blender"
             return [target_dir]
+
 
     def install(self, force=False, *args, **kwargs):
         from plugget import commands
