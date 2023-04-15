@@ -227,40 +227,44 @@ class Package(object):
         with open(json_path, "w") as f:
             json.dump(output, f, indent=4)
 
-    def get_content(self) -> "list[Path]":
+    def get_content(self, target_dir=None) -> "list[Path]":
         """download the plugin content from the repo, and return the paths to the files"""
-        return self._clone_repo()
+        return self._clone_repo(target_dir=target_dir)
 
-    def _clone_repo(self) -> "list[Path]":
+    def _clone_repo(self, target_dir=None) -> "list[Path]":
         """
         returns either the files in repo (sparse) or the folder containing the repo
         """
-        # clone package repo to temp folder
-        rmdir(self.clone_dir)
 
-        print("cloning", self.repo_url, "to", self.clone_dir)
+        target_dir = target_dir or self.clone_dir
+        # todo save target_dir in self.clone_dir ?
+
+        # clone package repo to temp folder
+        rmdir(target_dir)
+
+        print("cloning", self.repo_url, "to", target_dir)
         # todo sparse checkout, support multiple entries in self.repo_paths
         if self.repo_paths:
-            # logging.debug(f"cloning {self.repo_url} to {self.clone_dir}")
-            subprocess.run(["git", "clone", "--depth", "1", "--progress", self.repo_url, str(self.clone_dir)])
+            # logging.debug(f"cloning {self.repo_url} to {target_dir}")
+            subprocess.run(["git", "clone", "--depth", "1", "--progress", self.repo_url, str(target_dir)])
 
             # delete .git folder
-            rmdir(self.clone_dir / ".git")
+            rmdir(target_dir / ".git")
 
             # confirm folder was created
-            if not self.clone_dir.exists():
-                raise Exception(f"Failed to clone repo to {self.clone_dir}")
+            if not target_dir.exists():
+                raise Exception(f"Failed to clone repo to {target_dir}")
 
-            return [self.clone_dir / p for p in self.repo_paths]
+            return [target_dir / p for p in self.repo_paths]
         else:
             # clone repo
-            subprocess.run(["git", "clone", "--depth", "1", "--progress", self.repo_url, str(self.clone_dir)])
+            subprocess.run(["git", "clone", "--depth", "1", "--progress", self.repo_url, str(target_dir)])
 
             # delete .git folder
-            rmdir(self.clone_dir / ".git")
+            rmdir(target_dir / ".git")
 
             # app_dir = Path("C:/Users/hanne/OneDrive/Documents/repos/plugget-pkgs") / "blender"
-            return [self.clone_dir]
+            return [target_dir]
 
     def install(self, force=False, *args, **kwargs):
         from plugget import commands

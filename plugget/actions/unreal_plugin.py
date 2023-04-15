@@ -13,10 +13,12 @@ def install(package: "plugget.data.Package", max_folder=None, **kwargs) -> bool:
     plugin_dir = project_plugins_dir()
 
     # move it to target folder
-    repo_paths = package.get_content()
-    for sub_path in repo_paths:
-        print("copying", sub_path, "to", plugin_dir)
-        shutil.copy(sub_path, plugin_dir)
+    repo_paths = package.get_content(target_dir=plugin_dir)
+    # for sub_path in repo_paths:
+    #     print("copying", sub_path, "to", plugin_dir)
+    #     shutil.copy(sub_path, plugin_dir)  # PermissionError install unreal
+    #     #PermissionError: [Errno 13] Permission denied: 'C:\\Users\\hanne\\AppData\\Local\\Temp\\plugget\\unreal\\VaRest\\latest\\VaRest'
+    #     # permis denied to source.
 
 
 def uninstall(package: "plugget.data.Package", **kwargs):
