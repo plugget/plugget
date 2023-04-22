@@ -70,6 +70,7 @@ class Package(object):
         self.installed_paths = set() if installed_paths is None else set(installed_paths)   # list of files cloned locally
         self._starred = None
         self._stars = None
+        self._clone_dir = None
     # @property
     # def app(self):
     #     return self._app
@@ -112,7 +113,9 @@ class Package(object):
     @property
     def clone_dir(self):
         """return the path we clone to on install e.g C:/Users/username/AppData/Local/Temp/plugget/bqt/0.1.0"""
-        return settings.TEMP_PLUGGET / self.app / self.package_name / self.version / self.package_name
+        if not self._clone_dir:
+            self._clone_dir = settings.TEMP_PLUGGET / self.app / self.package_name / self.version / self.package_name
+        return self._clone_dir
 
     @property
     def is_installed(self):
@@ -242,6 +245,7 @@ class Package(object):
         """
 
         target_dir = target_dir or self.clone_dir
+        self._clone_dir = target_dir
         # todo save target_dir in self.clone_dir ?
 
         # clone package repo to temp folder
