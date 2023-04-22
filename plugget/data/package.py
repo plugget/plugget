@@ -141,7 +141,7 @@ class Package(object):
         """get the number of stars on the repo"""
         import plugget.github
         if self._stars is None:
-            self._stars = plugget.github.get_repo_stars(self.repo_url)
+            self._stars =plugget.github.get_repo_stars(self.repo_url)
         return self._stars
 
     def is_starred(self):
@@ -318,21 +318,6 @@ class Package(object):
                 package = Package(**d)
 
             package.install(force=force, *args, **kwargs)
-
-        # # if requirements.txt exists in self.repo_paths, install requirements
-        # requirements_paths = []
-        # if (self.clone_dir / "requirements.txt").exists():
-        #     requirements_paths.append(self.clone_dir / "requirements.txt")
-        # if self.repo_paths:
-        #     for p in self.repo_paths:
-        #         if p.endswith("requirements.txt"):
-        #             requirements_paths.append(self.clone_dir / p)
-        # for p in requirements_paths:
-        #     if p.exists():
-        #         print("requirements.txt found, installing requirements")
-        #         subprocess.run(["pip", "install", "-r", self.clone_dir / p])
-        #     else:
-        #         logging.warning(f"expected requirements.txt not found: '{p}'")
 
         # copy manifest to installed packages dir
         # todo check if install was successful
