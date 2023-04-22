@@ -26,7 +26,7 @@ class Package(object):
     def __init__(self, app=None, name=None, display_name=None, plugin_name=None, id=None, version=None,
                  description=None, author=None, repo_url=None, package_url=None, license=None, tags=None,
                  dependencies=None, repo_paths=None, docs_url=None, package_name=None, manifest_path=None,
-                 actions=None, installed_paths=None, **kwargs):
+                 actions=None, installed_paths=None, repo_SHA=None, **kwargs):
         """
         :param app: the application this plugin is for e.g. blender
 
@@ -55,6 +55,7 @@ class Package(object):
         # manifest settings
         self.repo_url = repo_url  # set before plugin name
         self.repo_paths: "list[str]" = repo_paths  # subdir(s)
+        self.repo_SHA = repo_SHA
         self.package_url = package_url  # set before self.plugin_name
          # self.name = name #or self.plugin_name
         self.docs_url = None
@@ -207,6 +208,7 @@ class Package(object):
                   'version': self.version,
                   'repo_url': self.repo_url,
                   'repo_paths': self.repo_paths,
+                  'self.repo_SHA': self.repo_SHA,
                   'package_url': self.package_url,
                   'docs_url': self.docs_url,
                   'actions': self._actions,
@@ -251,6 +253,11 @@ class Package(object):
         # logging.debug(f"cloning {self.repo_url} to {target_dir}")
         subprocess.run(["git", "clone", "--depth", "1", "--progress", self.repo_url, str(target_dir)])
         # todo this doesnt always print the error, see unreal plugget for example with errors
+
+        if self.repo_SHA:
+            # todo check if repo_SHA is valid
+            subprocess.run(["git", "fetch", "--depth", "1", "origin", self.repo_SHA], cwd=target_dir)
+            subprocess.run(["git", "checkout", self.repo_SHA], cwd=target_dir)
 
         # delete .git folder
         rmdir(target_dir / ".git")
