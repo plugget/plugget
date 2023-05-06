@@ -292,6 +292,12 @@ def info(package_name=None, verbose=True):
 #     module.open_install_dir()
 
 
+def open_installed_dir(*args, **kwargs):
+    # todo currently copies json. but json is named after version
+    #  this will clash between plugins with same version (but diff name)
+
+    # start file explorer in installed dir
+    os.startfile(settings.INSTALLED_DIR)
 # aliases
 # upgrade = update
 
