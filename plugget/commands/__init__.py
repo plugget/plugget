@@ -4,12 +4,13 @@ Plugget is a plugin-manager for various applications.
 import logging
 import subprocess
 import datetime
-import os
 import pprint
 
 from plugget.utils import rmdir
 from plugget.data import Package
 from plugget import settings
+
+from pathlib import Path
 
 
 # plugget / cache
@@ -28,7 +29,8 @@ from plugget import settings
 #         return plugin_name
 
 
-def _clone_manifest_repo(source_url):
+def _clone_manifest_repo(source_url) -> "pathlib.Path":
+    """clone git repo containing plugget manifests, from a git URL"""
     source_name = source_url.split("/")[-1].split(".")[0]
     source_dir = settings.TEMP_PLUGGET / source_name
 
@@ -40,15 +42,15 @@ def _clone_manifest_repo(source_url):
             print("using cached manifest repo, last updated less than a day ago")
             return source_dir
 
+    # remove old manifest repo
     rmdir(source_dir)  # todo catch if this failed
-
     # check if dir exists
     if source_dir.exists():
         raise Exception(f"Failed to remove source_dir {source_dir}")
 
     # clone repo
     subprocess.run(["git", "clone", "--depth", "1", "--progress", source_url, str(source_dir)])
-
+    # todo check if command errored / catch exception
     # todo check if clone was successful
 
     # CACHING: make a file inside named _LAST_UPDATED with the current date
@@ -59,7 +61,6 @@ def _clone_manifest_repo(source_url):
     return source_dir
 
 
-
 def _clone_manifest_repos():
     """
     clone the manifest repos that are registered, defaults to ['github.com/hannesdelbeke/plugget-pkgs']
@@ -67,10 +68,16 @@ def _clone_manifest_repos():
     # if repo doesn't exist, clone it
     source_dirs = []
     for source_url in settings.sources:
-        source_dir = _clone_manifest_repo(source_url)
-        source_dirs.append(source_dir)
-    return source_dirs
 
+        # first check if path is a local path
+        source_dir = Path(source_url)
+        if not source_dir.exists():  # todo fix this naive impicit approach
+            # else assume it's a git URL
+            source_dir = _clone_manifest_repo(source_url)
+
+        source_dirs.append(source_dir)
+
+    return source_dirs
 
 
 def _add_repo(repo_url):
