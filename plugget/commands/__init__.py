@@ -10,7 +10,6 @@ import pprint
 from plugget.utils import rmdir
 from plugget.data import Package
 from plugget import settings
-import detect_app
 
 
 # plugget / cache
@@ -80,10 +79,14 @@ def _add_repo(repo_url):
 
 
 def _detect_app_id():
-    app = None
-    if not app:
-        app_found = detect_app.detect_app()
-        return app_found.id if app_found else None
+    try:
+        import detect_app
+        app = None
+        if not app:
+            app_found = detect_app.detect_app()
+            return app_found.id if app_found else None
+    except:
+        None
 
 
 def search(name=None, app=None, verbose=True):
