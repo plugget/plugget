@@ -97,7 +97,7 @@ def _detect_app_id():
         None
 
 
-def search(name=None, app=None, verbose=True):
+def search(name=None, app=None, verbose=True, latest_only=True):
     """
     search if package is in sources
     :param name: pacakge name to search in manifest repo, return all packages if not set
@@ -117,11 +117,36 @@ def search(name=None, app=None, verbose=True):
             if name is None or name.lower() in source_name.lower():
                 plugins.append(Package.from_json(plugin_manifest))
 
+    if latest_only and len(plugins)>1:
+        # todo sort versions
+        # [ numpy 1, numpy 2 ]
+        # check if same manifest folder
+        shared = {}  # same packages, but diff version, sorted by their package name
+        temp = []
+        for plugin in plugins:
+            shared.setdefault(plugin.package_name, [])
+            shared[plugin.package_name].append(plugin)
+            temp.append(plugin)
+        if len(shared) == 1:
+
+            # get latest in shared
+            # TODO sort temp, by latest version
+            # for now hack, if it says latest return that
+            latest = [p.version == "latest" for p in temp]
+            if latest:
+                return latest
+
+            # sort versions sorts list of strings
+            # temp contains packages, so we need to get their version with .version
+            temp_sorted = sorted(temp, key=lambda x: x.version)
+            plugins = [temp_sorted[-1]]
+
     if verbose:
         print(f"{len(plugins)} plugins found in repo:")
         print(f"{'-' * 20}")
         for plugin in plugins:
             print(f"{plugin}")
+
     return plugins
 
 
