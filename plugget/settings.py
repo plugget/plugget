@@ -24,6 +24,7 @@ def _settings_name(name):
 
 
 def load_settings(name):
+    """Load the settings from the settings config in PLUGGET_DIR"""
     settings_path = _settings_name(name)
     if not settings_path.exists():
         return {}
