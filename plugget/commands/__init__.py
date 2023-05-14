@@ -97,7 +97,7 @@ def _detect_app_id():
         None
 
 
-def search(name=None, app=None, verbose=True, latest_only=True):
+def search(name=None, app=None, verbose=True, latest_only=True, version=None):
     """
     search if package is in sources
     :param name: pacakge name to search in manifest repo, return all packages if not set
@@ -117,7 +117,9 @@ def search(name=None, app=None, verbose=True, latest_only=True):
             if name is None or name.lower() in source_name.lower():
                 plugins.append(Package.from_json(plugin_manifest))
 
-    if latest_only and len(plugins)>1:
+    if version and len(plugins) > 1:
+        plugins = [p for p in plugins if p.version == version]
+    elif latest_only and len(plugins) > 1:
         # todo sort versions
         # [ numpy 1, numpy 2 ]
         # check if same manifest folder
@@ -199,7 +201,7 @@ def list(package_name:str = None, enabled=False, disabled=False, verbose=True, a
 
 
 #    plugin_name = plugin_name or plugin_name_from_manifest(package_name)
-def install(package_name, enable=True, app=None, **kwargs):
+def install(package_name, enable=True, app=None, version=None, **kwargs):
     """
     install package
     :param name: name of the manifest folder in the manifest repo
@@ -215,7 +217,7 @@ def install(package_name, enable=True, app=None, **kwargs):
     # module = _get_app_module()
 
     # get package manifest from package repo
-    package = search(name=package_name, app=app, verbose=False)[0]
+    package = search(name=package_name, app=app, verbose=False, version=version)[0]
     if not package:
         logging.warning("Package not found, cancelling install")
         return
