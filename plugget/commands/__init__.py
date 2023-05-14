@@ -80,12 +80,6 @@ def _clone_manifest_repos():
     return source_dirs
 
 
-def _add_source(repo_url):
-    """add a git URL or local path to manifest repo"""
-    settings.sources.append(repo_url)
-    # TODO save to config file
-
-
 def _detect_app_id():
     try:
         import detect_app
