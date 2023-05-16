@@ -34,7 +34,7 @@ class PackagesMeta():
         return getattr(self.latest, attr)
 
     def get_version(self, version:str) -> "plugget.data.package.Package":
-        # search self,packages#
+        """get package with matching version from self.packages"""
         match = [x for x in self.packages if version == x.version]
         if match:
             return match[0]
