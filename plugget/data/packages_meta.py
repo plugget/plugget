@@ -1,3 +1,4 @@
+import logging
 
 
 class PackagesMeta():
@@ -27,7 +28,10 @@ class PackagesMeta():
         try get the attr from the latest package, e.g. package_meta.install() == package_meta.latest.install()"""
         return getattr(self.latest, attr)
 
-    # inherit the commands from package
-    # e.g. install: installs the latest version of the collection
-
-    # also add extra versions, return all versions
+    def get_version(self, version:str) -> "plugget.data.package.Package":
+        # search self,packages#
+        match = [x for x in self.packages if version == x.version]
+        if match:
+            return match[0]
+        else:
+            logging.warning(f"could not find package of version '{version}'")
