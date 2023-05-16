@@ -2,6 +2,11 @@ import logging
 
 
 class PackagesMeta():
+    """
+    A collection of different versions of the same package.
+    Any command run on a PackagesMeta instance will attempt to run on the latest package. see self.__getattr__
+    A PackagesMeta instance is returned by plugget.search()
+    """
 
     def __init__(self):
         self.packages = []
