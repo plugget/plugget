@@ -2,7 +2,7 @@ from pathlib import Path
 import os
 import tempfile
 import json
-
+import logging
 
 
 # paths
@@ -26,6 +26,8 @@ def _settings_name(name):
 def load_settings(name):
     """Load the settings from the settings config in PLUGGET_DIR"""
     settings_path = _settings_name(name)
+    print("settings_path", settings_path)
+
     if not settings_path.exists():
         return {}
     try:
@@ -38,30 +40,30 @@ def load_settings(name):
 def save_settings(name, settings):
     with open(_settings_name(name), "w") as f:
         json.dump(settings, f, indent=4)
-        print("saved settings:", _settings_name(name))
+        logging.debug("saved settings:", _settings_name(name))
 
 
-sources = [
-    "https://github.com/hannesdelbeke/plugget-pkgs.git",
-]
+sources = set()
+sources.add("https://github.com/hannesdelbeke/plugget-pkgs.git")
 
 
 def add_source(source):
-    sources.append(source)
-    save_settings("plugget", {"sources": sources})
+    """source: a git URL or path to local manifest-folder"""
+    sources.add(source)
+    save_settings("plugget", {"sources": list(sources)})
 
 
 def remove_source(source):
     sources.remove(source)
-    save_settings("plugget", {"sources": sources})
+    save_settings("plugget", {"sources": list(sources)})  # todo combine all these save settings lines
 
 
-def list_sources():
-    return sources
+# def list_sources():
+#     return sources
 
 
 # todo in settings we need a add_repo, remove_repo, list_repos.
 # todo cleanup simple way of loading
 settings_data = load_settings("plugget")
-sources = settings_data.get("sources", sources)
-save_settings("plugget", {"sources": sources})
+sources = set(settings_data.get("sources", sources))
+save_settings("plugget", {"sources": list(sources)})
