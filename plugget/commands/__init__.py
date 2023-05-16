@@ -7,7 +7,7 @@ import datetime
 import pprint
 
 from plugget.utils import rmdir
-from plugget.data import Package
+from plugget.data import Package, PackagesMeta
 from plugget import settings
 
 from pathlib import Path
@@ -99,17 +99,41 @@ def search(name=None, app=None, verbose=True, latest_only=True, version=None):
     :param verbose: print results if True
     """
 
+    # todo curr returns package and version
+    #  return package meta. latest, name, author, description
+    #  search will return all package names, and then plugin needs to read all versions from this package name.
+    #  ideally i can do .versions
+
     app = _detect_app_id() if not app else app
 
     plugins = []
     source_dirs = _clone_manifest_repos()
     for source_dir in source_dirs:  # go through all cloned manifest repos
-        if app and app != 'all':  # filter by app
+
+        # filter by app
+        if app and app != 'all':
             source_dir = source_dir / app
-        for plugin_manifest in source_dir.rglob("*.json"):
-            source_name = plugin_manifest.parent.name  # this checks for manifest name, not name in package todo
-            if name is None or name.lower() in source_name.lower():
-                plugins.append(Package.from_json(plugin_manifest))
+
+        # go through folders
+        for _path in source_dir.glob("*"):
+
+            # ensure we iter folders and not files
+            if not _path.is_dir():
+                continue
+            package_dir = _path
+
+            # create a packages meta to collect all versions
+            meta = PackagesMeta()
+
+            # iter through jsons in folder
+            for plugin_manifest in package_dir.rglob("*.json"):
+                source_name = package_dir.name  # this checks for manifest name, not name in package todo
+                if name is None or name.lower() in source_name.lower():
+                    meta.packages.append(Package.from_json(plugin_manifest))
+
+            # if package meta contains any packages, we add it to search results
+            if meta.packages:
+                plugins.append(meta)
 
     if version and len(plugins) > 1:
         plugins = [p for p in plugins if p.version == version]
