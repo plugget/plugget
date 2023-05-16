@@ -91,7 +91,7 @@ def _detect_app_id():
         None
 
 
-def search(name=None, app=None, verbose=True, version=None):
+def search(name=None, app=None, verbose=True, version=None, source_dirs=None):
     """
     search if package is in sources
     :param name: pacakge name to search in manifest repo, return all packages if not set
@@ -107,7 +107,7 @@ def search(name=None, app=None, verbose=True, version=None):
     app = _detect_app_id() if not app else app
 
     plugins = []
-    source_dirs = _clone_manifest_repos()
+    source_dirs = source_dirs or _clone_manifest_repos()
     for source_dir in source_dirs:  # go through all cloned manifest repos
 
         # filter by app
@@ -146,6 +146,7 @@ def search(name=None, app=None, verbose=True, version=None):
 
 # # WARNING we overwrite build in type list here, careful when using list in this module!
 # open package manager
+# todo do we need this or can this be mergeed w search
 def list(package_name:str = None, enabled=False, disabled=False, verbose=True, app=None):  # , source=None):
     """
     list all installed packages
@@ -169,7 +170,6 @@ def list(package_name:str = None, enabled=False, disabled=False, verbose=True, a
     # todo we don#'t _clone_manifest_repos, so won't find packages if we didnt first search.
 
     # list all installed in settings.INSTALLED_DIR
-    plugins = []
     app = _detect_app_id() if not app else app
 
     if app and app != "all":
@@ -177,19 +177,9 @@ def list(package_name:str = None, enabled=False, disabled=False, verbose=True, a
     else:
         app_manifest_dir = settings.INSTALLED_DIR
 
-    for plugin_manifest in app_manifest_dir.rglob("*.json"):
-        package = Package.from_json(plugin_manifest)
-        if package_name and package_name.lower() not in package.package_name.lower():  #  plugin_manifest.parent.name.lower():
-            continue
-        plugins.append(package)
+    results = search(name=package_name, app=app, verbose=verbose, source_dirs=[app_manifest_dir])
 
-    if verbose:
-        print(f"{len(plugins)} installed plugins")
-        print(f"{'-' * 20}")
-        for plugin in plugins:
-            print(f"{plugin}")
-
-    return plugins
+    return results
 
 
 #    plugin_name = plugin_name or plugin_name_from_manifest(package_name)
