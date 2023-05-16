@@ -91,7 +91,7 @@ def _detect_app_id():
         None
 
 
-def search(name=None, app=None, verbose=True, latest_only=True, version=None):
+def search(name=None, app=None, verbose=True, version=None):
     """
     search if package is in sources
     :param name: pacakge name to search in manifest repo, return all packages if not set
@@ -209,7 +209,9 @@ def install(package_name, enable=True, app=None, version=None, **kwargs):
     # module = _get_app_module()
 
     # get package manifest from package repo
-    package = search(name=package_name, app=app, verbose=False, version=version)[0]
+    meta_collection = search(name=package_name, app=app, verbose=False, version=version)[0]
+    package = meta_collection.get_version(version)
+
     if not package:
         logging.warning("Package not found, cancelling install")
         return
