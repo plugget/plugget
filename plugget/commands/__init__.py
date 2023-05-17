@@ -114,6 +114,8 @@ def search(name=None, app=None, verbose=True, version=None, source_dirs=None):
         if app and app != 'all':
             source_dir = source_dir / app
 
+        # todo correctly parse if app is all or None
+        
         # go through folders
         for _path in source_dir.glob("*"):
 
@@ -156,28 +158,7 @@ def list(package_name:str = None, enabled=False, disabled=False, verbose=True, a
     :param disabled: list disabled packages only if True
     TODO :param source: list packages from specific source only if set
     """
-    # todo print installed packages in INSTALLED_DIR, instead of app plugins
-
-    # module = _get_app_module()
-
-    # if enabled:
-    #     plugins = module.enabled_plugins()
-    # elif disabled:
-    #     plugins = module.disabled_plugins()
-    # else:  # list all installed
-    #     plugins = module.installed_plugins()
-
-    # todo we don#'t _clone_manifest_repos, so won't find packages if we didnt first search.
-
-    # list all installed in settings.INSTALLED_DIR
-    app = _detect_app_id() if not app else app
-
-    if app and app != "all":
-        app_manifest_dir = settings.INSTALLED_DIR / app
-    else:
-        app_manifest_dir = settings.INSTALLED_DIR
-
-    results = search(name=package_name, app=app, verbose=verbose, source_dirs=[app_manifest_dir])
+    results = search(name=package_name, app=app, verbose=verbose, source_dirs=[settings.INSTALLED_DIR])
 
     return results
 
