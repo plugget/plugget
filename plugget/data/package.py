@@ -125,11 +125,11 @@ class Package(object):
     @property
     def default_actions(self):
         """get the default action for the app"""
-        DefaultActions = {
-            "blender": ["blender_addon", "blender_pip"],
+        DefaultActions = {  # ppip actions before addon, install dependenies first else bug
+            "blender": ["blender_pip", "blender_addon"],
             "max3ds": ["max_macroscript"],  # todo pip
-            "krita": ["krita_plugin", "krita_pip"],
-            "unreal": ["unreal_plugin", "unreal_pip"],
+            "krita": ["krita_pip", "krita_plugin"],
+            "unreal": ["unreal_pip", "unreal_plugin"],
             # "maya": "maya_module",
         }
         actions = DefaultActions.get(self.app)
