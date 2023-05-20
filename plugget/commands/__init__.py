@@ -91,7 +91,7 @@ def _detect_app_id():
         None
 
 
-def search(name=None, app=None, verbose=True, version=None, source_dirs=None):
+def search(name=None, app=None, verbose=True, version=None, source_dirs=None) -> PackagesMeta:
     """
     search if package is in sources
     :param name: pacakge name to search in manifest repo, return all packages if not set
@@ -159,11 +159,9 @@ def list(package_name:str = None, enabled=False, disabled=False, verbose=True, a
     TODO :param source: list packages from specific source only if set
     """
     results = search(name=package_name, app=app, verbose=verbose, source_dirs=[settings.INSTALLED_DIR])
-
     return results
 
 
-#    plugin_name = plugin_name or plugin_name_from_manifest(package_name)
 def install(package_name, enable=True, app=None, version=None, **kwargs):
     """
     install package
@@ -180,8 +178,13 @@ def install(package_name, enable=True, app=None, version=None, **kwargs):
     # module = _get_app_module()
 
     # get package manifest from package repo
-    meta_collection = search(name=package_name, app=app, verbose=False, version=version)[0]
-    package = meta_collection.get_version(version)
+    result = search(name=package_name, app=app, verbose=False, version=version)
+    if not result:
+        logging.warning(f"Package {package_name} not found, failed install")
+        return
+
+    meta_collection = result[0]
+    package = meta_collection.get_version(version) or meta_collection.latest
 
     if not package:
         logging.warning("Package not found, cancelling install")
