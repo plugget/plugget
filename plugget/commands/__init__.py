@@ -5,6 +5,7 @@ import logging
 import subprocess
 import datetime
 import pprint
+import os
 
 from plugget.utils import rmdir
 from plugget.data import Package, PackagesMeta
@@ -34,13 +35,16 @@ def _clone_manifest_repo(source_url) -> "pathlib.Path":
     source_name = source_url.split("/")[-1].split(".")[0]
     source_dir = settings.TEMP_PLUGGET / source_name
 
-    # CACHING: check when repo was last updated
-    if (source_dir / "_LAST_UPDATED").exists():
-        with open(source_dir / "_LAST_UPDATED", "r") as f:
-            last_updated = datetime.datetime.strptime(f.read(), "%Y-%m-%d %H:%M:%S")
-        if last_updated > datetime.datetime.now() - datetime.timedelta(days=1):
-            print("using cached manifest repo, last updated less than a day ago")
-            return source_dir
+    # by default disable caching for now, it hinders debugging
+    # great for instant search results though
+    if os.environ['PLUGGET_USE_CACHE'] == 1:
+        # CACHING: check when repo was last updated
+        if (source_dir / "_LAST_UPDATED").exists():
+            with open(source_dir / "_LAST_UPDATED", "r") as f:
+                last_updated = datetime.datetime.strptime(f.read(), "%Y-%m-%d %H:%M:%S")
+            if last_updated > datetime.datetime.now() - datetime.timedelta(days=1):
+                print("using cached manifest repo, last updated less than a day ago")
+                return source_dir
 
     # remove old manifest repo
     rmdir(source_dir)  # todo catch if this failed
