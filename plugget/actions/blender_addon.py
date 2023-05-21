@@ -80,6 +80,8 @@ def _install_addon(package):
         #     return False
 
     package.installed_paths |= {local_addons_dir / x.name for x in addon_paths}  # todo might want a dict later
+    # todo support renaming the addon in the config file
+    #  also delete renamed folder
 
 
 def uninstall(package: "plugget.data.Package", **kwargs):
