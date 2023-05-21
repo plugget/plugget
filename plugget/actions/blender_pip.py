@@ -25,7 +25,11 @@ def install(package: "plugget.data.Package", **kwargs):
         if p.exists():
             print("requirements.txt found, installing requirements")
             # todo blender pip
-            subprocess.run(["pip", "install", "-r", package.clone_dir / p, '-t', blender_user_site_packages])
+            try:
+                # todo python -m pip
+                subprocess.run(["pip", "install", "-r", package.clone_dir / p, '-t', blender_user_site_packages, "--no-user"])
+            except subprocess.CalledProcessError as e:
+                logging.error(e.output)
         else:
             logging.warning(f"expected requirements.txt not found: '{p}'")
     importlib.invalidate_caches()
