@@ -33,10 +33,8 @@ class PackagesMeta():
         try get the attr from the latest package, e.g. package_meta.install() == package_meta.latest.install()"""
         return getattr(self.latest, attr)
 
-    def get_version(self, version:str) -> "plugget.data.package.Package":
+    def get_version(self, version:str) -> "plugget.data.package.Package | None":
         """get package with matching version from self.packages"""
         match = [x for x in self.packages if version == x.version]
         if match:
             return match[0]
-        else:
-            logging.warning(f"could not find package of version '{version}'")
