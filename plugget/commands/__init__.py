@@ -37,7 +37,7 @@ def _clone_manifest_repo(source_url) -> "pathlib.Path":
 
     # by default disable caching for now, it hinders debugging
     # great for instant search results though
-    if os.environ['PLUGGET_USE_CACHE'] == 1:
+    if os.environ.get('PLUGGET_USE_CACHE') == 1:
         # CACHING: check when repo was last updated
         if (source_dir / "_LAST_UPDATED").exists():
             with open(source_dir / "_LAST_UPDATED", "r") as f:
