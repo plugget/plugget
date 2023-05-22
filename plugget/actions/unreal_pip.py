@@ -51,6 +51,7 @@ def install(package: "plugget.data.Package", **kwargs):
     for p in get_requirements(package):
         if p.exists():
             print("requirements.txt found, installing requirements")
+            # todo python -m pip with unreal py interpreter
             subprocess.run(["pip", "install", "-r", package.clone_dir / p, '-t', project_site_dir, "--no-user"])
         else:
             logging.warning(f"expected requirements.txt not found: '{p}'")
