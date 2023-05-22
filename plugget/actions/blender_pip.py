@@ -41,7 +41,9 @@ def install(package: "plugget.data.Package", **kwargs):
             # todo blender pip
             try:
                 # todo python -m pip
-                subprocess.run(["pip", "install", "-r", package.clone_dir / p, '-t', blender_user_site_packages, "--no-user"])
+                subprocess.run(
+                    ["pip", "install", "--upgrade", "-r", package.clone_dir / p, '-t', blender_user_site_packages,
+                     "--no-user"])
             except subprocess.CalledProcessError as e:
                 logging.error(e.output)
         else:
