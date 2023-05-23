@@ -43,7 +43,7 @@ def install(package: "plugget.data.Package", force=False, enable=True, **kwargs)
     _install_addon(package)
     addon_names_after = _get_all_addon_names()
     new_addons = addon_names_after - addon_names_before
-    _enable_addons(new_addons, enable=enable)
+    _enable_addons(new_addons, enable=enable)  # don't run this before dependencies are installed
     return True
 
 
