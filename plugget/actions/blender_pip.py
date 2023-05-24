@@ -34,6 +34,7 @@ def install(package: "plugget.data.Package", **kwargs):
     prep_pythonpath()
 
     blender_user_site_packages = Path(str(bpy.utils.script_path_user())) / "modules"  # appdata
+    blender_user_site_packages.mkdir(exist_ok=True, parents=True)
 
     for p in get_requirements(package):
         if p.exists():
