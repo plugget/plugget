@@ -72,14 +72,23 @@ def _clone_manifest_repos():
     # if repo doesn't exist, clone it
     source_dirs = []
     for source_url in settings.sources:
+        
+            # first check if path is a local path
+            source_dir = Path(source_url)
 
-        # first check if path is a local path
-        source_dir = Path(source_url)
-        if not source_dir.exists():  # todo fix this naive impicit approach
-            # else assume it's a git URL
-            source_dir = _clone_manifest_repo(source_url)
+            exists = False
+            try:
+                exists = source_dir.exists()
+            except OSError as e:
+                # source_dir.exists triggers OSError if it's a git URL (in older versions of python?)
+                pass
 
-        source_dirs.append(source_dir)
+            if not exists:  # todo fix this naive impicit approach
+                # else assume it's a git URL
+                # we then clone the repo to a temp folder, and save the path in source_dir
+                source_dir = _clone_manifest_repo(source_url)
+                
+            source_dirs.append(source_dir)
 
     return source_dirs
 
@@ -101,6 +110,8 @@ def search(name=None, app=None, verbose=True, version=None, source_dirs=None) ->
     :param name: pacakge name to search in manifest repo, return all packages if not set
     :param app: app name to search in, return all apps if not set
     :param verbose: print results if True
+    source_dirs: list of pathlib.Path objects to search in, 
+                defaults to temp path of clone for all registered manifest repos
     """
 
     # todo curr returns package and version
