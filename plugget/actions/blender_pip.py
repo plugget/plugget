@@ -7,6 +7,28 @@ import os
 import sys
 
 
+def run_command(cmd):
+    """Run a command in a subprocess and print the output to the console."""
+
+    # Start the command with Popen
+    process = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+
+    # Loop over the output of the command
+    while True:
+        output = process.stdout.readline()
+        if output == b'' and process.poll() is not None:
+            break
+        if output:
+            print(output.strip().decode('utf-8'))
+
+    # Get the output of the command
+    stdout, stderr = process.communicate()
+
+    # Print the output to the Blender console
+    print(stdout.decode('utf-8'))
+    print(stderr.decode('utf-8'))
+
+
 def prep_pythonpath():
     # copy the sys.paths to PYTHONPATH to pass to subprocess, for pip to use
     paths = os.environ.get("PYTHONPATH", "").split(os.pathsep)
@@ -41,10 +63,11 @@ def install(package: "plugget.data.Package", **kwargs):
             print("requirements.txt found, installing requirements")
             # todo blender pip
             try:
-                # todo python -m pip
-                subprocess.run(
-                    [f'"{sys.executable}" -m pip', "install", "--upgrade", "-r", package.clone_dir / p, '-t', blender_user_site_packages,
-                     "--no-user"])
+                cmd = [sys.executable, '-m', 'pip', "install", "--upgrade", 
+                "-r", str(package.clone_dir / p), 
+                '-t', str(blender_user_site_packages), "--no-user"]
+                print(cmd)
+                subprocess.run(cmd)
             except subprocess.CalledProcessError as e:
                 logging.error(e.output)
         else:
@@ -67,7 +90,9 @@ def uninstall(package: "plugget.data.Package", dependencies=False, **kwargs):
         if p.exists():
             print("requirements.txt found, uninstalling requirements")
             print("package.clone_dir / p", package.clone_dir / p)
-            subprocess.run([f'"{sys.executable}" -m pip', "uninstall", "-r", package.clone_dir / p, "-y"])
+            cmd = [sys.executable, '-m', 'pip', "uninstall", "-r", package.clone_dir / p, "-y"]
+            print(cmd)
+            subprocess.run(cmd)
         else:
             logging.warning(f"expected requirements.txt not found: '{p}'")
 
