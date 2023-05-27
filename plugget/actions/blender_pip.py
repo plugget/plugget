@@ -43,7 +43,7 @@ def install(package: "plugget.data.Package", **kwargs):
             try:
                 # todo python -m pip
                 subprocess.run(
-                    ["pip", "install", "--upgrade", "-r", package.clone_dir / p, '-t', blender_user_site_packages,
+                    [f'"{sys.executable}" -m pip', "install", "--upgrade", "-r", package.clone_dir / p, '-t', blender_user_site_packages,
                      "--no-user"])
             except subprocess.CalledProcessError as e:
                 logging.error(e.output)
@@ -67,7 +67,7 @@ def uninstall(package: "plugget.data.Package", dependencies=False, **kwargs):
         if p.exists():
             print("requirements.txt found, uninstalling requirements")
             print("package.clone_dir / p", package.clone_dir / p)
-            subprocess.run(["pip", "uninstall", "-r", package.clone_dir / p, "-y"])
+            subprocess.run([f'"{sys.executable}" -m pip', "uninstall", "-r", package.clone_dir / p, "-y"])
         else:
             logging.warning(f"expected requirements.txt not found: '{p}'")
 
