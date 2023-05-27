@@ -7,28 +7,6 @@ import os
 import sys
 
 
-def run_command(cmd):
-    """Run a command in a subprocess and print the output to the console."""
-
-    # Start the command with Popen
-    process = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-
-    # Loop over the output of the command
-    while True:
-        output = process.stdout.readline()
-        if output == b'' and process.poll() is not None:
-            break
-        if output:
-            print(output.strip().decode('utf-8'))
-
-    # Get the output of the command
-    stdout, stderr = process.communicate()
-
-    # Print the output to the Blender console
-    print(stdout.decode('utf-8'))
-    print(stderr.decode('utf-8'))
-
-
 def prep_pythonpath():
     # copy the sys.paths to PYTHONPATH to pass to subprocess, for pip to use
     paths = os.environ.get("PYTHONPATH", "").split(os.pathsep)
