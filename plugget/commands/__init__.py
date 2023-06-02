@@ -130,6 +130,7 @@ def search(name=None, app=None, verbose=True, version=None, source_dirs=None) ->
             source_dir = source_dir / app
 
         # todo correctly parse if app is all or None
+        # todo ensure user doesnt create an app that is named all
         
         # go through folders
         for _path in source_dir.glob("*"):
@@ -139,11 +140,11 @@ def search(name=None, app=None, verbose=True, version=None, source_dirs=None) ->
                 continue
             package_dir = _path
 
-            # create a packages meta to collect all versions
+            # create an empty PackagesMeta to collect all versions
             meta = PackagesMeta()
 
             # iter through jsons in folder
-            for plugin_manifest in package_dir.rglob("*.json"):
+            for plugin_manifest in package_dir.glob("*.json"):
                 source_name = package_dir.name  # this checks for manifest name, not name in package todo
                 if name is None or name.lower() in source_name.lower():
                     meta.packages.append(Package.from_json(plugin_manifest))
