@@ -30,7 +30,7 @@ def get_requirements(package: "plugget.data.Package", **kwargs) -> list[Path]:
 
 
 # todo share pip functions
-def install(package: "plugget.data.Package", **kwargs):
+def install(package: "plugget.data.Package", force=False, **kwargs):
     prep_pythonpath()
 
     blender_user_site_packages = Path(str(bpy.utils.script_path_user())) / "modules"  # appdata
@@ -39,12 +39,13 @@ def install(package: "plugget.data.Package", **kwargs):
     for p in get_requirements(package):
         if p.exists():
             print("requirements.txt found, installing requirements")
-            # todo blender pip
+            cmd = [sys.executable, '-m', 'pip', "install", "--upgrade",
+                   "-r", str(package.clone_dir / p),
+                   '-t', str(blender_user_site_packages), "--no-user"]
+            if force:
+                cmd.append("--force-reinstall")
+            print(cmd)
             try:
-                cmd = [sys.executable, '-m', 'pip', "install", "--upgrade", 
-                "-r", str(package.clone_dir / p), 
-                '-t', str(blender_user_site_packages), "--no-user"]
-                print(cmd)
                 subprocess.run(cmd)
             except subprocess.CalledProcessError as e:
                 logging.error(e.output)

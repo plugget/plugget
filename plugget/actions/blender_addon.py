@@ -3,6 +3,7 @@ import logging
 import shutil
 import bpy
 import addon_utils
+from plugget.utils import rmdir
 
 
 def __clash_import_name(name):
@@ -40,14 +41,14 @@ def _enable_addons(names: set[str], enable=True):
 def install(package: "plugget.data.Package", force=False, enable=True, **kwargs) -> bool:  # todo , force=False, enable=True):
     # If the “force” parameter is True, the add-on will be reinstalled, even if it has not been previously removed.
     addon_names_before = _get_all_addon_names()
-    _install_addon(package)
+    _install_addon(package, force=force)
     addon_names_after = _get_all_addon_names()
     new_addons = addon_names_after - addon_names_before
     _enable_addons(new_addons, enable=enable)  # don't run this before dependencies are installed
     return True
 
 
-def _install_addon(package):
+def _install_addon(package, force=False):
 
     # if a repo has plugin in root. we get the repo files content
     # if the repo has plugin in subdir, that file lives in repo_paths
@@ -56,16 +57,16 @@ def _install_addon(package):
     # copy addons to local addons dir
     local_script_dir = bpy.utils.script_path_user()
     local_addons_dir = Path(local_script_dir) / "addons"
-    # if force:
-    #     from plugget.utils import rmdir
-    #     rmdir(new_plugin_path)
     # shutil.move(str(plugin_path), str(new_plugin_path.parent), )  # copy plugin_path to local_addons_dir
     # todo filter repo paths
     print(f"copy files to {local_addons_dir}")
     for addon_path in addon_paths:
         print(addon_path)
 
-        if __clash_import_name(addon_path.name):
+        if force:
+            rmdir(local_addons_dir / addon_path.name)
+
+        if not force and __clash_import_name(addon_path.name):
             continue
 
         # new_addon_path.mkdir(parents=True, exist_ok=True)
