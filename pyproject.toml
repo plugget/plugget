@@ -12,7 +12,7 @@ name = "plugget"
 authors = [
     {name = "Hannes"},
 ]
-description = "detect which app the python interpreter is running in"
+description = "a package manager to install packages in your app"
 readme = "README.md"
 requires-python = ">=3.4"
 keywords = ["plugin", "addon", "add-on", "extension", "package", "manager", "resource", "studio", "dcc", "app", "application", "pipeline", "blender", "krita", "max"]
