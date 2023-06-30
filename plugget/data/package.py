@@ -234,6 +234,9 @@ class Package(object):
 
     def get_content(self, target_dir=None) -> "list[Path]":
         """download the plugin content from the repo, and return the paths to the files"""
+        # this choosing what to do, could be a manager in an action
+        # if zip file, download and extract
+        # else clone repo
         return self._clone_repo(target_dir=target_dir)
     # todo instead of clone can we download the files directly?
     # cant clone to non empty folder, so we need to move files instead. but unreal had permission issues with that
@@ -266,11 +269,9 @@ class Package(object):
         # delete .git folder
         rmdir(target_dir / ".git")
 
-        # confirm folder was created
-        # todo check if target_dir / repo file or foldername(s) exist
-        #  target dir always exists
-        # if not target_dir.exists():
-        #     raise Exception(f"Failed to clone repo to {target_dir}")
+        # check if target dir contains any files
+        if not any(target_dir.iterdir()):
+            raise Exception(f"Failed to clone repo to {target_dir}")
 
         if self.repo_paths:
             return [target_dir / p for p in self.repo_paths]
