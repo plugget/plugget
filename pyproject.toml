@@ -10,7 +10,7 @@ packages = ["plugget"]
 [project]
 name = "plugget"
 authors = [
-    {name = "Hannes"},
+    {name = "Hannes D"},
 ]
 description = "a package manager to install packages in your app"
 readme = "README.md"
@@ -23,7 +23,7 @@ classifiers = [
 #dynamic = ["dependencies"]
 dependencies = ['importlib-metadata; python_version<"3.7"', "detect-app"]
 #dynamic = ["version"]
-version = "0.0.12"
+version = "0.0.13"
 
 #[project.optional-dependencies]
 #yaml = ["pyyaml"]
@@ -32,5 +32,5 @@ version = "0.0.12"
 #my-script = "my_package.module:function"
 
 [project.urls]
-Homepage = "https://github.com/hannesdelbeke/plugget"
-Source = "https://github.com/hannesdelbeke/plugget"
+Homepage = "https://github.com/plugget/plugget"
+Source = "https://github.com/plugget/plugget"
