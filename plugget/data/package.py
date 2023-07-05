@@ -6,6 +6,9 @@ from plugget.utils import rmdir
 from plugget import settings
 import importlib
 import shutil
+import sys
+import hashlib
+import zlib
 
 
 # app plugin / addon: a plugin for a specific app
@@ -111,16 +114,20 @@ class Package(object):
         self.package_name = self.package_name or self._manifest_path.parent.name
 
     @property
-    def clone_dir(self):
+    def clone_dir(self):  # keep in sync with package_install_dir
         """return the path we clone to on install e.g C:/Users/username/AppData/Local/Temp/plugget/bqt/0.1.0"""
         if not self._clone_dir:
-            self._clone_dir = settings.TEMP_PLUGGET / self.app / self.package_name / self.version / self.package_name
+            self._clone_dir = settings.TEMP_PLUGGET / self.app / get_app_id() / self.package_name / self.version / self.package_name
         return self._clone_dir
+
+    @property
+    def package_install_dir(self):  # keep in sync with clone_dir
+        return settings.INSTALLED_DIR / self.app / get_app_id() / self.package_name
 
     @property
     def is_installed(self):
         """a plugin is installed, if the manifest is in the installed packages folder"""
-        return (settings.INSTALLED_DIR / self.app / self.package_name / f"{self.version}.json").exists()
+        return (self.package_install_dir / f"{self.version}.json").exists()
 
     @property
     def default_actions(self):
@@ -241,7 +248,6 @@ class Package(object):
     # todo instead of clone can we download the files directly?
     # cant clone to non empty folder, so we need to move files instead. but unreal had permission issues with that
 
-
     def _clone_repo(self, target_dir=None) -> "list[Path]":
         """
         returns either the files in repo (sparse) or the folder containing the repo
@@ -322,7 +328,7 @@ class Package(object):
 
         # copy manifest to installed packages dir
         # todo check if install was successful
-        manifest_path = settings.INSTALLED_DIR / self.app / self.package_name / self.manifest_path.name
+        manifest_path = self.package_install_dir / self.manifest_path.name
         self.to_json(manifest_path)
 
     def uninstall(self, dependencies=False, **kwargs):
@@ -334,6 +340,32 @@ class Package(object):
 
         # remove manifest from installed packages dir
         # todo check if uninstall was successful
-        install_dir = settings.INSTALLED_DIR / self.app / self.package_name  # / plugin.manifest_path.name
-        shutil.rmtree(install_dir, ignore_errors=True)
+        shutil.rmtree(self.package_install_dir, ignore_errors=True)
 
+
+def get_app_id() -> str:
+    """
+    create unique hash from sys exec path
+    """
+
+    sys_exec_path = sys.executable
+    crc32_hash = zlib.crc32(sys_exec_path.encode())
+    app_id = hex(crc32_hash & 0xFFFFFFFF)[2:]  # Convert to hex and remove the "0x" prefix
+    return app_id
+
+
+def update_app_ids_json(app_id, root_folder_path, ) -> None:
+    """
+    add to json file which hash is which path in root folder.
+    """
+    data = {}
+    try:
+        with open('app_versions.json', 'r') as json_file:
+            data = json.load(json_file)
+    except FileNotFoundError:
+        pass
+
+    data[app_id] = root_folder_path
+
+    with open('app_versions.json', 'w') as json_file:
+        json.dump(data, json_file)
