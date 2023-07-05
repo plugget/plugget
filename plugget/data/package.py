@@ -29,7 +29,7 @@ class Package(object):
     def __init__(self, app=None, name=None, display_name=None, plugin_name=None, id=None, version=None,
                  description=None, author=None, repo_url=None, package_url=None, license=None, tags=None,
                  dependencies=None, repo_paths=None, docs_url=None, package_name=None, manifest_path=None,
-                 actions=None, installed_paths=None, repo_SHA=None, **kwargs):
+                 actions=None, installed_paths=None, repo_SHA=None, repo_tag=None, **kwargs):
         """
         :param app: the application this plugin is for e.g. blender
 
@@ -59,6 +59,7 @@ class Package(object):
         self.repo_url = repo_url  # set before plugin name
         self.repo_paths: "list[str]" = repo_paths  # subdir(s)
         self.repo_SHA = repo_SHA
+        self.repo_tag = repo_tag
         self.package_url = package_url  # set before self.plugin_name
          # self.name = name #or self.plugin_name
         self.docs_url = None
@@ -264,13 +265,25 @@ class Package(object):
         # todo sparse checkout, support multiple entries in self.repo_paths
 
         # logging.debug(f"cloning {self.repo_url} to {target_dir}")
-        subprocess.run(["git", "clone", "--depth", "1", "--progress", self.repo_url, str(target_dir)])
+        # subprocess.run(["git", "clone", "--depth", "1", "--progress", self.repo_url, str(target_dir)])
         # todo this doesnt always print the error, see unreal plugget for example with errors
+
+        # ensure target dir exists.
+        target_dir.mkdir(exist_ok=True, parents=True)
 
         if self.repo_SHA:
             # todo check if repo_SHA is valid
+            print("command to run repo_SHA:", ["git", "clone", "--depth", "1", "--progress", self.repo_url, str(target_dir)])
+            subprocess.run(["git", "clone", "--depth", "1", "--progress", self.repo_url, str(target_dir)])
             subprocess.run(["git", "fetch", "--depth", "1", "origin", self.repo_SHA], cwd=target_dir)
             subprocess.run(["git", "checkout", self.repo_SHA], cwd=target_dir)
+        elif self.repo_tag:
+            # subprocess.run(["git", "checkout", f"tags/{self.repo_tag}"], cwd=target_dir)
+            print("command to run repo_tag:", ["git", "clone", "--depth", "1", "--branch", self.repo_tag], target_dir)
+            subprocess.run(["git", "clone", "--depth", "1", "--branch", self.repo_tag,  "--progress", self.repo_url, str(target_dir)])
+        else:
+            print("command to run other:", ["git", "clone", "--depth", "1", "--progress", self.repo_url, str(target_dir)])
+            subprocess.run(["git", "clone", "--depth", "1", "--progress", self.repo_url, str(target_dir)])
 
         # delete .git folder
         rmdir(target_dir / ".git")
