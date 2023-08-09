@@ -348,10 +348,14 @@ def help(object=None):
         return
 
     # if no object provided, print plugget version
-    if object:
+    if not object:
         from importlib.metadata import version
         plugget_version = version('plugget')
+        print("Plugget is a package manager for app plugins & content")
         print(f"Plugget version: {plugget_version}")
+        print()
+        print("To find out more about a module or function, pass it to plugget.help()")
+        print("e.g. >>> plugget.help(plugget.install)")
         print()
 
     # print attributes
