@@ -7,7 +7,7 @@ import datetime
 import pprint
 import os
 
-from plugget.utils import rmdir
+from plugget._utils import rmdir
 from plugget.data import Package, PackagesMeta
 from plugget import settings
 

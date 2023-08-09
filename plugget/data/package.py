@@ -2,7 +2,7 @@ from pathlib import Path
 import subprocess
 import json
 import logging
-from plugget.utils import rmdir
+from plugget._utils import rmdir
 from plugget import settings
 import importlib
 import shutil

@@ -3,7 +3,7 @@ import logging
 import shutil
 import bpy
 import addon_utils
-from plugget.utils import rmdir
+from plugget._utils import rmdir
 
 
 def __clash_import_name(name):
