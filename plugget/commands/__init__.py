@@ -347,6 +347,13 @@ def help(object=None):
     if not attributes:
         return
 
+    # if no object provided, print plugget version
+    if object:
+        from importlib.metadata import version
+        plugget_version = version('plugget')
+        print(f"Plugget version: {plugget_version}")
+        print()
+
     # print attributes
     print("Available commands:")
     max_attr_name_length = max(len(attr_name) for attr_name in attr_names)
