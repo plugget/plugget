@@ -331,28 +331,30 @@ def help(object=None):
     try:
         if object.__doc__:
             print(object.__doc__)
+            print("")
     except:
         pass
-    if object:
-        attributes = [attr for attr in dir(object) if not attr.startswith("_")]
-    else:
-        attributes = [attr for attr in globals() if not attr.startswith("_") and attr in __all__]
 
+    # get attributes
+    if object:
+        attr_names = [attr for attr in dir(object) if not attr.startswith("_")]
+        attributes = [getattr(object, attr) for attr in attr_names]
+    else:
+        import plugget
+        attr_names = [attr for attr in dir(plugget) if not attr.startswith("_")]
+        attributes = [getattr(plugget, attr) for attr in attr_names]
     if not attributes:
         return
 
+    # print attributes
     print("Available commands:")
-
-    max_attr_name_length = max(len(attr) for attr in attributes)
-    for attr in attributes:
+    max_attr_name_length = max(len(attr_name) for attr_name in attr_names)
+    for attr, attr_name in zip(attributes, attr_names):
         try:
-            docstr_lines = globals()[attr].__doc__.split("\n")
+            docstr_lines = attr.__doc__.split("\n")
             first_line_of_doc = docstr_lines[0] or docstr_lines[1]  # if first line is empty, use second line
             first_line_of_doc = first_line_of_doc.strip()  # remove leading and trailing whitespace
         except:
             first_line_of_doc = ""
-
-        # Format the attribute name with appropriate padding
-        formatted_attr = attr.ljust(max_attr_name_length, ' ')
-
-        print(f"{formatted_attr} {first_line_of_doc}")
+        formatted_attr = attr_name.ljust(max_attr_name_length, ' ')  # add padding
+        print(f"  {formatted_attr} {first_line_of_doc}")
