@@ -104,7 +104,7 @@ def _detect_app_id():
         None
 
 
-def search(name=None, app=None, verbose=True, version=None, source_dirs=None) -> PackagesMeta:
+def search(name=None, app=None, verbose=True, version=None, source_dirs=None, current_app_only=False) -> PackagesMeta:
     """
     search if package is in sources
     :param name: pacakge name to search in manifest repo, return all packages if not set
@@ -119,6 +119,9 @@ def search(name=None, app=None, verbose=True, version=None, source_dirs=None) ->
     #  search will return all package names, and then plugin needs to read all versions from this package name.
     #  ideally i can do .versions
 
+    import plugget.data.package
+    app_hash = plugget.data.package.hash_current_app()  # get the hash of the current app
+
     app = _detect_app_id() if not app else app
 
     plugins = []
@@ -128,6 +131,10 @@ def search(name=None, app=None, verbose=True, version=None, source_dirs=None) ->
         # filter by app
         if app and app != 'all':
             source_dir = source_dir / app
+            
+            # filter by current app
+            if current_app_only:
+                source_dir = source_dir / app_hash
 
         # todo correctly parse if app is all or None
         # todo ensure user doesnt create an app that is named all
@@ -174,7 +181,7 @@ def list(package_name:str = None, enabled=False, disabled=False, verbose=True, a
     :param disabled: list disabled packages only if True
     TODO :param source: list packages from specific source only if set
     """
-    results = search(name=package_name, app=app, verbose=verbose, source_dirs=[settings.INSTALLED_DIR])
+    results = search(name=package_name, app=app, verbose=verbose, source_dirs=[settings.INSTALLED_DIR], current_app_only=True)
     return results
 
 
