@@ -118,12 +118,12 @@ class Package(object):
     def clone_dir(self):  # keep in sync with package_install_dir
         """return the path we clone to on install e.g C:/Users/username/AppData/Local/Temp/plugget/bqt/0.1.0"""
         if not self._clone_dir:
-            self._clone_dir = settings.TEMP_PLUGGET / self.app / get_app_id() / self.package_name / self.version / self.package_name
+            self._clone_dir = settings.TEMP_PLUGGET / self.app / hash_current_app() / self.package_name / self.version / self.package_name
         return self._clone_dir
 
     @property
     def package_install_dir(self):  # keep in sync with clone_dir
-        return settings.INSTALLED_DIR / self.app / get_app_id() / self.package_name
+        return settings.INSTALLED_DIR / self.app / hash_current_app() / self.package_name
 
     @property
     def is_installed(self):
@@ -356,11 +356,10 @@ class Package(object):
         shutil.rmtree(self.package_install_dir, ignore_errors=True)
 
 
-def get_app_id() -> str:
+def hash_current_app() -> str:
     """
     create unique hash from sys exec path
     """
-
     sys_exec_path = sys.executable
     crc32_hash = zlib.crc32(sys_exec_path.encode())
     app_id = hex(crc32_hash & 0xFFFFFFFF)[2:]  # Convert to hex and remove the "0x" prefix
