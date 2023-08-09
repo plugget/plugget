@@ -1,6 +1,7 @@
 """
-util functions used by plugget, avoid using if possible
+util functions for Plugget
 """
+
 import os
 
 

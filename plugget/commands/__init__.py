@@ -1,6 +1,7 @@
 """
-Plugget is a plugin-manager for various applications.
+The core commands for Plugget. See plugget.help() for more info
 """
+
 import logging
 import subprocess
 import datetime
@@ -43,7 +44,7 @@ __all__ = [
 
 
 def _clone_manifest_repo(source_url) -> "pathlib.Path":
-    """clone git repo containing plugget manifests, from a git URL"""
+    """Clone git repo containing plugget manifests, from a git URL"""
     source_name = source_url.split("/")[-1].split(".")[0]
     source_dir = settings.TEMP_PLUGGET / source_name
 
@@ -118,7 +119,7 @@ def _detect_app_id():
 
 def search(name=None, app=None, verbose=True, version=None, source_dirs=None, current_app_only=False) -> PackagesMeta:
     """
-    search if package is in sources
+    Search if package is in sources
     :param name: pacakge name to search in manifest repo, return all packages if not set
     :param app: app name to search in, return all apps if not set
     :param verbose: print results if True
@@ -186,7 +187,7 @@ def search(name=None, app=None, verbose=True, version=None, source_dirs=None, cu
 # todo do we need this or can this be mergeed w search
 def list(package_name:str = None, enabled=False, disabled=False, verbose=True, app=None):  # , source=None):
     """
-    list all installed packages
+    List all installed packages
     if run from an app, only list the apps installed packages, with option to list all app installed packages
 
     :param enabled: list enabled packages only if True
@@ -199,7 +200,7 @@ def list(package_name:str = None, enabled=False, disabled=False, verbose=True, a
 
 def install(package_name, enable=True, app=None, version=None, **kwargs):
     """
-    install package
+    Install package
     :param name: name of the manifest folder in the manifest repo
     :param enable: enable plugin after install
     """
@@ -231,7 +232,7 @@ def install(package_name, enable=True, app=None, version=None, **kwargs):
 
 def uninstall(package_name=None, dependencies=False, **kwargs):
     """
-    uninstall package
+    Uninstall package
     :param name: name of the manifest folder in the manifest repo
     """
     # todo, a user might expect to do install(pluginname") instead of install("manifestname"),
@@ -252,7 +253,7 @@ def uninstall(package_name=None, dependencies=False, **kwargs):
 
 def info(package_name=None, verbose=True):
     """
-    show info about package
+    Show info about package
     :param name: name of the manifest folder in the manifest repo
     """
 

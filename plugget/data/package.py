@@ -20,7 +20,7 @@ import zlib
 
 class Package(object):
     """
-    manifest & package wrapper
+    Manifest & package wrapper
     """
 
     def __repr__(self):
@@ -46,7 +46,7 @@ class Package(object):
 
         """
         if kwargs:
-            logging.warning("unused kwargs on Package init:", kwargs)
+            logging.warning("Unused kwargs on Package init:", kwargs)
 
         # attributes derived from the manifest path
         self.app = app  # set from app folder containing the manifest, todo currently is app name, swap to app object

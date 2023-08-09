@@ -1,3 +1,8 @@
+"""
+Configure plugget settings & manifest sources
+e.g. constant paths & setting methods for plugget
+"""
+
 from pathlib import Path
 import os
 import tempfile
