@@ -14,6 +14,18 @@ from plugget import settings
 from pathlib import Path
 
 
+# define which methods can be imported with import *
+__all__ = [
+    "search",
+    "list",
+    "install",
+    "uninstall",
+    "info",
+    "open_installed_dir",
+    "help",
+]
+
+
 # plugget / cache
 # plugget / installed / blender / io_xray.
 
@@ -131,7 +143,7 @@ def search(name=None, app=None, verbose=True, version=None, source_dirs=None, cu
         # filter by app
         if app and app != 'all':
             source_dir = source_dir / app
-            
+
             # filter by current app
             if current_app_only:
                 source_dir = source_dir / app_hash
@@ -300,15 +312,47 @@ def info(package_name=None, verbose=True):
 
 
 def open_installed_dir(*args, **kwargs):
+    """Open the plugget manifests install folder in file explorer"""
     # todo currently copies json. but json is named after version
     #  this will clash between plugins with same version (but diff name)
 
     # start file explorer in installed dir
     os.startfile(settings.INSTALLED_DIR)
-# aliases
-# upgrade = update
 
 
+def help(object=None):
+    """
+    List all available commands
 
+    object: object to print help for, if None, print help for this module
+    """
 
+    # try to print the docstring
+    try:
+        if object.__doc__:
+            print(object.__doc__)
+    except:
+        pass
+    if object:
+        attributes = [attr for attr in dir(object) if not attr.startswith("_")]
+    else:
+        attributes = [attr for attr in globals() if not attr.startswith("_") and attr in __all__]
 
+    if not attributes:
+        return
+
+    print("Available commands:")
+
+    max_attr_name_length = max(len(attr) for attr in attributes)
+    for attr in attributes:
+        try:
+            docstr_lines = globals()[attr].__doc__.split("\n")
+            first_line_of_doc = docstr_lines[0] or docstr_lines[1]  # if first line is empty, use second line
+            first_line_of_doc = first_line_of_doc.strip()  # remove leading and trailing whitespace
+        except:
+            first_line_of_doc = ""
+
+        # Format the attribute name with appropriate padding
+        formatted_attr = attr.ljust(max_attr_name_length, ' ')
+
+        print(f"{formatted_attr} {first_line_of_doc}")
