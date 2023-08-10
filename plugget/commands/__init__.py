@@ -80,7 +80,7 @@ def _clone_manifest_repo(source_url) -> "pathlib.Path":
 
 def _clone_manifest_repos():
     """
-    clone the manifest repos that are registered, defaults to ['github.com/hannesdelbeke/plugget-pkgs']
+    clone the manifest repos that are registered, defaults to ['github.com/plugget/plugget-pkgs']
     """
     # if repo doesn't exist, clone it
     source_dirs = []
@@ -124,11 +124,9 @@ def _print_search_results(packages):
         print(f"{package_name}")
 
 
-def _manifest_repo_app_paths(app):  # todo make it clear this also clones
+def _get_app_paths(search_paths, app=None):  # todo make it clear this also clones
     """get the default app paths from all registered manifest repos"""
-    # assume default search if we didn't get any search_paths
     app = _detect_app_id() if not app else app  # e.g. blender
-    search_paths = _clone_manifest_repos()
     if app and app != 'all':
         search_paths = [search_path / app for search_path in search_paths]
     return search_paths
@@ -154,8 +152,11 @@ def search(name=None, app=None, verbose=True, version=None, search_paths=None) -
     #  return package meta. latest, name, author, description
     #  search will return all package names, and then plugin needs to read all versions from this package name.
     #  ideally i can do .versions
-
-    manifest_paths = _discover_manifest_paths(name=name, search_paths=search_paths, app=app)    # todo make it clear this also clones
+    app = app or _detect_app_id()
+    if not search_paths:
+        search_paths = _clone_manifest_repos()
+        search_paths = _get_app_paths(search_paths=search_paths, app=app)
+    manifest_paths = _discover_manifest_paths(name=name, search_paths=search_paths)
     manifest_dirs = {manifest_path.parent for manifest_path in manifest_paths}
     meta_packages = [PackagesMeta(manifests_dir=manifest_dir) for manifest_dir in manifest_dirs]
     if verbose:
@@ -163,11 +164,8 @@ def search(name=None, app=None, verbose=True, version=None, search_paths=None) -
     return meta_packages
 
 
-def _discover_manifest_paths(name=None, search_paths=None, app=None):
+def _discover_manifest_paths(search_paths, name=None):
     """search for manifest files"""
-    app = app or _detect_app_id()
-    search_paths = search_paths or _manifest_repo_app_paths(app)  #   # todo make it clear this also clones
-
     manifest_paths = []  # get the manifests
     for app_path in search_paths:  # iter app folders
         package_dirs = [package_dir for package_dir in app_path.iterdir() if package_dir.is_dir()]

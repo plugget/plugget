@@ -42,8 +42,6 @@ class Package(object):
         :param repo_paths: a list containing the subdirectory of the repo where the plugin is located, this becomes pluginname in blender, can contain multiple paths or files
 
         :param version: the version of the plugin e.g. 0.1.0, derived from manifest name
-
-
         """
         if kwargs:
             logging.warning("Unused kwargs on Package init:", kwargs)
@@ -52,8 +50,12 @@ class Package(object):
         self.app = app  # set from app folder containing the manifest, todo currently is app name, swap to app object
         self.package_name = package_name  # set from folder name containing the manifests
         self.version = version  # set from manifest name
-        self.manifest_path = Path(manifest_path)  # set before _set_data_from_manifest_path()
-        self._set_data_from_manifest_path()  # populate above attributes to their default values
+
+        if manifest_path:
+            self.manifest_path = Path(manifest_path)  # set before _set_data_from_manifest_path()
+            self._set_data_from_manifest_path()  # populate above attributes to their default values
+        else:
+            self.manifest_path = None
 
         # manifest settings
         self.repo_url = repo_url  # set before plugin name
@@ -106,7 +108,10 @@ class Package(object):
     @manifest_path.setter
     def manifest_path(self, value):
         # expects a path from the folder structure: app_name/package_name/version.json
-        self._manifest_path = Path(value)
+        if value:
+            self._manifest_path = Path(value)
+        else:
+            self._manifest_path = None
 
     def _set_data_from_manifest_path(self):
         """set app_name, package_name, version from the manifest path"""
