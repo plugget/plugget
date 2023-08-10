@@ -124,13 +124,23 @@ def _print_plugins_found(plugins):
         print(f"{plugin}")
 
 
-def search(name=None, app=None, verbose=True, version=None, source_dirs=None, current_app_only=False) -> PackagesMeta:
+def _manifest_repo_app_paths(app):
+    """get the default app paths from all registered manifest repos"""
+    # assume default search if we didn't get any search_paths
+    app = _detect_app_id() if not app else app  # e.g. blender
+    search_paths = _clone_manifest_repos()
+    if app and app != 'all':
+        search_paths = [search_path / app for search_path in search_paths]
+    return search_paths
+
+
+def search(name=None, app=None, verbose=True, version=None, search_paths=None) -> PackagesMeta:
     """
     Search if package is in sources
     :param name: pacakge name to search in manifest repo, return all packages if not set
     :param app: app name to search in, return all apps if not set
     :param verbose: print results if True
-    source_dirs: list of pathlib.Path objects to search in, 
+    search_paths: list of pathlib.Path objects to search in,
                 defaults to temp path of clone for all registered manifest repos
     """
     # search a folder with the format: app/app-hash/package/manifest-version.json, e.g.:
@@ -145,44 +155,18 @@ def search(name=None, app=None, verbose=True, version=None, source_dirs=None, cu
     #  search will return all package names, and then plugin needs to read all versions from this package name.
     #  ideally i can do .versions
 
-    import plugget.data.package
-    app_hash = plugget.data.package.hash_current_app()  # get the hash of the current app
-
-    app = _detect_app_id() if not app else app
-
+    search_paths = search_paths or _manifest_repo_app_paths(app)
     plugins = []
-    source_dirs = source_dirs or _clone_manifest_repos()
-    for source_dir in source_dirs:  # go through all cloned manifest repos
 
-        # filter by app
-        if app and app != 'all':
-            source_dir = source_dir / app
-
-            # filter by current app
-            if current_app_only:
-                source_dir = source_dir / app_hash
-
-        # todo correctly parse if app is all or None
-        # todo ensure user doesnt create an app that is named all
-        
-        # go through folders
-        for _path in source_dir.glob("*"):
-
-            # ensure we iter folders and not files
-            if not _path.is_dir():
-                continue
-            package_dir = _path
-
-            # create an empty PackagesMeta to collect all versions
+    for app_path in search_paths:  # iter app folders
+        package_dirs = [package_dir for package_dir in app_path.iterdir() if package_dir.is_dir()]
+        for package_dir in package_dirs:  # iter package folders
             meta = PackagesMeta()
-
-            # iter through jsons in folder
-            for plugin_manifest in package_dir.glob("*.json"):
+            # get the jsons from the package folder
+            for plugin_manifest in package_dir.glob("*.json"):  # iter manifests
                 source_name = package_dir.name  # this checks for manifest name, not name in package todo
-                if name is None or name.lower() in source_name.lower():
+                if name is None or name.lower() in source_name.lower():  # todo we search manifest file name, instead of name in the package
                     meta.packages.append(Package.from_json(plugin_manifest))
-
-            # if package meta contains any packages, we add it to search results
             if meta.packages:
                 plugins.append(meta)
 
@@ -193,8 +177,7 @@ def search(name=None, app=None, verbose=True, version=None, source_dirs=None, cu
 
 
 # # WARNING we overwrite build in type list here, careful when using list in this module!
-# open package manager
-# todo do we need this or can this be mergeed w search
+# todo do we need list, or can this be merged w search?
 def list(package_name:str = None, enabled=False, disabled=False, verbose=True, app=None):  # , source=None):
     """
     List all installed packages
@@ -204,7 +187,14 @@ def list(package_name:str = None, enabled=False, disabled=False, verbose=True, a
     :param disabled: list disabled packages only if True
     TODO :param source: list packages from specific source only if set
     """
-    results = search(name=package_name, app=app, verbose=verbose, source_dirs=[settings.INSTALLED_DIR], current_app_only=True)
+
+    # todo setting an app name wont work externally since hash will be different.
+
+    import plugget.data.package
+    app_hash = plugget.data.package.hash_current_app()    # e.g. 8e3c1114
+    app = _detect_app_id() if not app else app            # e.g. blender
+    source_dir = settings.INSTALLED_DIR / app / app_hash  # e.g. ...\AppData\Roaming\plugget\installed\blender\8e3c1114
+    results = search(name=package_name, app=app, verbose=verbose, search_paths=[source_dir])
     return results
 
 
