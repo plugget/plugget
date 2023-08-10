@@ -360,6 +360,9 @@ def hash_current_app() -> str:
     """
     create unique hash from sys exec path
     """
+    # todo ensure this doesnt change mid session
+    #  error if it does
+
     sys_exec_path = sys.executable
     crc32_hash = zlib.crc32(sys_exec_path.encode())
     app_id = hex(crc32_hash & 0xFFFFFFFF)[2:]  # Convert to hex and remove the "0x" prefix

@@ -124,7 +124,7 @@ def _print_search_results(packages):
         print(f"{package_name}")
 
 
-def _manifest_repo_app_paths(app):
+def _manifest_repo_app_paths(app):  # todo make it clear this also clones
     """get the default app paths from all registered manifest repos"""
     # assume default search if we didn't get any search_paths
     app = _detect_app_id() if not app else app  # e.g. blender
@@ -166,7 +166,7 @@ def search(name=None, app=None, verbose=True, version=None, search_paths=None) -
 def _discover_manifest_paths(name=None, search_paths=None, app=None):
     """search for manifest files"""
     app = app or _detect_app_id()
-    search_paths = search_paths or _manifest_repo_app_paths(app)
+    search_paths = search_paths or _manifest_repo_app_paths(app)  #   # todo make it clear this also clones
 
     manifest_paths = []  # get the manifests
     for app_path in search_paths:  # iter app folders
