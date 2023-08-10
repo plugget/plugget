@@ -163,17 +163,19 @@ def search(name=None, app=None, verbose=True, version=None, search_paths=None) -
 
 
 def _create_packages(manifest_paths):
-    # create packages from manifests
+    """create package_collections from manifests"""
     packages_metas = {}
     for manifest_path in manifest_paths:
-        meta = packages_metas.get(manifest_path) or PackagesMeta()
-        packages_metas[manifest_path] = meta
+        package_dir_name = manifest_path.parent.name
+        meta = packages_metas.get(package_dir_name) or PackagesMeta()
+        packages_metas[package_dir_name] = meta
         meta.packages.append(Package.from_json(manifest_path))
     package_collections = packages_metas.values()
     return package_collections
 
 
 def _discover_manifest_paths(name=None, search_paths=None, app=None):
+    """search for manifest files"""
     app = _detect_app_id() if not app else app
     search_paths = search_paths or _manifest_repo_app_paths(app)
 
