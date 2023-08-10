@@ -117,11 +117,11 @@ def _detect_app_id():
         None
 
 
-def _print_plugins_found(plugins):
-    print(f"{len(plugins)} plugins found in repo:")
+def _print_search_results(packages):
+    print(f"{len(packages)} packages found in repo:")
     print(f"{'-' * 20}")
-    for plugin in plugins:
-        print(f"{plugin}")
+    for package_name in packages:
+        print(f"{package_name}")
 
 
 def _manifest_repo_app_paths(app):
@@ -155,25 +155,37 @@ def search(name=None, app=None, verbose=True, version=None, search_paths=None) -
     #  search will return all package names, and then plugin needs to read all versions from this package name.
     #  ideally i can do .versions
 
-    search_paths = search_paths or _manifest_repo_app_paths(app)
-    plugins = []
+    manifest_paths = _discover_manifest_paths(name=name, search_paths=search_paths, app=app)
+    meta_packages = _create_packages(manifest_paths)
+    if verbose:
+        _print_search_results(meta_packages)
+    return meta_packages
 
+
+def _create_packages(manifest_paths):
+    # create packages from manifests
+    packages_metas = {}
+    for manifest_path in manifest_paths:
+        meta = packages_metas.get(manifest_path) or PackagesMeta()
+        packages_metas[manifest_path] = meta
+        meta.packages.append(Package.from_json(manifest_path))
+    package_collections = packages_metas.values()
+    return package_collections
+
+
+def _discover_manifest_paths(name=None, search_paths=None, app=None):
+    app = _detect_app_id() if not app else app
+    search_paths = search_paths or _manifest_repo_app_paths(app)
+
+    manifest_paths = []  # get the manifests
     for app_path in search_paths:  # iter app folders
         package_dirs = [package_dir for package_dir in app_path.iterdir() if package_dir.is_dir()]
         for package_dir in package_dirs:  # iter package folders
-            meta = PackagesMeta()
-            # get the jsons from the package folder
-            for plugin_manifest in package_dir.glob("*.json"):  # iter manifests
+            for manifest_path in package_dir.glob("*.json"):  # iter manifests
                 source_name = package_dir.name  # this checks for manifest name, not name in package todo
                 if name is None or name.lower() in source_name.lower():  # todo we search manifest file name, instead of name in the package
-                    meta.packages.append(Package.from_json(plugin_manifest))
-            if meta.packages:
-                plugins.append(meta)
-
-    if verbose:
-        _print_plugins_found(plugins)
-
-    return plugins
+                    manifest_paths.append(manifest_path)
+    return manifest_paths
 
 
 # # WARNING we overwrite build in type list here, careful when using list in this module!
