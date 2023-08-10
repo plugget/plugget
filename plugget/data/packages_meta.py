@@ -27,14 +27,9 @@ class PackagesMeta:
     @property
     def packages(self):
         from plugget.data.package import Package
-
         for manifest in self.manifests:
-            cached_package = self._packages_cache.get(manifest)
-            if not cached_package:
-                self._packages_cache[manifest] = Package.from_json(manifest)
-
-        return self._packages_cache.values()
-        # [self._packages_cache.get(x, Package()) for x in self.manifest_folders]
+            self._packages_cache.setdefault(manifest, Package.from_json(manifest))
+        return [self._packages_cache.get(manifest, Package()) for manifest in self.manifests]
 
     @property
     def latest(self):
