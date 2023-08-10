@@ -176,7 +176,7 @@ def _create_packages(manifest_paths):
 
 def _discover_manifest_paths(name=None, search_paths=None, app=None):
     """search for manifest files"""
-    app = _detect_app_id() if not app else app
+    app = app or _detect_app_id()
     search_paths = search_paths or _manifest_repo_app_paths(app)
 
     manifest_paths = []  # get the manifests
