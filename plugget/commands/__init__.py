@@ -117,6 +117,13 @@ def _detect_app_id():
         None
 
 
+def _print_plugins_found(plugins):
+    print(f"{len(plugins)} plugins found in repo:")
+    print(f"{'-' * 20}")
+    for plugin in plugins:
+        print(f"{plugin}")
+
+
 def search(name=None, app=None, verbose=True, version=None, source_dirs=None, current_app_only=False) -> PackagesMeta:
     """
     Search if package is in sources
@@ -174,10 +181,7 @@ def search(name=None, app=None, verbose=True, version=None, source_dirs=None, cu
                 plugins.append(meta)
 
     if verbose:
-        print(f"{len(plugins)} plugins found in repo:")
-        print(f"{'-' * 20}")
-        for plugin in plugins:
-            print(f"{plugin}")
+        _print_plugins_found(plugins)
 
     return plugins
 
