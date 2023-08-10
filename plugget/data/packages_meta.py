@@ -1,18 +1,40 @@
 import logging
 
 
-class PackagesMeta():
+class PackagesMeta:
     """
     A collection of different versions of the same package.
     Any command run on a PackagesMeta instance will attempt to run on the latest package. see self.__getattr__
     A PackagesMeta instance is returned by plugget.search()
     """
 
-    def __init__(self):
-        self.packages: "list(plugget.data.package.Package)" = []
+    def __init__(self, manifests_dir=None):
+        self._packages_cache: "typing.Dict[str, plugget.data.package.Package]" = {}
+        self.manifests_dir = manifests_dir
+        # self.manifest_dirs is expected to be set externally,
+        # self.manifest_dirs is not included in init so we can first build it up in a loop
 
     def __repr__(self):
         return f"PackagesMeta({self.latest.package_name} latest version:'{self.latest.version}')"
+
+    @property
+    def manifests(self) -> "typing.List[Path]":
+        if self.manifests_dir:
+            return self.manifests_dir.glob("*.json")  # todo is this dupe code from _discover_manifest_paths?
+        else:
+            return []
+
+    @property
+    def packages(self):
+        from plugget.data.package import Package
+
+        for manifest in self.manifests:
+            cached_package = self._packages_cache.get(manifest)
+            if not cached_package:
+                self._packages_cache[manifest] = Package.from_json(manifest)
+
+        return self._packages_cache.values()
+        # [self._packages_cache.get(x, Package()) for x in self.manifest_folders]
 
     @property
     def latest(self):

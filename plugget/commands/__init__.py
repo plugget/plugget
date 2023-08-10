@@ -155,23 +155,12 @@ def search(name=None, app=None, verbose=True, version=None, search_paths=None) -
     #  search will return all package names, and then plugin needs to read all versions from this package name.
     #  ideally i can do .versions
 
-    manifest_paths = _discover_manifest_paths(name=name, search_paths=search_paths, app=app)
-    meta_packages = _create_packages(manifest_paths)
+    manifest_paths = _discover_manifest_paths(name=name, search_paths=search_paths, app=app)    # todo make it clear this also clones
+    manifest_dirs = {manifest_path.parent for manifest_path in manifest_paths}
+    meta_packages = [PackagesMeta(manifests_dir=manifest_dir) for manifest_dir in manifest_dirs]
     if verbose:
         _print_search_results(meta_packages)
     return meta_packages
-
-
-def _create_packages(manifest_paths):
-    """create package_collections from manifests"""
-    packages_metas = {}
-    for manifest_path in manifest_paths:
-        package_dir_name = manifest_path.parent.name
-        meta = packages_metas.get(package_dir_name) or PackagesMeta()
-        packages_metas[package_dir_name] = meta
-        meta.packages.append(Package.from_json(manifest_path))
-    package_collections = packages_metas.values()
-    return package_collections
 
 
 def _discover_manifest_paths(name=None, search_paths=None, app=None):
