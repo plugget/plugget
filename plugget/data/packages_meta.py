@@ -14,9 +14,14 @@ class PackagesMeta:
         # self.manifest_dirs is expected to be set externally,
         # self.manifest_dirs is not included in init so we can first build it up in a loop
 
-    def __repr__(self):
-        return f"PackagesMeta({self.latest.package_name} latest version:'{self.latest.version}')"
 
+    def __repr__(self):
+        if self.installed_package:
+            msg = f"installed version:'{self.installed_package.version}'"
+        else:
+            msg = f"not installed"
+        return f"PackagesMeta({self.latest.package_name} {msg})"
+    
     @property
     def manifests(self) -> "typing.List[Path]":
         if self.manifests_dir:
