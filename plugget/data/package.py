@@ -29,7 +29,7 @@ class Package(object):
     def __init__(self, app=None, name=None, display_name=None, plugin_name=None, id=None, version=None,
                  description=None, author=None, repo_url=None, package_url=None, license=None, tags=None,
                  dependencies=None, repo_paths=None, docs_url=None, package_name=None, manifest_path=None,
-                 actions=None, installed_paths=None, repo_SHA=None, repo_tag=None, **kwargs):
+                 actions=None, installed_paths=None, repo_SHA=None, repo_tag=None, packages_meta=None, **kwargs):
         """
         :param app: the application this plugin is for e.g. blender
 
@@ -77,6 +77,8 @@ class Package(object):
         self._starred = None
         self._stars = None
         self._clone_dir = None
+        self.packages_meta = packages_meta or None  # optional backlink to the packages meta object # todo make it not optional?
+
     # @property
     # def app(self):
     #     return self._app
@@ -306,10 +308,14 @@ class Package(object):
     def install(self, force=False, *args, **kwargs):
         from plugget import commands
 
+        # install should be handled by its parent the packages meta.
+        # since atm we check is installed. not if other versions are installed
+        self.packages_meta.uninstall(self.package_name)
+
         if self.is_installed and not force:
             logging.warning(f"{self.package_name} is already installed")
             return
-            # raise Exception(f"{self.package_name} is already installed")
+        
         for action in self.actions:
             # action install implicitly adds to self.install_paths
             action.install(self, *args, force=force, **kwargs)

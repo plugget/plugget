@@ -16,7 +16,8 @@ class PackagesMeta:
 
         self.manifests = list(self.manifests_dir.glob("*.json"))
         self.packages = [Package.from_json(manifest) for manifest in self.manifests]
-
+        for package in self.packages:
+            package.packages_meta = self
 
     def __repr__(self):
         if self.installed_package:
@@ -52,21 +53,27 @@ class PackagesMeta:
             return match[0]
 
     @property
+    def installed_packages(self) -> "typing.List[plugget.data.package.Package]":
+        return [x for x in self.packages if x.is_installed]
+
+    @property
     def installed_package(self) -> "plugget.data.package.Package | None":
         """get installed package from self.packages"""
         # you shouldn't have multiple package versions installed in the same app
         # if 'my_package' is installed in both Blender 3.2 & 3.3, they'll have separate PackageMeta instances
-
-        match = [x for x in self.packages if x.is_installed]
-
-        if len(match) > 1:
-            logging.warning(f"multiple versions of {self.package_name} installed: {match}")
-
-        if match:
-            return match[0]
+        packages = self.installed_packages
+        if len(packages) > 1:
+            logging.warning(f"multiple versions of {self.package_name} installed: {packages}")
+        if packages:
+            return packages[0]
 
     # is installed. any(x.is_installed for x in meta_packages.packages)
     # but think of UX, if dev thinks its installed and then gets an attr, through __getattr__
     # it ll return attrs from the latest version, which might not be the one installed
     # but e.g. requesting name, should work even if not installed
     # todo handle better, remove attr get method
+
+    def uninstall(self, dependencies=False, **kwargs):
+        """uninstall latest package"""
+        for p in self.installed_packages:
+            p.uninstall(dependencies=dependencies, **kwargs)

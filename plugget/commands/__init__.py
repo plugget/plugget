@@ -135,7 +135,7 @@ def _get_app_paths(search_paths, app=None):  # todo make it clear this also clon
     return search_paths
 
 
-def search(name=None, app=None, verbose=True, version=None, search_paths=None, use_cache=False, installed=False) -> PackagesMeta:
+def search(name=None, app=None, verbose=True, version=None, search_paths=None, use_cache=False, installed=False) -> "typing.List[PackagesMeta]":
     """
     Search if package is in sources
     :param name: pacakge name to search in manifest repo, return all packages if not set
@@ -208,13 +208,13 @@ def install(package_name, enable=True, app=None, version=None, **kwargs):
     # module = _get_app_module()
 
     # get package manifest from package repo
-    result = search(name=package_name, app=app, verbose=False, version=version)
-    if not result:
+    packages = search(name=package_name, app=app, verbose=False, version=version)
+    if not packages:
         logging.warning(f"Package {package_name} not found, failed install")
         return
 
-    meta_collection = result[0]
-    package = meta_collection.get_version(version) or meta_collection.latest
+    meta_package: PackagesMeta = packages[0]
+    package: Package = meta_package.get_version(version) or meta_package.latest
 
     if not package:
         logging.warning("Package not found, cancelling install")
@@ -237,12 +237,14 @@ def uninstall(package_name=None, dependencies=False, **kwargs):
     # module = _get_app_module()  # todo remove
     # module.uninstall_plugin(plugin_name)
 
-    package = search(package_name, verbose=False, installed=True)[0]
-    if not package:
+    packages = search(package_name, verbose=False, installed=True)[0]
+
+    if not packages:
         logging.warning("Package not found, cancelling install")
         return
 
-    package.uninstall(dependencies=dependencies, **kwargs)
+    for package in packages:
+        package.uninstall(dependencies=dependencies, **kwargs)
 
 
 # todo maybe move info to the package?
@@ -252,7 +254,7 @@ def info(package_name=None, verbose=True):
     :param name: name of the manifest folder in the manifest repo
     """
 
-    packages = search(package_name, verbose=False, installed=True)
+    packages: "typing.List[Package]" = search(package_name, verbose=False, installed=True)
     if not packages:
         logging.warning("Package not found")
         return
