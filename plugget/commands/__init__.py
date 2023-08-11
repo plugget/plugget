@@ -149,19 +149,12 @@ def search(name=None, app=None, verbose=True, version=None, search_paths=None, u
     # search a folder with the format: app/app-hash/package/manifest-version.json, e.g.:
     # Blender/8e3c1114/io_xray/1.2.3.json
 
-    # todo atm packagemeta populates it's versions from the folder structure
-    #  which means that if we create it from the installed folder in appdata,
-    #  it wont include all versions from the local manifest repo in appdata
-
-    # todo curr returns package and version
-    #  return package meta. latest, name, author, description
-    #  search will return all package names, and then plugin needs to read all versions from this package name.
-    #  ideally i can do .versions
-
+    if installed:
+        use_cache = True
+    
     # clone
-    if not search_paths:
-        search_paths = _clone_manifest_repos(use_cache=use_cache)
-        search_paths = _get_app_paths(search_paths=search_paths, app=app)
+    search_paths = _clone_manifest_repos(use_cache=use_cache)
+    search_paths = _get_app_paths(search_paths=search_paths, app=app)
 
     manifest_paths = _discover_manifest_paths(name=name, search_paths=search_paths)
     manifest_dirs = {manifest_path.parent for manifest_path in manifest_paths}
@@ -192,7 +185,7 @@ def _discover_manifest_paths(search_paths, name=None):
 def list(package_name: str = None, enabled=False, disabled=False, verbose=True, app=None) -> PackagesMeta:  # , source=None):
     """List all installed packages"""
     logging.warning("list is deprecated, use search instead")
-    return search(name=package_name, app=app, verbose=verbose, installed=True)
+    return search(name=package_name, app=app, verbose=verbose, installed=True, use_cache=True)
 
 
 def install(package_name, enable=True, app=None, version=None, **kwargs):
