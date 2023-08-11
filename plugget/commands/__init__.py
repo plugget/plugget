@@ -135,7 +135,7 @@ def _get_app_paths(search_paths, app=None):  # todo make it clear this also clon
     return search_paths
 
 
-def search(name=None, app=None, verbose=True, version=None, search_paths=None, use_cache=False, installed=False) -> "typing.List[PackagesMeta]":
+def search(name=None, app=None, verbose=True, version=None, use_cache=False, installed=False) -> "typing.List[PackagesMeta]":
     """
     Search if package is in sources
     :param name: pacakge name to search in manifest repo, return all packages if not set
@@ -185,7 +185,7 @@ def _discover_manifest_paths(search_paths, name=None):
 def list(package_name: str = None, enabled=False, disabled=False, verbose=True, app=None) -> PackagesMeta:  # , source=None):
     """List all installed packages"""
     logging.warning("list is deprecated, use search instead")
-    return search(name=package_name, app=app, verbose=verbose, installed=True, use_cache=True)
+    return search(name=package_name, app=app, verbose=verbose, installed=True)
 
 
 def install(package_name, enable=True, app=None, version=None, **kwargs):
