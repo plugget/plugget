@@ -232,7 +232,7 @@ def uninstall(package_name=None, dependencies=False, **kwargs):
     # module = _get_app_module()  # todo remove
     # module.uninstall_plugin(plugin_name)
 
-    packages = search(package_name, verbose=False, installed=True)[0]
+    packages = search(package_name, verbose=False, installed=True)
 
     if not packages:
         logging.warning("Package not found, cancelling install")
