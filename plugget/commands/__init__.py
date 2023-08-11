@@ -189,6 +189,7 @@ def _discover_manifest_paths(search_paths, name=None):
 # # # WARNING we overwrite build in type list here, careful when using list in this module!
 def list(package_name: str = None, enabled=False, disabled=False, verbose=True, app=None) -> PackagesMeta:  # , source=None):
     """List all installed packages"""
+    logging.warning("list is deprecated, use search instead")
     return search(name=package_name, app=app, verbose=verbose, installed=True)
 
 
