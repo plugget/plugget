@@ -43,10 +43,13 @@ __all__ = [
 #         return plugin_name
 
 
-def _clone_manifest_repo(source_url) -> "pathlib.Path":
+def _clone_manifest_repo(source_url, use_cache=False) -> "pathlib.Path":
     """Clone git repo containing plugget manifests, from a git URL"""
     source_name = source_url.split("/")[-1].split(".")[0]
     source_dir = settings.TEMP_PLUGGET / source_name
+
+    if use_cache:
+        return source_dir
 
     # by default disable caching for now, it hinders debugging
     # great for instant search results though
@@ -78,7 +81,7 @@ def _clone_manifest_repo(source_url) -> "pathlib.Path":
     return source_dir
 
 
-def _clone_manifest_repos():
+def _clone_manifest_repos(use_cache=False):
     """
     clone the manifest repos that are registered, defaults to ['github.com/plugget/plugget-pkgs']
     """
@@ -99,7 +102,7 @@ def _clone_manifest_repos():
             if not exists:  # todo fix this naive impicit approach
                 # else assume it's a git URL
                 # we then clone the repo to a temp folder, and save the path in source_dir
-                source_dir = _clone_manifest_repo(source_url)
+                source_dir = _clone_manifest_repo(source_url, use_cache=use_cache)
                 
             source_dirs.append(source_dir)
 
@@ -126,13 +129,13 @@ def _print_search_results(packages):
 
 def _get_app_paths(search_paths, app=None):  # todo make it clear this also clones
     """get the default app paths from all registered manifest repos"""
-    app = _detect_app_id() if not app else app  # e.g. blender
+    app = app or _detect_app_id()  # e.g. blender
     if app and app != 'all':
         search_paths = [search_path / app for search_path in search_paths]
     return search_paths
 
 
-def search(name=None, app=None, verbose=True, version=None, search_paths=None) -> PackagesMeta:
+def search(name=None, app=None, verbose=True, version=None, search_paths=None, use_cache=False, installed=False) -> PackagesMeta:
     """
     Search if package is in sources
     :param name: pacakge name to search in manifest repo, return all packages if not set
@@ -140,6 +143,8 @@ def search(name=None, app=None, verbose=True, version=None, search_paths=None) -
     :param verbose: print results if True
     search_paths: list of pathlib.Path objects to search in,
                 defaults to temp path of clone for all registered manifest repos
+    installed: filter results to only installed packages
+    use_cache: don't re-clone the manifest repos, use cached version
     """
     # search a folder with the format: app/app-hash/package/manifest-version.json, e.g.:
     # Blender/8e3c1114/io_xray/1.2.3.json
@@ -152,13 +157,17 @@ def search(name=None, app=None, verbose=True, version=None, search_paths=None) -
     #  return package meta. latest, name, author, description
     #  search will return all package names, and then plugin needs to read all versions from this package name.
     #  ideally i can do .versions
-    app = app or _detect_app_id()
+
+    # clone
     if not search_paths:
-        search_paths = _clone_manifest_repos()
+        search_paths = _clone_manifest_repos(use_cache=use_cache)
         search_paths = _get_app_paths(search_paths=search_paths, app=app)
+
     manifest_paths = _discover_manifest_paths(name=name, search_paths=search_paths)
     manifest_dirs = {manifest_path.parent for manifest_path in manifest_paths}
-    meta_packages = [PackagesMeta(manifests_dir=manifest_dir) for manifest_dir in manifest_dirs]
+    meta_packages = [PackagesMeta(manifests_dir=manifest_dir) for manifest_dir in manifest_dirs]  # todo move to PackagesMeta, create from manifest_dir
+    if installed:
+        meta_packages = [x for x in meta_packages if x.installed_package]
     if verbose:
         _print_search_results(meta_packages)
     return meta_packages
@@ -177,26 +186,10 @@ def _discover_manifest_paths(search_paths, name=None):
     return manifest_paths
 
 
-# # WARNING we overwrite build in type list here, careful when using list in this module!
-# todo do we need list, or can this be merged w search?
-def list(package_name:str = None, enabled=False, disabled=False, verbose=True, app=None):  # , source=None):
-    """
-    List all installed packages
-    if run from an app, only list the apps installed packages, with option to list all app installed packages
-
-    :param enabled: list enabled packages only if True
-    :param disabled: list disabled packages only if True
-    TODO :param source: list packages from specific source only if set
-    """
-
-    # todo setting an app name wont work externally since hash will be different.
-
-    import plugget.data.package
-    app_hash = plugget.data.package.hash_current_app()    # e.g. 8e3c1114
-    app = _detect_app_id() if not app else app            # e.g. blender
-    source_dir = settings.INSTALLED_DIR / app / app_hash  # e.g. ...\AppData\Roaming\plugget\installed\blender\8e3c1114
-    results = search(name=package_name, app=app, verbose=verbose, search_paths=[source_dir])
-    return results
+# # # WARNING we overwrite build in type list here, careful when using list in this module!
+def list(package_name: str = None, enabled=False, disabled=False, verbose=True, app=None) -> PackagesMeta:  # , source=None):
+    """List all installed packages"""
+    return search(name=package_name, app=app, verbose=verbose, installed=True)
 
 
 def install(package_name, enable=True, app=None, version=None, **kwargs):
@@ -244,7 +237,7 @@ def uninstall(package_name=None, dependencies=False, **kwargs):
     # module = _get_app_module()  # todo remove
     # module.uninstall_plugin(plugin_name)
 
-    package = list(package_name, verbose=False)[0]
+    package = search(package_name, verbose=False, installed=True)[0]
     if not package:
         logging.warning("Package not found, cancelling install")
         return
@@ -252,13 +245,14 @@ def uninstall(package_name=None, dependencies=False, **kwargs):
     package.uninstall(dependencies=dependencies, **kwargs)
 
 
+# todo maybe move info to the package?
 def info(package_name=None, verbose=True):
     """
     Show info about package
     :param name: name of the manifest folder in the manifest repo
     """
 
-    packages = list(package_name, verbose=False) or search(package_name, verbose=False)
+    packages = search(package_name, verbose=False, installed=True)
     if not packages:
         logging.warning("Package not found")
         return
