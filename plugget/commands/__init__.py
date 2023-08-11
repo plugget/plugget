@@ -187,6 +187,8 @@ def _discover_manifest_paths(search_paths, name=None):
 
 
 # # # WARNING we overwrite build in type list here, careful when using list in this module!
+# todo remove this list
+#  and update all dependent projects. plugget qt, plugget blender, ....
 def list(package_name: str = None, enabled=False, disabled=False, verbose=True, app=None) -> PackagesMeta:  # , source=None):
     """List all installed packages"""
     logging.warning("list is deprecated, use search instead")
@@ -199,16 +201,15 @@ def install(package_name, enable=True, app=None, version=None, **kwargs):
     :param name: name of the manifest folder in the manifest repo
     :param enable: enable plugin after install
     """
-    # todo
     #  get package (manifest)
     #  check if package is already installed
     #  install package, by running action(s) from manifest
     #  save manifest to installed packages dir
 
-    # copy package to blender package folder
-    # module = _get_app_module()
+    # todo this search clones the repo. (pure optimization, low priority)
+    #  we should check first if we already have this version installed.
+    #  if yes dont install unless force
 
-    # get package manifest from package repo
     packages = search(name=package_name, app=app, verbose=False, version=version)
     if not packages:
         logging.warning(f"Package {package_name} not found, failed install")
