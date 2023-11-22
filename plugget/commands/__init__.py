@@ -170,6 +170,9 @@ def _discover_manifest_paths(search_paths, name=None):
     """search for manifest files"""
     manifest_paths = []  # get the manifests
     for app_path in search_paths:  # iter app folders
+        print("app_path", app_path)
+        if not app_path.exists(): # or not app_path.is_dir() or app_path.name.startswith("."):
+            continue
         package_dirs = [package_dir for package_dir in app_path.iterdir() if package_dir.is_dir()]
         for package_dir in package_dirs:  # iter package folders
             for manifest_path in package_dir.glob("*.json"):  # iter manifests
