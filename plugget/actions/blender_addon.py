@@ -46,8 +46,14 @@ def _enable_addons(names: set[str], enable=True):
 
 def install(package: "plugget.data.Package", force=False, enable=True, target=None, **kwargs) -> bool:  # todo , force=False, enable=True):
     # If the “force” parameter is True, the add-on will be reinstalled, even if it has not been previously removed.
+
+    # since we don't know the addon name, we use a hack.
+    # by comparing all addon names before and after install, we can find the new addon name
+    # then we enable the addon by name
     addon_names_before = _get_all_addon_names()
+
     _install_addon(package, force=force, target=target)
+
     addon_names_after = _get_all_addon_names()
     new_addons = addon_names_after - addon_names_before
     _enable_addons(new_addons, enable=enable)  # don't run this before dependencies are installed
