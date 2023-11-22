@@ -1,8 +1,7 @@
 from pathlib import Path
 import logging
 import shutil
-import bpy
-import addon_utils
+import bpy  # todo make this optional, so we can run this from outside blender
 from plugget._utils import rmdir
 
 
@@ -20,6 +19,7 @@ def __clash_import_name(name):
 
 
 def _get_all_addon_names() -> set[str]:
+    import addon_utils
     bpy.ops.preferences.addon_refresh()
     return {a.__name__ for a in addon_utils.modules()}
 
