@@ -39,25 +39,26 @@ def _enable_addons(names: set[str], enable=True):
         traceback.print_exc()
 
 
-def install(package: "plugget.data.Package", force=False, enable=True, **kwargs) -> bool:  # todo , force=False, enable=True):
+def install(package: "plugget.data.Package", force=False, enable=True, target=None, **kwargs) -> bool:  # todo , force=False, enable=True):
     # If the “force” parameter is True, the add-on will be reinstalled, even if it has not been previously removed.
     addon_names_before = _get_all_addon_names()
-    _install_addon(package, force=force)
+    _install_addon(package, force=force, target=target)
     addon_names_after = _get_all_addon_names()
     new_addons = addon_names_after - addon_names_before
     _enable_addons(new_addons, enable=enable)  # don't run this before dependencies are installed
     return True
 
 
-def _install_addon(package, force=False):
+def _install_addon(package, force=False, target=None):
 
     # if a repo has plugin in root. we get the repo files content
     # if the repo has plugin in subdir, that file lives in repo_paths
 
     addon_paths: list[Path] = package.get_content()  # get paths to plugin files in cloned repo
+
+    local_addons_dir = target or Path(bpy.utils.script_path_user()) / "addons"
+
     # copy addons to local addons dir
-    local_script_dir = bpy.utils.script_path_user()
-    local_addons_dir = Path(local_script_dir) / "addons"
     # shutil.move(str(plugin_path), str(new_plugin_path.parent), )  # copy plugin_path to local_addons_dir
     # todo filter repo paths
     print(f"copy files to {local_addons_dir}")
