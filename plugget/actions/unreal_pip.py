@@ -28,9 +28,7 @@ def project_site_dir():
 
 
 project_site_dir = project_site_dir()
-
-
-python_version = "{}.{}".format(sys.version_info.major, sys.version_info.minor)
+# python_version = "{}.{}".format(sys.version_info.major, sys.version_info.minor)
 
 
 def get_requirements(package: "plugget.data.Package", **kwargs) -> "list[Path]":
@@ -60,7 +58,6 @@ def install(package: "plugget.data.Package", **kwargs):
     # # check if files were copied: package.clone_dir / p
     # if not (package.clone_dir / p).exists():
     #     raise FileNotFoundError(f"expected file not found: '{p}'")
-
 
 
 # def install(package: "plugget.data.Package", **kwargs):

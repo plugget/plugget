@@ -26,7 +26,7 @@ else:
 
 
 path = Path(path) / "pykrita"
-python_version = "{}.{}".format(sys.version_info.major, sys.version_info.minor)
+# python_version = "{}.{}".format(sys.version_info.major, sys.version_info.minor)
 
 
 def get_requirements(package: "plugget.data.Package", **kwargs) -> "list[Path]":
@@ -64,6 +64,7 @@ def install(package: "plugget.data.Package", **kwargs):
             subprocess.run(["pip", "install", "-r", package.clone_dir / p, '-t', path, "--no-user"])
         else:
             logging.warning(f"expected requirements.txt not found: '{p}'")
+
     importlib.invalidate_caches()
 
 
@@ -85,6 +86,8 @@ def uninstall(package: "plugget.data.Package", dependencies=False, **kwargs):
     # this method runs on uninstall, then the manifest is removed from installed packages
     # ideally uninstall removes files from a folder,
 
+    # todo uninstall package (atm we only uninstall package dependencies!)
+
     if not dependencies:
         return
 
@@ -92,8 +95,10 @@ def uninstall(package: "plugget.data.Package", dependencies=False, **kwargs):
         if p.exists():
             print("requirements.txt found, uninstalling requirements")
             print("package.clone_dir / p", package.clone_dir / p)
+            # todo pass custom path to subprocess, e.g. with sys.path in env var PYTHONPATH
             subprocess.run(["pip", "uninstall", "-r", package.clone_dir / p, "-y"])
         else:
             logging.warning(f"expected requirements.txt not found: '{p}'")
+
     importlib.invalidate_caches()
 

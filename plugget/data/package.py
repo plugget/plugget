@@ -131,6 +131,7 @@ class Package(object):
     @property
     def package_install_dir(self):  # keep in sync with clone_dir
         return settings.INSTALLED_DIR / self.app / hash_current_app() / self.package_name
+        # todo hash_current_app, only works for current app
 
     @property
     def is_installed(self):

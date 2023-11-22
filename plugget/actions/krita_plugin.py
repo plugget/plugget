@@ -2,8 +2,6 @@
 
 
 import os
-import sys
-import subprocess
 import logging
 from pathlib import Path
 import shutil
@@ -11,6 +9,7 @@ import shutil
 
 # todo merge dupe code with krita pip and blender addon
 
+# maybe if env var PLUGGET_KRITA_PLUGIN_PATH is set, use that path?
 
 if os.name == 'posix':  # Linux or macOS
     home = os.path.expanduser("~")
@@ -21,7 +20,9 @@ elif os.name == 'nt':  # Windows
     # todo add support for windows store
     #  If you installed Krita in the Windows Store, your custom resources will be in a location like:
     #  %LOCALAPPDATA%\Packages\49800Krita_RANDOM STRING\LocalCacheRoamingkrita
+
     # todo what about portable windows version?
+    #  allow user to manually set a target folder
 else:
     raise OSError("Unsupported operating system")
 
@@ -42,15 +43,6 @@ def __clash_import_name(name):
 
 def install(package: "plugget.data.Package", force=False, enable=True, **kwargs) -> bool:  # todo , force=False, enable=True):
     # If the “force” parameter is True, the add-on will be reinstalled, even if it has not been previously removed.
-    # addon_names_before = _get_all_addon_names()
-    _install_plugin(package)
-    # addon_names_after = _get_all_addon_names()
-    # new_addons = addon_names_after - addon_names_before
-    # _enable_addons(new_addons, enable=enable)
-    return True
-
-
-def _install_plugin(package):
 
     # if a repo has plugin in root. we get the repo files content
     # if the repo has plugin in subdir, that file lives in repo_paths

@@ -47,6 +47,9 @@ def _enable_addons(names: set[str], enable=True):
 def install(package: "plugget.data.Package", force=False, enable=True, target=None, **kwargs) -> bool:  # todo , force=False, enable=True):
     # If the “force” parameter is True, the add-on will be reinstalled, even if it has not been previously removed.
 
+    if kwargs:
+        logging.warning(f"unsupported kwargs passed to blender_addon install: {kwargs}")
+
     # since we don't know the addon name, we use a hack.
     # by comparing all addon names before and after install, we can find the new addon name
     # then we enable the addon by name
@@ -109,6 +112,8 @@ def uninstall(package: "plugget.data.Package", **kwargs):
             shutil.rmtree(p, ignore_errors=True)
         else:
             p.unlink(missing_ok=True)
+
+    # todo disable addon
 
     bpy.ops.preferences.addon_refresh()
 
