@@ -5,6 +5,7 @@ import bpy
 import importlib
 import os
 import sys
+import plugget.actions._utils as action_utils
 
 
 def prep_pythonpath():
@@ -17,19 +18,6 @@ def prep_pythonpath():
         os.environ["PYTHONPATH"] = joined_paths
 
 
-def get_requirements(package: "plugget.data.Package", **kwargs) -> list[Path]:
-    # TODO ideally use setup.py or pyproject.toml to install dependencies
-    # if requirements.txt exists in self.repo_paths, install requirements
-    requirements_paths = []
-    if (package.clone_dir / "requirements.txt").exists():
-        requirements_paths.append(package.clone_dir / "requirements.txt")
-    if package.repo_paths:
-        for p in package.repo_paths:
-            if p.endswith("requirements.txt"):
-                requirements_paths.append(package.clone_dir / p)
-    return requirements_paths
-
-
 # todo share pip functions
 def install(package: "plugget.data.Package", force=False, **kwargs):
     prep_pythonpath()
@@ -37,7 +25,9 @@ def install(package: "plugget.data.Package", force=False, **kwargs):
     blender_user_site_packages = Path(str(bpy.utils.script_path_user())) / "modules"  # appdata
     blender_user_site_packages.mkdir(exist_ok=True, parents=True)
 
-    for p in get_requirements(package):
+    # TODO ideally use setup.py or pyproject.toml to install dependencies
+    # if requirements.txt exists in self.repo_paths, install requirements
+    for p in action_utils.get_requirements(package):
         if p.exists():
             print("requirements.txt found, installing requirements")
             cmd = [sys.executable, '-m', 'pip', "install", "--upgrade",
@@ -66,7 +56,7 @@ def uninstall(package: "plugget.data.Package", dependencies=False, **kwargs):
 
     blender_user_site_packages = Path(str(bpy.utils.script_path_user())) / "modules"  # appdata
 
-    for p in get_requirements(package):
+    for p in action_utils.get_requirements(package):
         if p.exists():
             print("requirements.txt found, uninstalling requirements")
             print("package.clone_dir / p", package.clone_dir / p)

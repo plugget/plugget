@@ -9,6 +9,7 @@ import subprocess
 import logging
 from pathlib import Path
 import importlib
+import plugget.actions._utils as action_utils
 
 
 if os.name == 'posix':  # Linux or macOS
@@ -29,18 +30,6 @@ path = Path(path) / "pykrita"
 # python_version = "{}.{}".format(sys.version_info.major, sys.version_info.minor)
 
 
-def get_requirements(package: "plugget.data.Package", **kwargs) -> "list[Path]":
-    # if requirements.txt exists in self.repo_paths, install requirements
-    requirements_paths = []
-    if (package.clone_dir / "requirements.txt").exists():
-        requirements_paths.append(package.clone_dir / "requirements.txt")
-    if package.repo_paths:
-        for p in package.repo_paths:
-            if p.endswith("requirements.txt"):
-                requirements_paths.append(package.clone_dir / p)
-    return requirements_paths
-
-
 # def get_python():
 #     python_exe = os.environ.get("PLUGGET_KRITA_PYTHON")  # set to same version as python in krita!
 #
@@ -57,7 +46,7 @@ def get_requirements(package: "plugget.data.Package", **kwargs) -> "list[Path]":
 def install(package: "plugget.data.Package", **kwargs):
     print("check for requirements")
 
-    for p in get_requirements(package):
+    for p in action_utils.get_requirements(package):
         if p.exists():
             print("requirements.txt found, installing requirements")
             # todo python -m pip with krita py interpreter
@@ -91,7 +80,7 @@ def uninstall(package: "plugget.data.Package", dependencies=False, **kwargs):
     if not dependencies:
         return
 
-    for p in get_requirements(package):
+    for p in action_utils.get_requirements(package):
         if p.exists():
             print("requirements.txt found, uninstalling requirements")
             print("package.clone_dir / p", package.clone_dir / p)
