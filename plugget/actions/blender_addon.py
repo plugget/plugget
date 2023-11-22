@@ -25,6 +25,11 @@ def _get_all_addon_names() -> set[str]:
 
 
 def _enable_addons(names: set[str], enable=True):
+    """
+    Enable addons by name, only works when run from inside Blender
+    """
+    # todo support enabling addons from outside blender
+
     if not enable:
         return
     try:
@@ -67,8 +72,7 @@ def _install_addon(package, force=False, target=None):
 
         if force:
             rmdir(local_addons_dir / addon_path.name)
-
-        if not force and __clash_import_name(addon_path.name):
+        elif __clash_import_name(addon_path.name):
             continue
 
         # new_addon_path.mkdir(parents=True, exist_ok=True)

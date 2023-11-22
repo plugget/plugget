@@ -18,6 +18,7 @@ def prep_pythonpath():
 
 
 def get_requirements(package: "plugget.data.Package", **kwargs) -> list[Path]:
+    # TODO ideally use setup.py or pyproject.toml to install dependencies
     # if requirements.txt exists in self.repo_paths, install requirements
     requirements_paths = []
     if (package.clone_dir / "requirements.txt").exists():
@@ -76,6 +77,3 @@ def uninstall(package: "plugget.data.Package", dependencies=False, **kwargs):
             logging.warning(f"expected requirements.txt not found: '{p}'")
 
     importlib.invalidate_caches()
-
-
-
