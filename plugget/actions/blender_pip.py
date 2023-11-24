@@ -1,48 +1,21 @@
 import logging
-import subprocess
 from pathlib import Path
 import bpy
-import importlib
-import os
 import sys
 import plugget.actions._utils as action_utils
+import py_pip
 
 
-def prep_pythonpath():
-    # copy the sys.paths to PYTHONPATH to pass to subprocess, for pip to use
-    paths = os.environ.get("PYTHONPATH", "").split(os.pathsep)
-    new_paths = [p for p in sys.path if p not in paths]
-    paths += new_paths
-    joined_paths = os.pathsep.join(paths)
-    if joined_paths:
-        os.environ["PYTHONPATH"] = joined_paths
+py_pip.default_target_path = str(Path(str(bpy.utils.script_path_user())) / "modules")  # defaults to no target path
+# todo, startup script to add to site packages, else we cant support pth files.
+py_pip.python_interpreter = sys.executable
 
 
-# todo share pip functions
 def install(package: "plugget.data.Package", force=False, **kwargs):
-    prep_pythonpath()
-
-    blender_user_site_packages = Path(str(bpy.utils.script_path_user())) / "modules"  # appdata
-    blender_user_site_packages.mkdir(exist_ok=True, parents=True)
-
     # TODO ideally use setup.py or pyproject.toml to install dependencies
     # if requirements.txt exists in self.repo_paths, install requirements
-    for p in action_utils.get_requirements(package):
-        if p.exists():
-            print("requirements.txt found, installing requirements")
-            cmd = [sys.executable, '-m', 'pip', "install", "--upgrade",
-                   "-r", str(package.clone_dir / p),
-                   '-t', str(blender_user_site_packages), "--no-user"]
-            if force:
-                cmd.append("--force-reinstall")
-            print(cmd)
-            try:
-                subprocess.run(cmd)
-            except subprocess.CalledProcessError as e:
-                logging.error(e.output)
-        else:
-            logging.warning(f"expected requirements.txt not found: '{p}'")
-    importlib.invalidate_caches()
+    for req_path in action_utils.iter_requirements(package):
+        py_pip.install(requirements=req_path, force=force, upgrade=True)
 
 
 def uninstall(package: "plugget.data.Package", dependencies=False, **kwargs):
@@ -52,18 +25,12 @@ def uninstall(package: "plugget.data.Package", dependencies=False, **kwargs):
     if not dependencies:
         return
 
-    prep_pythonpath()
+    # uninstall plugget_qt
+    # we uninstall the dependenceis (requirements)
+    # TODO is there a chance we share requirements with another package?
+    #  and uninstalling them breaks another package?
 
-    blender_user_site_packages = Path(str(bpy.utils.script_path_user())) / "modules"  # appdata
-
-    for p in action_utils.get_requirements(package):
-        if p.exists():
-            print("requirements.txt found, uninstalling requirements")
-            print("package.clone_dir / p", package.clone_dir / p)
-            cmd = [sys.executable, '-m', 'pip', "uninstall", "-r", package.clone_dir / p, "-y"]
-            print(cmd)
-            subprocess.run(cmd)
-        else:
-            logging.warning(f"expected requirements.txt not found: '{p}'")
-
-    importlib.invalidate_caches()
+    for req_path in action_utils.iter_requirements(package):
+        print("requirements.txt found, uninstalling requirements")
+        print("package.clone_dir / p", package.clone_dir / req_path)
+        py_pip.uninstall(requirements=req_path, yes=True)
