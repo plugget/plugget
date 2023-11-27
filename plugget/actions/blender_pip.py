@@ -1,12 +1,11 @@
 """
 Plugget action to install dependencies from requirements.txt using pip.
 
-PLUGGET_BLENDER_TARGET: env var to set target folder for pip install
-PLUGGET_BLENDER_INTERPRETER: env var to set python interpreter for pip install
+PLUGGET_BLENDER_TARGET: env var to set target folder for pip install, if not set use user scripts folder from bpy
+PLUGGET_BLENDER_INTERPRETER: env var to set python interpreter for pip install, defaults to sys.executable
 """
 
 from pathlib import Path
-import bpy
 import sys
 import plugget.actions._utils as action_utils
 import py_pip
@@ -14,8 +13,11 @@ import os
 
 
 def setup_py_pip():
-    user_modules_folder = str(Path(str(bpy.utils.script_path_user())) / "modules")
-    py_pip.default_target_path = os.environ.get("PLUGGET_BLENDER_TARGET") or user_modules_folder
+    py_pip.default_target_path = os.environ.get("PLUGGET_BLENDER_TARGET")
+    if not py_pip.default_target_path:
+        import bpy
+        py_pip.default_target_path = str(Path(str(bpy.utils.script_path_user())) / "modules")
+
     # todo, startup script to add to site packages, else we cant support pth files.
     py_pip.python_interpreter = os.environ.get("PLUGGET_BLENDER_INTERPRETER") or sys.executable
 
