@@ -1,6 +1,8 @@
 """
 this action copies all (repo_paths) files to the macroscript folder
 """
+import logging
+
 import pymxs
 from pymxs import runtime as rt
 import shutil
@@ -19,6 +21,11 @@ def install(package: "plugget.data.Package", max_folder=None, **kwargs) -> bool:
         if sub_path.is_file() and sub_path.suffix != ".mcr":
             new_path = sub_path.with_suffix(".mcr")
             sub_path = sub_path.rename(new_path)
+            logging.warning(f"renamed {sub_path} to {new_path}")
+
+        if not sub_path.is_file():
+            logging.warning(f"skipping: expected file, got folder: '{sub_path}'")
+            continue
 
         # copy files (and folders) to the macroscript folder
         print("copying", sub_path, "to", macro_folder_path)
