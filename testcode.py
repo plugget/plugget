@@ -9,7 +9,6 @@ import plugget
 import plugget.commands as cmd
 import plugget.data as da
 import plugget.actions.blender_addon as ba
-# import plugget.apps.blender as b
 
 from importlib import reload
 reload(plugget)
@@ -37,7 +36,6 @@ import plugget
 import plugget.data as d
 import plugget.commands as cmd
 import plugget.actions.max_macroscript as ma
-# import plugget.apps.blender as b
 
 from importlib import reload
 
