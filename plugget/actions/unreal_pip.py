@@ -34,7 +34,7 @@ project_site_dir = project_site_dir()
 def install(package: "plugget.data.Package", **kwargs):
     print("check for requirements")
 
-    for p in action_utils.get_requirements(package):
+    for p in action_utils.get_requirements_txt_paths(package):
         if p.exists():
             print("requirements.txt found, installing requirements")
             # todo python -m pip with unreal py interpreter
@@ -69,7 +69,7 @@ def uninstall(package: "plugget.data.Package", dependencies=False, **kwargs):
     if not dependencies:
         return
 
-    for p in action_utils.get_requirements(package):
+    for p in action_utils.get_requirements_txt_paths(package):
         if p.exists():
             print("requirements.txt found, uninstalling requirements")
             print("package.clone_dir / p", package.clone_dir / p)
