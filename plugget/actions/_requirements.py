@@ -23,9 +23,12 @@ class RequirementsAction:
 
     @classmethod
     def install(cls, package: "plugget.data.Package", force=False, **kwargs):
+        print("install requirements to target", cls.target)
         cls.setup_py_pip()
         for req_path in action_utils.iter_requirements_paths(package):
+            print("requirements.txt found, installing requirements", req_path)
             py_pip.install(requirements=req_path, force=force, upgrade=True)
+            # TODO confirm install worked, atm any crash in py_pip is silently ignored
 
     @classmethod
     def uninstall(cls, package: "plugget.data.Package", dependencies=False, **kwargs):
@@ -36,3 +39,4 @@ class RequirementsAction:
             print("requirements.txt found, uninstalling requirements")
             print("package.clone_dir / p", package.clone_dir / req_path)
             py_pip.uninstall(requirements=req_path, yes=True)
+            # TODO confirm uninstall worked
