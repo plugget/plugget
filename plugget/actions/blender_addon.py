@@ -85,6 +85,7 @@ def _install_addon(package, force=False, target=None):
             continue
 
         # new_addon_path.mkdir(parents=True, exist_ok=True)
+        # todo replace move with copytree, else we mess with the package's content cache
         shutil.move(str(addon_path), str(local_addons_dir))
 
         # todo clean up empty folders
