@@ -279,7 +279,7 @@ class Package(object):
         # clone package repo to temp folder
         rmdir(target_dir)
 
-        print("cloning", self.repo_url, "to", target_dir)
+        logging.info("cloning", self.repo_url, "to", target_dir)
         # todo sparse checkout, support multiple entries in self.repo_paths
 
         # logging.debug(f"cloning {self.repo_url} to {target_dir}")
@@ -290,12 +290,12 @@ class Package(object):
         target_dir.mkdir(exist_ok=True, parents=True)
 
         def run_log(command, cwd=None):
-            print("command:", command)
+            logging.info("command:", command)
             process = subprocess.Popen(command, cwd=cwd, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
             stdout, stderr = process.communicate()
             try:
                 if stdout:
-                    print(stdout.decode())
+                    logging.debug(stdout.decode())
                 if stderr:
                     logging.error(stderr.decode())
             except Exception as e:
@@ -305,16 +305,16 @@ class Package(object):
 
         if self.repo_SHA:
             # todo check if repo_SHA is valid
-            print("command to run repo_SHA:", ["git", "clone", "--depth", "1", "--progress", self.repo_url, str(target_dir)])
+            logging.info("command to run repo_SHA:", ["git", "clone", "--depth", "1", "--progress", self.repo_url, str(target_dir)])
             run_log(["git", "clone", "--depth", "1", "--progress", self.repo_url, str(target_dir)])
             run_log(["git", "fetch", "--depth", "1", "origin", self.repo_SHA], cwd=target_dir)
             run_log(["git", "checkout", self.repo_SHA], cwd=target_dir)
         elif self.repo_tag:
             # subprocess.run(["git", "checkout", f"tags/{self.repo_tag}"], cwd=target_dir)
-            print("command to run repo_tag:", ["git", "clone", "--depth", "1", "--branch", self.repo_tag], target_dir)
+            logging.info("command to run repo_tag:", ["git", "clone", "--depth", "1", "--branch", self.repo_tag], target_dir)
             run_log(["git", "clone", "--depth", "1", "--branch", self.repo_tag,  "--progress", self.repo_url, str(target_dir)])
         else:
-            print("command to run other:", ["git", "clone", "--depth", "1", "--progress", self.repo_url, str(target_dir)])
+            logging.info("command to run other:", ["git", "clone", "--depth", "1", "--progress", self.repo_url, str(target_dir)])
             run_log(["git", "clone", "--depth", "1", "--progress", self.repo_url, str(target_dir)])
 
         # delete .git folder
