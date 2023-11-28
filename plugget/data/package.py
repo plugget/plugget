@@ -73,10 +73,12 @@ class Package(object):
         # license = ""
         # tags = []
 
-        self.installed_paths = set() if installed_paths is None else set(installed_paths)   # list of files cloned locally
+        # AFAIK self.installed_paths is for the json, and self._content_paths is for the actual files. todo confirm
+        self.installed_paths = set() if installed_paths is None else set(installed_paths)  # list of files cloned locally
         self._starred = None
         self._stars = None
         self._clone_dir = None
+        self._content_paths = []  # used for caching, to prevent cloning multiple times
         self.packages_meta = packages_meta or None  # optional backlink to the packages meta object # todo make it not optional?
 
     # @property
@@ -250,14 +252,20 @@ class Package(object):
         with open(json_path, "w") as f:
             json.dump(output, f, indent=4)
 
-    def get_content(self, target_dir=None) -> "list[Path]":
-        """download the plugin content from the repo, and return the paths to the files"""
+    def get_content(self, target_dir=None, use_cached=True) -> "list[Path]":
+        """
+        download the plugin content from the repo, and return the paths to the files
+        target_dir: the folder to download the files to
+        use_cached: if True, use the cached files if they exist
+        """
         # this choosing what to do, could be a manager in an action
         # if zip file, download and extract
         # else clone repo
-        return self._clone_repo(target_dir=target_dir)
-    # todo instead of clone can we download the files directly?
-    # cant clone to non empty folder, so we need to move files instead. but unreal had permission issues with that
+        if not use_cached or not self._content_paths:
+            self._content_paths = self._clone_repo(target_dir=target_dir)
+        return self._content_paths
+        # todo instead of clone can we download the files directly?
+        # cant clone to non empty folder, so we need to move files instead. but unreal had permission issues with that
 
     def _clone_repo(self, target_dir=None) -> "list[Path]":
         """
@@ -281,19 +289,33 @@ class Package(object):
         # ensure target dir exists.
         target_dir.mkdir(exist_ok=True, parents=True)
 
+        def run_log(command, cwd=None):
+            print("command:", command)
+            process = subprocess.Popen(command, cwd=cwd, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
+            stdout, stderr = process.communicate()
+            try:
+                if stdout:
+                    print(stdout.decode())
+                if stderr:
+                    logging.error(stderr.decode())
+            except Exception as e:
+                logging.error("error printing stdout/stderr:", e)
+                logging.error("stdout:", stdout)
+            return process.returncode
+
         if self.repo_SHA:
             # todo check if repo_SHA is valid
             print("command to run repo_SHA:", ["git", "clone", "--depth", "1", "--progress", self.repo_url, str(target_dir)])
-            subprocess.run(["git", "clone", "--depth", "1", "--progress", self.repo_url, str(target_dir)])
-            subprocess.run(["git", "fetch", "--depth", "1", "origin", self.repo_SHA], cwd=target_dir)
-            subprocess.run(["git", "checkout", self.repo_SHA], cwd=target_dir)
+            run_log(["git", "clone", "--depth", "1", "--progress", self.repo_url, str(target_dir)])
+            run_log(["git", "fetch", "--depth", "1", "origin", self.repo_SHA], cwd=target_dir)
+            run_log(["git", "checkout", self.repo_SHA], cwd=target_dir)
         elif self.repo_tag:
             # subprocess.run(["git", "checkout", f"tags/{self.repo_tag}"], cwd=target_dir)
             print("command to run repo_tag:", ["git", "clone", "--depth", "1", "--branch", self.repo_tag], target_dir)
-            subprocess.run(["git", "clone", "--depth", "1", "--branch", self.repo_tag,  "--progress", self.repo_url, str(target_dir)])
+            run_log(["git", "clone", "--depth", "1", "--branch", self.repo_tag,  "--progress", self.repo_url, str(target_dir)])
         else:
             print("command to run other:", ["git", "clone", "--depth", "1", "--progress", self.repo_url, str(target_dir)])
-            subprocess.run(["git", "clone", "--depth", "1", "--progress", self.repo_url, str(target_dir)])
+            run_log(["git", "clone", "--depth", "1", "--progress", self.repo_url, str(target_dir)])
 
         # delete .git folder
         rmdir(target_dir / ".git")
@@ -306,7 +328,6 @@ class Package(object):
             return [target_dir / p for p in self.repo_paths]
         else:
             return [target_dir]
-
 
     def install(self, force=False, *args, **kwargs):
         from plugget import commands

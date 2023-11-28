@@ -24,9 +24,10 @@ class RequirementsAction:
     @classmethod
     def install(cls, package: "plugget.data.Package", force=False, **kwargs):
         print("install requirements to target", cls.target)
+        package.get_content(use_cached=True)
         cls.setup_py_pip()
         for req_path in action_utils.iter_requirements_paths(package):
-            print("requirements.txt found, installing requirements", req_path)
+            print("requirements.txt found, installing: ", req_path)
             py_pip.install(requirements=req_path, force=force, upgrade=True)
             # TODO confirm install worked, atm any crash in py_pip is silently ignored
 
