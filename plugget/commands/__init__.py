@@ -190,6 +190,8 @@ def _discover_manifest_paths(search_paths, name=None):
             continue
         package_dirs = [package_dir for package_dir in app_path.iterdir() if package_dir.is_dir()]
         for package_dir in package_dirs:  # iter package folders
+            if not package_dir.exists():
+                continue
             for manifest_path in package_dir.glob("*.json"):  # iter manifests
                 source_name = package_dir.name  # this checks for manifest name, not name in package todo
                 if name is None or name.lower() in source_name.lower():  # todo we search manifest file name, instead of name in the package
