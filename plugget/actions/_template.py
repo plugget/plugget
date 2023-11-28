@@ -1,12 +1,7 @@
 """
-This is a template for a plugget action.  It is not intended to be used
-try writing the (un)install method in pure python, so it also runs outside the app
-methods:
-    install
-    uninstall
-    enable
-    disable
+This is a template for a plugget action.  It is not intended to be used directly.
 """
+# try to write the (un)install methods without use of any dcc modules, so the methods can run outside the app
 
 
 # todo make install uninstall optional too, when provided a target dir. e.g. plugin or icon folder for an app

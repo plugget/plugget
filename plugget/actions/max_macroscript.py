@@ -38,7 +38,7 @@ def install(package: "plugget.data.Package", max_folder=None, **kwargs) -> bool:
 def uninstall(package: "plugget.data.Package", **kwargs):
 
     # get macroscript folder
-    macro_folder_path = rt.getDir(rt.name('userMacros'))
+    # macro_folder_path = rt.getDir(rt.name('userMacros'))
 
     # for sub_path in package.repo_paths:
     #     sub_path = Path(sub_path)

@@ -65,6 +65,7 @@ def install(package: "plugget.data.Package", force=False, enable=True, **kwargs)
 
         # new_addon_path.mkdir(parents=True, exist_ok=True)
         shutil.move(str(addon_path), str(local_addons_dir))
+        # todo use copy instead of move
 
         # todo clean up empty folders
 
