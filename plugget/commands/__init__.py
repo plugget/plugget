@@ -69,7 +69,22 @@ def _clone_manifest_repo(source_url, use_cache=False) -> "pathlib.Path":
         raise Exception(f"Failed to remove source_dir {source_dir}")
 
     # clone repo
-    subprocess.run(["git", "clone", "--depth", "1", "--progress", source_url, str(source_dir)])
+    commands = ["git", "clone", "--depth", "1", "--progress", source_url, str(source_dir)]
+    process = subprocess.Popen(commands, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
+    stdout, stderr = process.communicate()
+
+    for line in stdout.splitlines():
+        low_line = line.lower()
+        if low_line.startswith(b"error") or low_line.startswith(b"fatal"):
+            logging.error(line)
+        elif low_line.startswith(b"warning"):
+            logging.warning(line)
+        else:
+            logging.debug(line)
+    if stderr:
+        for line in stderr.splitlines():
+            logging.error(line)
+
     # todo check if command errored / catch exception
     # todo check if clone was successful
 
