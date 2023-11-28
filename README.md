@@ -17,8 +17,8 @@ plugget.install("my_package")
 also check out  
 🔹 [Plugget Qt](https://github.com/plugget/plugget-qt)  
 <img src="https://raw.githubusercontent.com/tandpfun/skill-icons/59059d9d1a2c092696dc66e00931cc1181a4ce1f/icons/UnrealEngine.svg" width="32" style="max-width: 100%;"> [Plugget Qt Unreal plugin](https://github.com/hannesdelbeke/plugget-unreal)  
-<img src="https://raw.githubusercontent.com/tandpfun/skill-icons/59059d9d1a2c092696dc66e00931cc1181a4ce1f/icons/Blender-Dark.svg" width="32" style="max-width: 100%;"> [Plugget Blender addon](https://github.com/hannesdelbeke/plugget-blender-addon) (simple)  
 <img src="https://raw.githubusercontent.com/tandpfun/skill-icons/59059d9d1a2c092696dc66e00931cc1181a4ce1f/icons/Blender-Dark.svg" width="32" style="max-width: 100%;"> [Plugget Qt Blender addon](https://github.com/plugget/plugget-qt-addon) (more features)  
+<img src="https://raw.githubusercontent.com/tandpfun/skill-icons/59059d9d1a2c092696dc66e00931cc1181a4ce1f/icons/Blender-Dark.svg" width="32" style="max-width: 100%;"> [Plugget Blender addon](https://github.com/hannesdelbeke/plugget-blender-addon) (simple)  
 🔹 [plugget manifest repo](https://github.com/hannesdelbeke/plugget-pkgs)
 
 ## requirements
