@@ -146,9 +146,9 @@ class Package(object):
         DefaultActions = {
             "blender": ["blender_requirements", "blender_addon"],
             "max3ds": ["max_requirements", "max_macroscript"],
+            "maya": ["maya_requirements"],
             "krita": ["krita_requirements", "krita_plugin"],
             "unreal": ["unreal_requirements", "unreal_plugin"],
-            # "maya": "maya_module",
         }
         actions = DefaultActions.get(self.app)
         if not actions:
