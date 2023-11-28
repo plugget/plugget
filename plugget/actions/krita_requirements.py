@@ -1,15 +1,9 @@
 import os
-import sys
-import subprocess
-
-
-import os
-import sys
 import subprocess
 import logging
 from pathlib import Path
 import importlib
-import plugget.actions._utils as action_utils
+import plugget.actions._requirements as action_utils
 
 
 if os.name == 'posix':  # Linux or macOS

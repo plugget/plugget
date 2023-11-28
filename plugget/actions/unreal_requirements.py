@@ -10,7 +10,8 @@ import logging
 from pathlib import Path
 import importlib
 import unreal
-import plugget.actions._utils as action_utils
+import plugget.actions._requirements as action_utils
+
 
 # def project_plugins_dir():
 #     project_path = unreal.Paths.project_plugins_dir()
