@@ -44,7 +44,7 @@ class Package(object):
         :param version: the version of the plugin e.g. 0.1.0, derived from manifest name
         """
         if kwargs:
-            logging.warning("Unused kwargs on Package init:", kwargs)
+            logging.warning("Unused kwargs on Package init: '{kwargs}'")
 
         # attributes derived from the manifest path
         self.app = app  # set from app folder containing the manifest, todo currently is app name, swap to app object
@@ -154,7 +154,7 @@ class Package(object):
         }
         actions = DefaultActions.get(self.app)
         if not actions:
-            raise Exception(f"no default action for app {self.app}")
+            raise Exception(f"no default action for app '{self.app}'")
         return actions
 
     def get_stars(self):
@@ -279,7 +279,7 @@ class Package(object):
         # clone package repo to temp folder
         rmdir(target_dir)
 
-        logging.info("cloning", self.repo_url, "to", target_dir)
+        logging.info(f"cloning '{self.repo_url}' to '{target_dir}'")
         # todo sparse checkout, support multiple entries in self.repo_paths
 
         # logging.debug(f"cloning {self.repo_url} to {target_dir}")
@@ -290,7 +290,7 @@ class Package(object):
         target_dir.mkdir(exist_ok=True, parents=True)
 
         def run_log(command, cwd=None):
-            logging.info("command:", command)
+            logging.info("command: '{command}'")
             process = subprocess.Popen(command, cwd=cwd, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
             stdout, stderr = process.communicate()
             try:
@@ -299,22 +299,22 @@ class Package(object):
                 if stderr:
                     logging.error(stderr.decode())
             except Exception as e:
-                logging.error("error printing stdout/stderr:", e)
-                logging.error("stdout:", stdout)
+                logging.error("error printing stdout/stderr: '{e}'")
+                logging.error("stdout: '{stdout}'")
             return process.returncode
 
         if self.repo_SHA:
             # todo check if repo_SHA is valid
-            logging.info("command to run repo_SHA:", ["git", "clone", "--depth", "1", "--progress", self.repo_url, str(target_dir)])
+            logging.info(["command to run repo_SHA:", ["git", "clone", "--depth", "1", "--progress", self.repo_url, str(target_dir)]])
             run_log(["git", "clone", "--depth", "1", "--progress", self.repo_url, str(target_dir)])
             run_log(["git", "fetch", "--depth", "1", "origin", self.repo_SHA], cwd=target_dir)
             run_log(["git", "checkout", self.repo_SHA], cwd=target_dir)
         elif self.repo_tag:
             # subprocess.run(["git", "checkout", f"tags/{self.repo_tag}"], cwd=target_dir)
-            logging.info("command to run repo_tag:", ["git", "clone", "--depth", "1", "--branch", self.repo_tag], target_dir)
+            logging.info(["command to run repo_tag:", ["git", "clone", "--depth", "1", "--branch", self.repo_tag], target_dir])
             run_log(["git", "clone", "--depth", "1", "--branch", self.repo_tag,  "--progress", self.repo_url, str(target_dir)])
         else:
-            logging.info("command to run other:", ["git", "clone", "--depth", "1", "--progress", self.repo_url, str(target_dir)])
+            logging.info(["command to run other:", ["git", "clone", "--depth", "1", "--progress", self.repo_url, str(target_dir)]])
             run_log(["git", "clone", "--depth", "1", "--progress", self.repo_url, str(target_dir)])
 
         # delete .git folder
