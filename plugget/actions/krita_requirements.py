@@ -84,4 +84,3 @@ def uninstall(package: "plugget.data.Package", dependencies=False, **kwargs):
             logging.warning(f"expected requirements.txt not found: '{p}'")
 
     importlib.invalidate_caches()
-

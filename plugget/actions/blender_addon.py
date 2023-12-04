@@ -3,7 +3,6 @@ import logging
 import shutil
 import bpy  # todo make this optional, so we can run this from outside blender
 from plugget._utils import rmdir
-import os
 
 
 # _target_path = os.environ.get("PLUGGET_BLENDER_TARGET_ADDONS")

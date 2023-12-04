@@ -16,7 +16,7 @@ def get_requirements_txt_paths(package: "plugget.data.Package", **kwargs) -> lis
     # get the requirements.txt in the root of the repo
     if (package.clone_dir / "requirements.txt").exists():
         requirements_paths.append(package.clone_dir / "requirements.txt")
-    # get requirements.txt paths defineed by user in repo_paths
+    # get requirements.txt paths defined by user in repo_paths
     if package.repo_paths:
         for p in package.repo_paths:
             if p.endswith("requirements.txt"):
@@ -35,6 +35,7 @@ def iter_requirements_paths(package: "plugget.data.Package") -> "Generator[Path]
             logging.warning(f"expected requirements.txt not found: '{req_path}'")
     if not req_paths:
         print(f"no requirements.txt paths found")
+
 
 # plugget gets requirements from requirements.txt, because the module is not packaged.
 # if we can get requirements from setup.py or pyproject.toml, the module is packaged,

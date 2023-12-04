@@ -34,5 +34,3 @@ class _Action(RequirementsAction):
 install = _Action.install
 uninstall = _Action.uninstall
 __all__ = ["install", "uninstall"]
-
-

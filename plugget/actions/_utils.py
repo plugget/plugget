@@ -1,11 +1,9 @@
 
-from pathlib import Path
 import sys
 import os
 
 
-
-def get_site_packages():
+def get_site_packages() -> str:
     # get env var APPDATA that contains 'C:\\Users\\hanne\\AppData\\Roaming\
     # todo support other OS
     roaming = os.environ.get("APPDATA")

@@ -1,8 +1,6 @@
 
 from pathlib import Path
 import sys
-import os
-
 
 
 def _get_interpreter_path():
