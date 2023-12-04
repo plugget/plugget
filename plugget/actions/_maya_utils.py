@@ -1,12 +1,37 @@
 import os
+import sys
 from pathlib import Path
+
+
+def get_interpreter_path() -> Path:
+    # TODO support other OS, see
+    #  https://help.autodesk.com/view/MAYAUL/2023/ENU/?guid=GUID-D64ACA64-2566-42B3-BE0F-BCE843A1702F
+    windows_python = Path(sys.executable).parent / "mayapy.exe"
+    return windows_python
+
+
+def get_user_scripts_dir() -> Path:
+    """
+    Return the user scripts dir for the current Maya version.
+    """
+    MAYA_APP_DIR: str = os.environ.get("MAYA_APP_DIR")  # env var set by maya on startup
+    MAYA_VERSION: str = os.environ.get("PLUGGET_MAYA_VERSION")
+    maya_version = MAYA_VERSION
+    if not maya_version:
+        maya_version = get_maya_version()
+    return Path(MAYA_APP_DIR) / maya_version / "scripts"
+
+
+def get_maya_version() -> str:
+    import maya.cmds as cmds
+    return cmds.about(version=True)
 
 
 def get_plugin_path():
     """return the path to the plugin folder"""
     # todo support other OS
     documents = Path(os.environ.get("USERPROFILE")) / "Documents"
-    maya_version = "2022"  # todo dynamic
+    maya_version = get_maya_version()
     plugin_path = documents / "maya" / maya_version / "plug-ins"
     return plugin_path
 

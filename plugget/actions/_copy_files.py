@@ -4,26 +4,36 @@ from pathlib import Path
 
 
 class CopyFiles:
-    def __init__(self, **kwargs):
-        self.target_dir = None
+    target_dir = None
 
-    def install(self, package: "plugget.data.Package", **kwargs) -> bool:
+    @classmethod
+    def install(cls, package: "plugget.data.Package", **kwargs) -> bool:
+        print ("installing", package)
 
         # validate input
         if kwargs:
             logging.warning(f"unsupported kwargs passed to install: {kwargs}")
-        if not self.target_dir:
+        if not cls.target_dir:
             raise ValueError("target_dir not set")
+        if not cls.target_dir.exists():
+            logging.warning(f"target_dir not found, creating: '{cls.target_dir}'")
+            cls.target_dir.mkdir(parents=True, exist_ok=True)
 
         # move it to target folder
         repo_paths = package.get_content()
         for sub_path in repo_paths:
             # copy files (and folders) to the target folder
-            print("copying", sub_path, "to", self.target_dir)
-            new_path = shutil.copy(sub_path, self.target_dir)
+            print("copying", sub_path, "to", cls.target_dir)
+
+            # check file or folder
+            if sub_path.is_dir():
+                # todo this is a naive implementation, doesn't handle nested folders
+                new_path = shutil.copytree(sub_path, cls.target_dir / sub_path.name)
+            else:
+                new_path = shutil.copy(sub_path, cls.target_dir)
 
             # confirm files were copied
-            if not new_path.exists():
+            if not Path(new_path).exists():
                 raise FileNotFoundError(f"expected file not found: '{sub_path}'")
 
             # save installed paths
