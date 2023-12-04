@@ -35,3 +35,16 @@ def get_plugin_path():
     plugin_path = documents / "maya" / maya_version / "plug-ins"
     return plugin_path
 
+
+def enable_plugin(name, quiet=True):
+    """enable a Maya plugin by name"""
+    import maya.cmds as cmds
+    cmds.loadPlugin(name, quiet=quiet)
+
+
+def enable_maya_plugins(package: "plugget.data.Package"):
+    """enable all plugins in the package"""
+    # usually only 1 plugin per package
+    for full_path in package.installed_paths:
+        if full_path.suffix == ".py":
+            enable_plugin(full_path.name)
