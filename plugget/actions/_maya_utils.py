@@ -1,6 +1,7 @@
 import os
 import sys
 from pathlib import Path
+from plugget.actions._utils import try_except
 
 
 def get_interpreter_path() -> Path:
@@ -42,6 +43,7 @@ def enable_plugin(name, quiet=True):
     cmds.loadPlugin(name, quiet=quiet)
 
 
+@try_except  # make this optional for now, accept fail
 def enable_maya_plugins(package: "plugget.data.Package"):
     """enable all plugins in the package"""
     # usually only 1 plugin per package
