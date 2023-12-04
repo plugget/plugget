@@ -73,8 +73,7 @@ class Package(object):
         # license = ""
         # tags = []
 
-        # AFAIK self.installed_paths is for the json, and self._content_paths is for the actual files. todo confirm
-        self.installed_paths = set() if installed_paths is None else set(installed_paths)  # list of files cloned locally
+        self.installed_paths: set = set() if installed_paths is None else set(installed_paths)   # list of files cloned locally
         self._starred = None
         self._stars = None
         self._clone_dir = None

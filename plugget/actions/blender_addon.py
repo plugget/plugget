@@ -3,6 +3,11 @@ import logging
 import shutil
 import bpy  # todo make this optional, so we can run this from outside blender
 from plugget._utils import rmdir
+import os
+
+
+# _target_path = os.environ.get("PLUGGET_BLENDER_TARGET_ADDONS")
+# _interpreter_path = os.environ.get("PLUGGET_BLENDER_INTERPRETER")
 
 
 def __clash_import_name(name):
@@ -73,7 +78,6 @@ def _install_addon(package, force=False, target=None):
     local_addons_dir = target or Path(bpy.utils.script_path_user()) / "addons"
 
     # copy addons to local addons dir
-    # shutil.move(str(plugin_path), str(new_plugin_path.parent), )  # copy plugin_path to local_addons_dir
     # todo filter repo paths
     print(f"copy files to {local_addons_dir}")
     for addon_path in addon_paths:
@@ -82,6 +86,7 @@ def _install_addon(package, force=False, target=None):
         if force:
             rmdir(local_addons_dir / addon_path.name)
         elif __clash_import_name(addon_path.name):
+            logging.warning(f"skipping addon install '{addon_path.name}', clashing py-module already imported")
             continue
 
         # new_addon_path.mkdir(parents=True, exist_ok=True)

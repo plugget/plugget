@@ -36,28 +36,8 @@ def install(package: "plugget.data.Package", max_folder=None, **kwargs) -> bool:
 
 
 def uninstall(package: "plugget.data.Package", **kwargs):
-
-    # get macroscript folder
-    # macro_folder_path = rt.getDir(rt.name('userMacros'))
-
-    # for sub_path in package.repo_paths:
-    #     sub_path = Path(sub_path)
-    #     if sub_path.suffix != ".mcr":
-    #         sub_path = sub_path.with_suffix(".mcr")
-    #     # delete files (and folders) from the macroscript folder
-    #     sub_path = macro_folder_path / sub_path
-    #     print("deleting", sub_path, "from", macro_folder_path)
-    #     if sub_path.is_file():
-    #         sub_path.unlink()
-    #     else:
-    #         sub_path.rmdir()
-
-
     for p in package.installed_paths:
         p = Path(p)
-
-        if p.suffix != ".mcr":
-            p = p.with_suffix(".mcr")
 
         print("remove", p)
         # delete all paths,. p can be folder or file. force delete and children
@@ -66,10 +46,13 @@ def uninstall(package: "plugget.data.Package", **kwargs):
         else:
             p.unlink(missing_ok=True)
 
+        # todo check if remove worked. if file in use (e.g. Qt.dll) it might fail.
+
     # refresh macroscript folder to unload the uninstalled macros in max
     # pymxs.runtime.macros.load(macro_folder_path)
     # todo this doesn't unload the macro, so it will still be available untill we restart max
 
+# todo commands
 # def run():
 #     #macros.run <category_string> <name_string>
 #     rt.macros.run("Plugget", "test")

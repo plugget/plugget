@@ -68,6 +68,12 @@ def iter_requirements_paths(package: "plugget.data.Package") -> "Generator[Path]
 
 
 class RequirementsAction:
+    """
+    interpreter: Path to interpreter to use for pip commands
+    target: Path to target folder to install dependencies to
+    env_var: app name to detect env-variables that override settings, e.g.MAYA -> PLUGGET_MAYA_INTERPRETER
+    """
+
     interpreter = None
     target = None
     env_var = None
