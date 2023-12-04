@@ -46,4 +46,10 @@ If the install fails. It likely is a bad manifest, a bad install, or a bug with 
 Report the issue in issues.
 There's a small chance the GitHub servers are down, you can check the [github status](https://www.githubstatus.com/).
 
+
+## community
+- https://discourse.techart.online/t/plugget-package-manager-for-tech-artists/16301
+- https://blenderartists.org/t/free-plugget-a-search-engine-installer-for-add-ons/1456558
+
+
 If this tool is helpfull, you can ⭐ star it on the github page, just click the ⭐ star button in the top-right of this page.
