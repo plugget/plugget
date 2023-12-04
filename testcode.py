@@ -35,7 +35,7 @@ site.addsitedir("C:\\Users\\hanne\\OneDrive\\Documents\\repos\\plugget")
 import plugget
 import plugget.data as d
 import plugget.commands as cmd
-import plugget.actions.max_macroscript as ma
+import plugget.actions.max3ds_macroscript as ma
 
 from importlib import reload
 

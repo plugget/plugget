@@ -146,8 +146,8 @@ class Package(object):
         # so order pip-install actions (requirements) in the list before addon-install actions,
         DefaultActions = {
             "blender": ["blender_requirements", "blender_addon"],
-            "max3ds": ["max_requirements", "max_macroscript"],
-            "maya": ["maya_requirements"],
+            "max3ds": ["max3ds_requirements", "max3ds_macroscript"],
+            "maya": ["maya_plugin", "maya_requirements"],
             "krita": ["krita_requirements", "krita_plugin"],
             "unreal": ["unreal_requirements", "unreal_plugin"],
         }
