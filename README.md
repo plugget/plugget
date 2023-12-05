@@ -48,8 +48,9 @@ There's a small chance the GitHub servers are down, you can check the [github st
 
 
 ## community
-- https://discourse.techart.online/t/plugget-package-manager-for-tech-artists/16301
-- https://blenderartists.org/t/free-plugget-a-search-engine-installer-for-add-ons/1456558
+- Pipeline https://discourse.techart.online/t/plugget-package-manager-for-tech-artists/16301
+- Blender https://blenderartists.org/t/free-plugget-a-search-engine-installer-for-add-ons/1456558
+- Maya https://forums.cgsociety.org/t/plugget-a-free-maya-tool-manager/2074249
 
 
 If this tool is helpfull, you can ⭐ star it on the github page, just click the ⭐ star button in the top-right of this page.
