@@ -26,3 +26,8 @@ def get_site_packages() -> str:
     return ""
     # todo even though it's a site packages, this path is not in site packages in Max?,
     #  might be a problem for pth files
+
+
+def get_plugin_path() -> Path:
+    # https://help.autodesk.com/view/MAXDEV/2023/ENU/?guid=packaging_plugins
+    return Path(os.environ.get("APPDATA")) / "Autodesk" / "ApplicationPlugins"
