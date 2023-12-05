@@ -150,6 +150,7 @@ class Package(object):
             "maya": ["maya_plugin", "maya_requirements"],
             "krita": ["krita_requirements", "krita_plugin"],
             "unreal": ["unreal_requirements", "unreal_plugin"],
+            "substance_painter": ["substance_painter_requirements", "substance_painter_plugin"],
         }
         actions = DefaultActions.get(self.app)
         if not actions:
