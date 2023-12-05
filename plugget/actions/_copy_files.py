@@ -4,7 +4,7 @@ from pathlib import Path
 
 
 class CopyFiles:
-    target_dir = None
+    target_dir: Path = None
 
     @classmethod
     def install(cls, package: "plugget.data.Package", **kwargs) -> bool:
