@@ -5,7 +5,8 @@ import plugget.actions._maya_utils
 class _Action(plugget.actions._copy_files.CopyFiles):
     target_dir = plugget.actions._maya_utils.get_plugin_path()
 
-    def install(self, package: "plugget.data.Package", **kwargs) -> bool:
+    @classmethod
+    def install(cls, package: "plugget.data.Package", **kwargs) -> bool:
         super().install(package, **kwargs)
         plugget.actions._maya_utils.enable_maya_plugins(package)
 
