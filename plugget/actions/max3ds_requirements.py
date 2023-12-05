@@ -3,8 +3,7 @@ A Plugget action to pip install Python dependencies from requirements.txt for 3d
 """
 
 from plugget.actions._requirements import RequirementsAction
-from plugget.actions._max3ds_utils import _get_interpreter_path
-from plugget.actions._utils import get_site_packages
+from plugget.actions._max3ds_utils import _get_interpreter_path, get_site_packages
 
 
 class _Action(RequirementsAction):
