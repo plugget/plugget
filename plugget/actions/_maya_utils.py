@@ -48,5 +48,7 @@ def enable_maya_plugins(package: "plugget.data.Package"):
     """enable all plugins in the package"""
     # usually only 1 plugin per package
     for full_path in package.installed_paths:
+        full_path = Path(full_path)
         if full_path.suffix == ".py":
+            print("enabling plugin", full_path.name)
             enable_plugin(full_path.name)
