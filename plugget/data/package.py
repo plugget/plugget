@@ -186,7 +186,15 @@ class Package(object):
             if isinstance(action, str):
                 module = importlib.import_module("plugget.actions")
                 action_module = None
-                for file in Path(module.__path__[0]).glob("*.py"):
+
+                # little bit hacky
+                path: "str|_frozen_importlib_external._NamespacePath" = module.__path__
+                if not isinstance(path, str):
+                    # assume _NamespacePath
+                    path: "list[str]" = path._path
+                path = path[0]
+
+                for file in Path(path).glob("*.py"):
                     if file.stem == action:  # todo action name
                         action_module = importlib.import_module(f"plugget.actions.{file.stem}")
                         action = action_module
