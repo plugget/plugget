@@ -147,7 +147,7 @@ class Package(object):
         DefaultActions = {
             "blender": ["blender_requirements", "blender_addon"],
             "max3ds": ["max3ds_requirements", "max3ds_macroscript"],
-            "maya": ["maya_plugin", "maya_requirements"],
+            "maya": ["maya_requirements", "maya_plugin"],
             "krita": ["krita_requirements", "krita_plugin"],
             "unreal": ["unreal_requirements", "unreal_plugin"],
             "substance_painter": ["substance_painter_requirements", "substance_painter_plugin"],
