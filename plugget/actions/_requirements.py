@@ -8,7 +8,7 @@ import logging
 from pathlib import Path
 
 
-def get_requirements_txt_paths(package: "plugget.data.Package", **kwargs) -> list[Path]:
+def get_requirements_txt_paths(package: "plugget.data.Package", **kwargs) -> "list[Path]":
     """return a list of requirements.txt paths"""
     requirements_paths = []
     if not package.clone_dir.exists():
