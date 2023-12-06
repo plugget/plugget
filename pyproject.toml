@@ -10,7 +10,7 @@ packages = ["plugget"]
 [project]
 name = "plugget"
 authors = [
-    {name = "Hannes D"},
+    {name = "Hannes Delbeke"},
 ]
 description = "a package manager to install packages in your app"
 readme = "README.md"
@@ -23,7 +23,7 @@ classifiers = [
 #dynamic = ["dependencies"]
 dependencies = ['importlib-metadata; python_version<"3.7"', "detect-app", "py-pip", "requests"]
 #dynamic = ["version"]
-version = "0.1.3"
+version = "0.1.4"
 
 #[project.optional-dependencies]
 #yaml = ["pyyaml"]
