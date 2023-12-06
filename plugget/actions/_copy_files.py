@@ -25,6 +25,14 @@ class CopyFiles:
             # copy files (and folders) to the target folder
             print("copying", sub_path, "to", cls.target_dir)
 
+            target_path = cls.target_dir / sub_path.name  # can be folder or file
+            if target_path.exists():
+                logging.warning(f"file already exists, overwriting: '{target_path}'")
+                if target_path.is_dir():
+                    shutil.rmtree(target_path)
+                else:
+                    target_path.unlink(missing_ok=True)
+
             # check file or folder
             if sub_path.is_dir():
                 # todo this is a naive implementation, doesn't handle nested folders
