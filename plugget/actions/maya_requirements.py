@@ -8,8 +8,8 @@ from plugget.actions._maya_utils import get_user_scripts_dir, get_interpreter_pa
 
 class _Action(RequirementsAction):
     env_var = "MAYA"
-    interpreter = get_interpreter_path()
-    target = get_user_scripts_dir()
+    interpreter = str(get_interpreter_path())
+    target = str(get_user_scripts_dir())
 
 
 install = _Action.install
