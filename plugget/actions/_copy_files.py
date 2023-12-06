@@ -30,8 +30,8 @@ class CopyFiles:
                 logging.warning(f"file already exists, overwriting: '{target_path}'")
                 if target_path.is_dir():
                     shutil.rmtree(target_path)
-                else:
-                    target_path.unlink(missing_ok=True)
+                else:  # file
+                    target_path.unlink()
 
             # check file or folder
             if sub_path.is_dir():
@@ -63,10 +63,11 @@ class CopyFiles:
 
             print("remove", p)
             # delete all paths,. p can be folder or file. force delete and children
-            if p.is_dir():
-                shutil.rmtree(p, ignore_errors=True)
-            else:
-                p.unlink(missing_ok=True)
+            if p.exists():
+                if p.is_dir():
+                    shutil.rmtree(p, ignore_errors=True)
+                else:  # file
+                    p.unlink()
 
             # todo check if remove worked. if file in use (e.g. Qt.dll) it might fail.
 
