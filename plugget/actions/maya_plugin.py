@@ -13,7 +13,7 @@ class _Action(plugget.actions._copy_files.CopyFiles):
     @classmethod
     def uninstall(cls, package: "plugget.data.Package", **kwargs) -> bool:
         plugget.actions._maya_utils.disable_plugin(package)
-        super().install(package, **kwargs)
+        super().uninstall(package, **kwargs)
 
 install = _Action.install
 uninstall = _Action.uninstall
