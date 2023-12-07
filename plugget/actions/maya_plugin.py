@@ -10,6 +10,10 @@ class _Action(plugget.actions._copy_files.CopyFiles):
         super().install(package, **kwargs)
         plugget.actions._maya_utils.enable_maya_plugins(package)
 
+    @classmethod
+    def uninstall(cls, package: "plugget.data.Package", **kwargs) -> bool:
+        plugget.actions._maya_utils.disable_plugin(package)
+        super().install(package, **kwargs)
 
 install = _Action.install
 uninstall = _Action.uninstall
