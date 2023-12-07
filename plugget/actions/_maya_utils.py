@@ -44,6 +44,13 @@ def enable_plugin(name, quiet=True):
     cmds.pluginInfo(name, edit=True, autoload=True)  # set autoload on startup
 
 
+def disable_plugin(name, quiet=True):
+    """disable a Maya plugin by name"""
+    import maya.cmds as cmds
+    cmds.unloadPlugin(name, quiet=quiet)  # load the plugin
+    cmds.pluginInfo(name, edit=True, autoload=False)  # set autoload on startup
+
+
 @try_except  # make this optional for now, accept fail
 def enable_maya_plugins(package: "plugget.data.Package"):
     """enable all plugins in the package"""
