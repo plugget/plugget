@@ -51,11 +51,10 @@ class Package(object):
         self.package_name = package_name  # set from folder name containing the manifests
         self.version = version  # set from manifest name
 
+        self.manifest_path = None
         if manifest_path:
             self.manifest_path = Path(manifest_path)  # set before _set_data_from_manifest_path()
             self._set_data_from_manifest_path()  # populate above attributes to their default values
-        else:
-            self.manifest_path = None
 
         # manifest settings
         self.repo_url = repo_url  # set before plugin name
@@ -64,7 +63,7 @@ class Package(object):
         self.repo_tag = repo_tag
         self.package_url = package_url  # set before self.plugin_name
          # self.name = name #or self.plugin_name
-        self.docs_url = None
+        self.docs_url = docs_url
         self._actions = actions  # todo default app action
         self.dependencies = dependencies or []  # todo
         # self.id = id or plugin_name  # unique id  # todo for now same as name
@@ -157,14 +156,14 @@ class Package(object):
             raise Exception(f"no default action for app '{self.app}'")
         return actions
 
-    def get_stars(self):
+    def get_stars(self) -> int:
         """get the number of stars on the repo"""
         import plugget.github
         if self._stars is None:
             self._stars =plugget.github.get_repo_stars(self.repo_url)
         return self._stars
 
-    def is_starred(self):
+    def is_starred(self) -> bool:
         """get the number of stars on the repo"""
 
         import plugget.github
@@ -173,19 +172,37 @@ class Package(object):
         return self._starred
 
     @property
-    def actions(self):
+    def actions_and_kwargs(self) -> "list[tuple[types.ModuleType, dict]]":
         """
-        get the action for the plugin, used for install, uninstall
-        if the manifest doesn't specify an action, get the default action for the app
+        Get the plugin's actions & it's action settings, used for install, uninstall.
+        If the manifest doesn't specify an action, get the default action for the app
         """
-        # get install action from manifest,
+        """
+        "actions": [
+            "action_1_name",
+            ("action_2_name", {"action_2_kwarg": "value"})
+            ]
+        """
+        # get install action from manifest,w
         actions_raw = self._actions or self.default_actions
-        actions = []
+        actions: list = []
+        action: "str|tuple|types.ModuleType" = None
         for action in actions_raw:
-            # if action is a string, it's the name of the action
+            action_name: str = ""
+            action_kwargs: dict = {}
+            action_module: "types.ModuleType" = None
+
+            # if action is dict, it's the action-name with kwargs
+            if isinstance(action, tuple):
+                action_name = action[0]
+                action_kwargs = action[1]
+
+            # if action is a string, it's the action-name
             if isinstance(action, str):
+                action_name = action
+
+            if action_name:
                 module = importlib.import_module("plugget.actions")
-                action_module = None
 
                 # little bit hacky
                 path: "str|_frozen_importlib_external._NamespacePath" = module.__path__
@@ -195,24 +212,25 @@ class Package(object):
                 path = path[0]
 
                 for file in Path(path).glob("*.py"):
-                    if file.stem == action:  # todo action name
+                    if file.stem == action_name:
                         action_module = importlib.import_module(f"plugget.actions.{file.stem}")
-                        action = action_module
                         break
                 if not action_module:
-                    raise Exception(f"action {action} not found")
+                    raise Exception(f"action '{action}' not found by name")
 
             # if action is a module, it's the action itself
-            # elif inspect.ismodule(self._action):
-            # else:
-            #     action = self._action
+            # if inspect.ismodule(self._action):
+            if isinstance(action, type(importlib)):  # check if action is of type module
+                action_module = action
 
-            actions.append(action)
+            if not action_module:
+                raise Exception(f"action '{action}' not found")
 
+            actions.append((action_module, action_kwargs))
         return actions
 
     @classmethod
-    def from_json(cls, json_path):
+    def from_json(cls, json_path) -> "plugget.data.package.Package":
         """create a plugin from a json file"""
         manifest_path = Path(json_path)
 
@@ -229,7 +247,7 @@ class Package(object):
         json_data.setdefault("manifest_path", manifest_path)
         return cls(**json_data)  #package_name=package_name
 
-    def to_dict(self, empty_keys=False):
+    def to_dict(self, empty_keys=False) -> dict:
         """
         convert the package to a dict, e.g. used for manifest files
         :param empty_keys: if True, include keys with None values
@@ -252,7 +270,7 @@ class Package(object):
                 del output[key]
         return output
 
-    def to_json(self, json_path):
+    def to_json(self, json_path) -> None:
         """save the plugin to a json file"""
 
         output = self.to_dict()
@@ -297,7 +315,7 @@ class Package(object):
         # ensure target dir exists.
         target_dir.mkdir(exist_ok=True, parents=True)
 
-        def run_log(command, cwd=None):
+        def run_log(command, cwd=None) -> int:
             logging.info("command: '{command}'")
             process = subprocess.Popen(command, cwd=cwd, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
             stdout, stderr = process.communicate()
@@ -337,7 +355,7 @@ class Package(object):
         else:
             return [target_dir]
 
-    def install(self, force=False, *args, **kwargs):
+    def install(self, force=False, *args, **kwargs) -> None:
         from plugget import commands
 
         # install should be handled by its parent the packages meta.
@@ -348,9 +366,10 @@ class Package(object):
             logging.warning(f"{self.package_name} is already installed")
             return
         
-        for action in self.actions:
+        for action, action_kwargs in self.actions_and_kwargs:
             # action install implicitly adds to self.install_paths
-            action.install(self, *args, force=force, **kwargs)
+            action_kwargs.update(kwargs)  # add kwargs to action_kwargs
+            action.install(self, *args, force=force, **action_kwargs)
 
         i = 0
         for d in self.dependencies:
@@ -387,9 +406,10 @@ class Package(object):
         manifest_path = self.package_install_dir / self.manifest_path.name
         self.to_json(manifest_path)
 
-    def uninstall(self, dependencies=False, **kwargs):
-        for action in self.actions:
-            action.uninstall(self, dependencies=False, **kwargs)
+    def uninstall(self, dependencies=False, **kwargs) -> None:
+        for action, action_kwargs in self.actions_and_kwargs:
+            action_kwargs.update(kwargs)
+            action.uninstall(self, dependencies=dependencies, **action_kwargs)
 
         # todo uninstall dependencies
         # todo move pip action to dependencies
