@@ -56,3 +56,4 @@ There's a small chance the GitHub servers are down, you can check the [github st
 If this tool is helpfull, you can ⭐ star it on the github page, just click the ⭐ star button in the top-right of this page.
 
 ![](https://linuxsimply.com/wp-content/uploads/2023/08/Package-manager-767x438.png)
+![](https://geekflare.com/wp-content/uploads/2023/09/6-how-package-manager-works.png)
