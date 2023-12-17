@@ -27,6 +27,7 @@ def get_requirements_txt_paths(package: "plugget.data.Package", **kwargs) -> "li
 def iter_requirements_paths(package: "plugget.data.Package") -> "Generator[Path]":
     """yield all requirements.txt paths"""
     req_paths = get_requirements_txt_paths(package)
+
     for req_path in req_paths:
         if req_path.exists():
             print(f"requirements.txt found: '{req_path}'")
@@ -89,7 +90,7 @@ class RequirementsAction:
         py_pip.python_interpreter = cls.interpreter
 
     @classmethod
-    def install(cls, package: "plugget.data.Package", force=False, **kwargs):
+    def install(cls, package: "plugget.data.Package", force=False, requirements:list=None, *args, **kwargs):
         print("install requirements to target", cls.target)
         package.get_content(use_cached=True)
         cls.setup_py_pip()
@@ -97,6 +98,10 @@ class RequirementsAction:
             print("requirements.txt found, installing: ", req_path)
             py_pip.install(requirements=req_path, force=force, upgrade=True)
             # TODO confirm install worked, atm any crash in py_pip is silently ignored
+        requirements = requirements or []
+        for name in requirements:
+            print("installing extra requirement:", name)
+            py_pip.install(package_name=name)
 
     @classmethod
     def uninstall(cls, package: "plugget.data.Package", dependencies=False, **kwargs):
