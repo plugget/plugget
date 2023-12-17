@@ -172,7 +172,7 @@ class Package(object):
         return self._starred
 
     @property
-    def actions_and_kwargs(self) -> "list[tuple[types.ModuleType, dict]]":
+    def actions_args_kwargs(self) -> "list[tuple[types.ModuleType, list, dict]]":
         """
         Get the plugin's actions & it's action settings, used for install, uninstall.
         If the manifest doesn't specify an action, get the default action for the app
@@ -186,26 +186,32 @@ class Package(object):
         # get install action from manifest,w
         actions_raw = self._actions or self.default_actions
         actions: list = []
-        action: "str|tuple|types.ModuleType" = None
+        action: "str | list | types.ModuleType" = None
         for action in actions_raw:
             action_name: str = ""
+            action_args: list = []
             action_kwargs: dict = {}
             action_module: "types.ModuleType" = None
 
-            # if action is dict, it's the action-name with kwargs
-            if isinstance(action, tuple):
+            if isinstance(action, list):
                 action_name = action[0]
-                action_kwargs = action[1]
+                action_args = action[1]
+                action_kwargs = action[2]
 
-            # if action is a string, it's the action-name
+            if isinstance(action, dict):
+                action_name = action["name"]
+                action_args = action.get("args", [])
+                action_kwargs = action.get("kwargs", {})
+
             if isinstance(action, str):
                 action_name = action
 
+            # get module from action name
             if action_name:
-                module = importlib.import_module("plugget.actions")
+                package = importlib.import_module("plugget.actions")
 
-                # little bit hacky
-                path: "str|_frozen_importlib_external._NamespacePath" = module.__path__
+                # little bit hacky, needed since path could be a path or _NamespacePath
+                path: "List[str]|_frozen_importlib_external._NamespacePath" = package.__path__
                 if not isinstance(path, str):
                     # assume _NamespacePath
                     path: "list[str]" = path._path
@@ -220,13 +226,14 @@ class Package(object):
 
             # if action is a module, it's the action itself
             # if inspect.ismodule(self._action):
-            if isinstance(action, type(importlib)):  # check if action is of type module
-                action_module = action
+            # if isinstance(action, type(importlib)):  # check if action is of type module
+            #     print("action is module", action, type(action), type(importlib))
+            #     action_module = action
 
             if not action_module:
                 raise Exception(f"action '{action}' not found")
 
-            actions.append((action_module, action_kwargs))
+            actions.append((action_module, action_args, action_kwargs))
         return actions
 
     @classmethod
@@ -365,11 +372,12 @@ class Package(object):
         if self.is_installed and not force:
             logging.warning(f"{self.package_name} is already installed")
             return
-        
-        for action, action_kwargs in self.actions_and_kwargs:
+
+        action: "types.ModuleType" = None
+        for action, action_args, action_kwargs in self.actions_args_kwargs:
             # action install implicitly adds to self.install_paths
             action_kwargs.update(kwargs)  # add kwargs to action_kwargs
-            action.install(self, *args, force=force, **action_kwargs)
+            action.install(self, *args, force=force, *action_args, **action_kwargs)
 
         i = 0
         for d in self.dependencies:
@@ -407,9 +415,9 @@ class Package(object):
         self.to_json(manifest_path)
 
     def uninstall(self, dependencies=False, **kwargs) -> None:
-        for action, action_kwargs in self.actions_and_kwargs:
+        for action, action_args, action_kwargs in self.actions_args_kwargs:
             action_kwargs.update(kwargs)
-            action.uninstall(self, dependencies=dependencies, **action_kwargs)
+            action.uninstall(self, dependencies=dependencies, *action_args, **action_kwargs)
 
         # todo uninstall dependencies
         # todo move pip action to dependencies
