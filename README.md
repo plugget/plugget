@@ -7,6 +7,8 @@ Plugget: Plugin Package Manager
 
 Install app packages (plugins, addons, icons, ...) from a repo with a single Python command:   
 (like pip, but more flexible)  
+1-click install plugins & add-ons in Blender, Maya, Max, Substance, ...  
+
 ```python
 import plugget
 plugget.install("my_package")
