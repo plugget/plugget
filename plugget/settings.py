@@ -8,7 +8,6 @@ import os
 import tempfile
 import json
 import logging
-import configparser
 import importlib.resources
 
 
@@ -30,15 +29,27 @@ def _settings_name(name):
     return PLUGGET_DIR / f"settings_{name}.json"
 
 
-def load_settings(name):
-    """Load the settings from the settings config in PLUGGET_DIR"""
-    settings_path = _settings_name(name)
-    print("settings_path", settings_path)
+def load_settings(name) -> dict:
+    """Load the settings configs in PLUGGET_DIR (user) and plugget/resources (default)"""
+    user_settings_path = _settings_name(name)
+    user_settings = _load_json_settings(user_settings_path)
 
-    if not settings_path.exists():
+    # plugget settings
+    path = importlib.resources.path('plugget.resources', 'config.json')
+    plugget_settings = _load_json_settings(path)
+
+    # combine settings
+    settings = plugget_settings
+    settings.update(user_settings)
+    return settings
+
+
+def _load_json_settings(path: Path) -> dict:
+
+    if not path.exists():
         return {}
     try:
-        with open(settings_path, "r") as f:
+        with open(path, "r") as f:
             return json.load(f)
     except json.decoder.JSONDecodeError:
         return {}
@@ -48,17 +59,6 @@ def save_settings(name, settings):
     with open(_settings_name(name), "w") as f:
         json.dump(settings, f, indent=4)
         logging.debug("saved settings:", _settings_name(name))
-
-
-def read_sources_from_ini():
-    config = configparser.ConfigParser()
-    ini_path = importlib.resources.open_text('plugget.resources', 'config.ini')
-    config.read_file(ini_path)
-    sources_raw_str = config.get('DEFAULT', 'sources')
-    sources_list = json.loads(sources_raw_str)
-    return sources_list
-
-
 
 
 def add_source(source):
@@ -79,6 +79,5 @@ def remove_source(source):
 # todo in settings we need a add_repo, remove_repo, list_repos.
 # todo cleanup simple way of loading
 settings_data = load_settings("plugget")
-sources = set(read_sources_from_ini())
-sources = set(settings_data.get("sources", sources))
+sources: set = set(settings_data.get("sources", []))
 save_settings("plugget", {"sources": list(sources)})
