@@ -52,6 +52,7 @@ There's a small chance the GitHub servers are down, you can check the [github st
 - Pipeline https://discourse.techart.online/t/plugget-package-manager-for-tech-artists/16301
 - Blender https://blenderartists.org/t/free-plugget-a-search-engine-installer-for-add-ons/1456558
 - Maya https://forums.cgsociety.org/t/plugget-a-free-maya-tool-manager/2074249
+- TODO Polycount https://polycount.com/categories/technical-talk
 
 
 If this tool is helpfull, you can ⭐ star it on the github page, just click the ⭐ star button in the top-right of this page.
