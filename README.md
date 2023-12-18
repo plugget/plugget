@@ -5,9 +5,8 @@ Plugget: Plugin Package Manager
 
 [![PyPI Downloads](https://img.shields.io/pypi/v/plugget?color=0)](https://pypi.org/project/plugget/)
 
-Install app packages (plugins, addons, icons, ...) from a repo with a single Python command:   
-(like pip, but more flexible)  
-1-click install plugins & add-ons in Blender, Maya, Max, Substance, ...  
+Install app packages (plugins, addons, icons, ...) with a single Python command. (like pip, but more flexible)  
+Or 1-click install plugins & add-ons in Blender, Maya, Max, Substance, ...  with [Plugget Qt](https://github.com/plugget/plugget-qt)  
 
 ```python
 import plugget
