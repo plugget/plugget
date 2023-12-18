@@ -8,6 +8,8 @@ import os
 import tempfile
 import json
 import logging
+import configparser
+import importlib.resources
 
 
 # paths
@@ -48,8 +50,15 @@ def save_settings(name, settings):
         logging.debug("saved settings:", _settings_name(name))
 
 
-sources = set()
-sources.add("https://github.com/hannesdelbeke/plugget-pkgs.git")
+def read_sources_from_ini():
+    config = configparser.ConfigParser()
+    ini_path = importlib.resources.open_text('plugget.resources', 'config.ini')
+    config.read_file(ini_path)
+    sources_raw_str = config.get('DEFAULT', 'sources')
+    sources_list = json.loads(sources_raw_str)
+    return sources_list
+
+
 
 
 def add_source(source):
@@ -70,5 +79,6 @@ def remove_source(source):
 # todo in settings we need a add_repo, remove_repo, list_repos.
 # todo cleanup simple way of loading
 settings_data = load_settings("plugget")
+sources = set(read_sources_from_ini())
 sources = set(settings_data.get("sources", sources))
 save_settings("plugget", {"sources": list(sources)})
