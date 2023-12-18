@@ -1,6 +1,8 @@
 """
 Configure plugget settings & manifest sources
 e.g. constant paths & setting methods for plugget
+
+these can then be saved to the user-settings in a json file, and automatically reload on startup
 """
 
 from pathlib import Path
@@ -13,11 +15,11 @@ import importlib.resources
 
 # paths
 TEMP_PLUGGET = Path(tempfile.gettempdir()) / "plugget"
-PLUGGET_DIR = Path(os.getenv("APPDATA")) / "plugget"
+PLUGGET_DIR = Path(os.getenv("APPDATA")) / "plugget"  # todo expose PLUGGET_DIR to env var so it can be changed
 INSTALLED_DIR = PLUGGET_DIR / "installed"
-# PLUGGET_SETTINGS = PLUGGET_DIR / "settings.json"
-# todo expose PLUGGET_DIR to env var so it can be changed
 INSTALLED_DIR.mkdir(exist_ok=True, parents=True)
+USER_SETTINGS_PATH = PLUGGET_DIR / "settings_plugget.json"
+DEFAULT_PLUGGET_SETTINGS_PATH = importlib.resources.path('plugget.resources', 'config.json')
 
 
 # get settings for the actions etc, requires unique name for each action
@@ -25,23 +27,20 @@ INSTALLED_DIR.mkdir(exist_ok=True, parents=True)
 # actions request plugget for their settings
 # plugget manages & saves the settings and returns them
 
-def _settings_name(name):
-    return PLUGGET_DIR / f"settings_{name}.json"
 
+registered_settings_paths = [DEFAULT_PLUGGET_SETTINGS_PATH, USER_SETTINGS_PATH]
+sources = set()
 
-def load_settings(name) -> dict:
-    """Load the settings configs in PLUGGET_DIR (user) and plugget/resources (default)"""
-    user_settings_path = _settings_name(name)
-    user_settings = _load_json_settings(user_settings_path)
-
-    # plugget settings
-    path = importlib.resources.path('plugget.resources', 'config.json')
-    plugget_settings = _load_json_settings(path)
-
-    # combine settings
-    settings = plugget_settings
-    settings.update(user_settings)
-    return settings
+# def load_settings(name) -> dict:
+#     """Load the settings configs in PLUGGET_DIR (user) and plugget/resources (default)"""
+#     user_settings_path = _settings_name(name)
+#     user_settings = _load_json_settings(user_settings_path)
+#     return user_settings
+#
+#
+# def _settings_name(name):
+#     """create user settings path for name"""
+#     return PLUGGET_DIR / f"settings_{name}.json"
 
 
 def _load_json_settings(path: Path) -> dict:
@@ -55,29 +54,29 @@ def _load_json_settings(path: Path) -> dict:
         return {}
 
 
-def save_settings(name, settings):
-    with open(_settings_name(name), "w") as f:
+def load_registered_settings() -> dict:
+    """Load the registered settings configs"""
+    settings = {}
+    for path in registered_settings_paths:
+        if not path.exists():
+            logging.warning(f"settings file not found: '{path}'")
+        data = _load_json_settings(USER_SETTINGS_PATH)
+        settings.update(data)
+    return settings
+
+
+def load_plugget_settings():
+    """load all plugget settings (default, user)"""
+    global sources
+    settings_data = load_registered_settings()
+    sources = set(settings_data.get("sources", []))
+    save_settings({"sources": list(sources)})
+
+
+def save_settings(settings):
+    with open(USER_SETTINGS_PATH, "w") as f:
         json.dump(settings, f, indent=4)
-        logging.debug("saved settings:", _settings_name(name))
+        logging.debug("saved settings:", USER_SETTINGS_PATH)
 
 
-def add_source(source):
-    """source: a git URL or path to local manifest-folder"""
-    sources.add(source)
-    save_settings("plugget", {"sources": list(sources)})
-
-
-def remove_source(source):
-    sources.remove(source)
-    save_settings("plugget", {"sources": list(sources)})  # todo combine all these save settings lines
-
-
-# def list_sources():
-#     return sources
-
-
-# todo in settings we need a add_repo, remove_repo, list_repos.
-# todo cleanup simple way of loading
-settings_data = load_settings("plugget")
-sources: set = set(settings_data.get("sources", []))
-save_settings("plugget", {"sources": list(sources)})
+load_plugget_settings()
