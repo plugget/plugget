@@ -19,8 +19,13 @@ PLUGGET_DIR = Path(os.getenv("APPDATA")) / "plugget"  # todo expose PLUGGET_DIR 
 INSTALLED_DIR = PLUGGET_DIR / "installed"
 INSTALLED_DIR.mkdir(exist_ok=True, parents=True)
 USER_SETTINGS_PATH = PLUGGET_DIR / "settings_plugget.json"
-DEFAULT_PLUGGET_SETTINGS_PATH = importlib.resources.path('plugget.resources', 'config.json')
 
+try:
+    with importlib.resources.path('plugget.resources', 'config.json') as p:
+        DEFAULT_PLUGGET_SETTINGS_PATH = Path(p).resolve()
+except Exception as e:
+    logging.error("failed to get default settings path", e)
+    DEFAULT_PLUGGET_SETTINGS_PATH = Path()
 
 # get settings for the actions etc, requires unique name for each action
 # todo support duplicates of the same settings for each app (blender, blender2, maya, etc)
@@ -47,8 +52,10 @@ def load_registered_settings() -> dict:
     """Load the registered settings configs"""
     settings = {}
     for path in registered_settings_paths:
+        path = Path(path)
         if not path.exists():
             logging.warning(f"settings file not found: '{path}'")
+            continue
         data = _load_json_settings(USER_SETTINGS_PATH)
         settings.update(data)
     return settings
