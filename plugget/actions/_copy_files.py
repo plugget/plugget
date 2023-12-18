@@ -10,6 +10,8 @@ class CopyFiles:
     def install(cls, package: "plugget.data.Package", **kwargs) -> bool:
         print ("installing", package)
 
+        cls.target_dir = cls.target_dir.resolve()
+
         # validate input
         if kwargs:
             logging.warning(f"unsupported kwargs passed to install: {kwargs}")
