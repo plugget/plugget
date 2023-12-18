@@ -13,7 +13,7 @@ settings_data = settings.load_registered_settings().get("github", {})
 # todo enforce required vs optional settings
 settings_data.setdefault("GITHUB_USER", None)
 settings_data.setdefault("GITHUB_TOKEN", None)
-settings.save_settings(settings_data)
+settings.save_user_settings(settings_data)
 
 GITHUB_TOKEN = settings_data["GITHUB_TOKEN"]
 GITHUB_USER = settings_data["GITHUB_USER"]

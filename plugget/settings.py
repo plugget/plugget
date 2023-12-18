@@ -29,18 +29,7 @@ DEFAULT_PLUGGET_SETTINGS_PATH = importlib.resources.path('plugget.resources', 'c
 
 
 registered_settings_paths = [DEFAULT_PLUGGET_SETTINGS_PATH, USER_SETTINGS_PATH]
-sources = set()
-
-# def load_settings(name) -> dict:
-#     """Load the settings configs in PLUGGET_DIR (user) and plugget/resources (default)"""
-#     user_settings_path = _settings_name(name)
-#     user_settings = _load_json_settings(user_settings_path)
-#     return user_settings
-#
-#
-# def _settings_name(name):
-#     """create user settings path for name"""
-#     return PLUGGET_DIR / f"settings_{name}.json"
+sources = []
 
 
 def _load_json_settings(path: Path) -> dict:
@@ -69,11 +58,11 @@ def load_plugget_settings():
     """load all plugget settings (default, user)"""
     global sources
     settings_data = load_registered_settings()
-    sources = set(settings_data.get("sources", []))
-    save_settings({"sources": list(sources)})
+    sources = settings_data.get("sources", [])
 
 
-def save_settings(settings):
+def save_user_settings(settings):
+    """save user settings to json file in USER_SETTINGS_PATH"""
     with open(USER_SETTINGS_PATH, "w") as f:
         json.dump(settings, f, indent=4)
         logging.debug("saved settings:", USER_SETTINGS_PATH)
