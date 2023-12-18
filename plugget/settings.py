@@ -29,7 +29,7 @@ DEFAULT_PLUGGET_SETTINGS_PATH = importlib.resources.path('plugget.resources', 'c
 
 
 registered_settings_paths = [DEFAULT_PLUGGET_SETTINGS_PATH, USER_SETTINGS_PATH]
-sources = []
+sources: set = set()  # set to avoid duplicate entries
 
 
 def _load_json_settings(path: Path) -> dict:
@@ -58,7 +58,7 @@ def load_plugget_settings():
     """load all plugget settings (default, user)"""
     global sources
     settings_data = load_registered_settings()
-    sources = settings_data.get("sources", [])
+    sources = set(settings_data.get("sources", []))
 
 
 def save_user_settings(settings):
