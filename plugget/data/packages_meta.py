@@ -8,6 +8,7 @@ class PackagesMeta:
     A PackagesMeta instance is returned by plugget.search()
     """
     def __init__(self, manifests_dir):
+        self.active_version: str = ""  # e.g. '1.0.0', to not install latest by default
         self._packages_cache: "typing.Dict[str, plugget.data.package.Package]" = {}
         self.manifests_dir: "pathlib.Path" = manifests_dir
         # self.manifest_dirs is expected to be set externally,
@@ -28,6 +29,14 @@ class PackagesMeta:
 
     @property
     def latest(self) -> "plugget.data.package.Package":
+        """
+        meta packages contain different versions of the same package
+        when we click install, the default behavior is to install the latest version
+        """
+        # e.g. when we search for a version, and we return a meta_package, set with the active version
+        if self.active_version:
+            return self.get_version(self.active_version)
+
         # get latest package
         latest = [p for p in self.packages if p.version == "latest"]
         if latest:

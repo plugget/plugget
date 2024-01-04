@@ -197,6 +197,11 @@ def search(name=None, app=None, verbose=True, version=None, use_cache:bool=False
         # todo support external querying of installed packages
         meta_packages = [x for x in meta_packages if x.installed_package]
 
+    if version:
+        meta_packages = [x for x in meta_packages if x.get_version(version)]
+        for meta_package in meta_packages:
+            meta_package.active_version = version
+
     if verbose:
         _print_search_results(meta_packages)
     return meta_packages
