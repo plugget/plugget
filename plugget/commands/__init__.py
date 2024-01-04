@@ -185,6 +185,49 @@ def search(name=None, app=None, verbose=True, version=None, use_cache=False, ins
     return meta_packages
 
 
+def load_package_config_data_from_file(path) -> "list[tuple[str, str, str]]":
+    """
+    load a requirements file from a path
+    packages are defined in text file in format app_name:package_name==version on every new line
+    """
+    # file is a text file, comma separated
+    # each line is a package name
+    # lines not starting with a letter are ignored
+    with open(path, "r") as f:
+        lines = f.readlines()
+    lines = [line.strip() for line in lines]
+    lines = [line for line in lines if line and line[0].isalpha()]
+
+    # a line can be app_name:package_name==version
+    # we split this into app_name, package_name, version
+    # if no app_name is provided, we use the current app
+    # if no version is provided, we use latest
+    packages_info = []
+    for line in lines:
+        app_name = None
+        version = None
+        if ":" in line:
+            app_name, line = line.split(":", 1)
+        if "==" in line:
+            line, version = line.split("==", 1)
+        package_name = line
+        packages_info.append((app_name, package_name, version))
+
+    return packages_info
+
+
+def packages_from_config_file(path):
+    packages_info = load_package_config_data_from_file(path)
+    packages = []
+    search("")  # empty search to create the temp plugget repo, so we can use cache later
+    for app_name, package_name, version in packages_info:
+        results = search(package_name, app=app_name, version=version, use_cache=True)
+        if not results:
+            logging.warning(f"package not found: {package_name}, version {version}, for app: {app_name}")
+        packages.extend(results)
+    return packages
+
+
 def _discover_manifest_paths(search_paths, name=None):
     """search for manifest files"""
     manifest_paths = []  # get the manifests
