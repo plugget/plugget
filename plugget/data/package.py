@@ -51,7 +51,7 @@ class Package(object):
         self.package_name = package_name  # set from folder name containing the manifests
         self.version = version  # set from manifest name
 
-        self.manifest_path = None
+        self._manifest_path: "Path|None" = None  # path to the manifest file in the plugget package repo
         if manifest_path:
             self.manifest_path = Path(manifest_path)  # set before _set_data_from_manifest_path()
             self._set_data_from_manifest_path()  # populate above attributes to their default values
@@ -105,11 +105,12 @@ class Package(object):
 
     @property
     def manifest_path(self):
+        """path to the package manifest, in the temp plugget repo"""
         return self._manifest_path
 
     @manifest_path.setter
     def manifest_path(self, value):
-        # expects a path from the folder structure: app_name/package_name/version.json
+        # expects a path from the folder structure: app_name/(optional hash/)package_name/version.json
         if value:
             self._manifest_path = Path(value)
         else:
@@ -125,17 +126,35 @@ class Package(object):
     def clone_dir(self):  # keep in sync with package_install_dir
         """return the path we clone to on install e.g C:/Users/username/AppData/Local/Temp/plugget/bqt/0.1.0"""
         if not self._clone_dir:
+            # todo atm we calc hash for current app
+            #  lets save this path instead, so we can load this data from outside the app
             self._clone_dir = settings.TEMP_PLUGGET / self.app / hash_current_app() / self.package_name / self.version / self.package_name
         return self._clone_dir
 
     @property
     def package_install_dir(self):  # keep in sync with clone_dir
+        dir_to_install_to = settings.INSTALLED_DIR / self.app / hash_current_app() / self.package_name
+        installed_dir = None
+
+        # if we haven't installed this package yet, return the default install dir
+        # if we have installed this package, the install dir is saved in the manifest
+        # we return the saved install dir, so we dont need to calc the hash.
+        # so the package data can be loaded from outside the app
+
         return settings.INSTALLED_DIR / self.app / hash_current_app() / self.package_name
         # todo hash_current_app, only works for current app
 
     @property
     def is_installed(self):
         """a plugin is installed, if the manifest is in the installed packages folder"""
+
+        # if INSTALLED DIR in manifest path
+        # installed_manifest_path = self.manifest_path
+        # if self.installed_manifest_path and self.installed_manifest_path.exists():
+        #     return True
+
+        # backward compatible when self.installed_manifest_path didnt exist
+        # else:
         return (self.package_install_dir / f"{self.version}.json").exists()
 
     @property
@@ -269,8 +288,9 @@ class Package(object):
                   'docs_url': self.docs_url,
                   'actions': self._actions,
                   'dependencies': self.dependencies,
-                  'installed_paths': [str(x) for x in self.installed_paths]
+                  'installed_paths': [str(x) for x in self.installed_paths],
                   }
+
         if not empty_keys:
             empty_keys = [k for k, v in output.items() if not v]
             for key in empty_keys:
@@ -385,7 +405,7 @@ class Package(object):
 
             package = None
 
-            # if dependency is a string, it's a package name, e.g. "blender:my-exporter",
+            # if dependency is a string, it's a package name, e.g. "blender:my-exporter", or "my-exporter"
             if isinstance(d, str):
                 result = d.split(":")
                 if len(result) == 1:
@@ -398,9 +418,11 @@ class Package(object):
                     raise Exception(f"expected only 1 ':', got {len(result)-1}. Invalid dependency: {d}")
                 package = commands.search(package_name)[0]  # app=app_name, also support python app dependencies
 
-            # if dependency is a dict, it's a package object, e.g. {"name": "my-exporter", "app": "blender"}
+            # if the dependency is a dict, it's a package object, e.g. {"name": "my-exporter", "app": "blender"}
+            # that's saved in the same manifest file
             elif isinstance(d, dict):
-                # overwrite attrs set in _set_data_from_manifest_path
+                # the dependency attrs are defined in the same manifest file, so we manually set them
+                # this overwrites attrs set in _set_data_from_manifest_path
                 d.setdefault("manifest_path", self.manifest_path)
                 d.setdefault("app", self.app)
                 d.setdefault("version", self.version)
@@ -409,10 +431,10 @@ class Package(object):
 
             package.install(force=force, *args, **kwargs)
 
-        # copy manifest to installed packages dir
+        # save (slightly modified) manifest to installed packages dir
         # todo check if install was successful
-        manifest_path = self.package_install_dir / self.manifest_path.name
-        self.to_json(manifest_path)
+        installed_manifest_path = self.package_install_dir / self.manifest_path.name
+        self.to_json(installed_manifest_path)
 
     def uninstall(self, dependencies=False, **kwargs) -> None:
         for action, action_args, action_kwargs in self.actions_args_kwargs:
