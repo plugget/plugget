@@ -146,11 +146,22 @@ def _print_search_results(packages):
         print(f"{package_name}")
 
 
-def _get_app_paths(search_paths, app=None):  # todo make it clear this also clones
-    """get the default app paths from all registered manifest repos"""
+def _get_app_paths(search_paths: "list[pathlib.Path]", app: str = None):
+    """
+    get the default app paths from all registered manifest repos
+    app: can be set to a specific app name, or to 'all' to get all apps
+    """
     app = app or _detect_app_id()  # e.g. blender
+
     if app and app != 'all':
         search_paths = [search_path / app for search_path in search_paths]
+
+    if app == 'all':
+        child_folder_paths = []
+        for search_path in search_paths:
+            child_folder_paths.extend([search_path / child for child in search_path.iterdir() if child.is_dir()])
+        search_paths = child_folder_paths
+
     return search_paths
 
 
