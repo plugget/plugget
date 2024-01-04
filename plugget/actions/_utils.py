@@ -9,16 +9,20 @@ def try_except(func):
         try:
             return func(*args, **kwargs)
         except Exception as e:
-            logging.error(f"error in '{func}': '{e}'")
+            logging.error(f"error in '{func}': \n'{e}'")
     return wrapper
 
 
 def get_my_documents() -> Path:
     # todo support other OS
     user_dir = Path(os.environ.get("USERPROFILE"))  # e.g. 'C:\\Users\\hannes'
+    user_dir = user_dir.resolve()
     one_drive_docs = user_dir / "OneDrive" / "Documents"
     if one_drive_docs.exists():
-        return one_drive_docs
+        path = one_drive_docs
     else:
-        return (user_dir / "Documents").resolve()
+        path = user_dir / "Documents"
+
+    logging.debug("my documents path:", path)
+    return path
     # todo are there other locations for documents?
