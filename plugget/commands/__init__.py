@@ -165,7 +165,7 @@ def _get_app_paths(search_paths: "list[pathlib.Path]", app: str = None):
     return search_paths
 
 
-def search(name=None, app=None, verbose=True, version=None, use_cache=False, installed=False) -> "typing.List[PackagesMeta]":
+def search(name=None, app=None, verbose=True, version=None, use_cache:bool=False, installed:bool=False) -> "typing.List[PackagesMeta]":
     """
     Search if package is in sources
     :param name: pacakge name to search in manifest repo, return all packages if not set
@@ -188,13 +188,32 @@ def search(name=None, app=None, verbose=True, version=None, use_cache=False, ins
 
     manifest_paths = _discover_manifest_paths(name=name, search_paths=search_paths)
     manifest_dirs = {manifest_path.parent for manifest_path in manifest_paths}
-    meta_packages = [PackagesMeta(manifests_dir=manifest_dir) for manifest_dir in manifest_dirs]  # todo move to PackagesMeta, create from manifest_dir
+
+    # meta packages point to manifests, in the plugget packages temp repo
+    meta_packages = [PackagesMeta(manifests_dir=manifest_dir) for manifest_dir in manifest_dirs]
+
     if installed:
+        # this currently checks if isntalled in active app.
+        # todo support external querying of installed packages
         meta_packages = [x for x in meta_packages if x.installed_package]
+
     if verbose:
         _print_search_results(meta_packages)
     return meta_packages
 
+
+# def installed_packages(app=None) -> "typing.List[Package]":
+#     """get all installed packages, not MetaPackages
+#     use this when search won't work. e.g. to query installed packages from a different ap
+#     """
+#
+#     if not settings.INSTALLED_DIR.exists():
+#         return []
+#
+#     search_paths = _get_app_paths(search_paths=search_paths, app=app)
+#     manifest_paths = _discover_manifest_paths(name=name, search_paths=search_paths)
+#     packages = [Package.from_json(manifest_path) for manifest_path in manifest_paths]
+#     return packages
 
 def load_package_config_data_from_file(path) -> "list[tuple[str, str, str]]":
     """

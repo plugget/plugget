@@ -21,9 +21,9 @@ class PackagesMeta:
 
     def __repr__(self):
         if self.installed_package:
-            msg = f"installed version:'{self.installed_package.version}'"
+            msg = f"- installed:'{self.installed_package.version}'"
         else:
-            msg = f"not installed"
+            msg = f"- not installed"
         return f"PackagesMeta({self.latest.package_name} {msg})"
 
     @property
@@ -54,6 +54,12 @@ class PackagesMeta:
 
     @property
     def installed_packages(self) -> "typing.List[plugget.data.package.Package]":
+        #todo
+        # since package meta is created from manifests in the temp plugget repo
+        # these manifests will never know if they are installed.
+        # instead they need to look in the app install folder for the package
+        # but the same package can be multiple times installed in different apps.
+
         return [x for x in self.packages if x.is_installed]
 
     @property
