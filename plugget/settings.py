@@ -33,7 +33,7 @@ except Exception as e:
 # plugget manages & saves the settings and returns them
 
 
-registered_settings_paths = set(DEFAULT_PLUGGET_SETTINGS_PATH, USER_SETTINGS_PATH)
+registered_settings_paths = set([DEFAULT_PLUGGET_SETTINGS_PATH, USER_SETTINGS_PATH])
 sources: set = set()  # set to avoid duplicate entries
 
 
