@@ -27,6 +27,7 @@ except Exception as e:
     logging.error("failed to get default settings path", e)
     DEFAULT_PLUGGET_SETTINGS_PATH = Path()
 
+
 # get settings for the actions etc, requires unique name for each action
 # todo support duplicates of the same settings for each app (blender, blender2, maya, etc)
 # actions request plugget for their settings
@@ -56,7 +57,7 @@ def load_registered_settings() -> dict:
         if not path.exists():
             logging.warning(f"settings file not found: '{path}'")
             continue
-        data = _load_json_settings(USER_SETTINGS_PATH)
+        data = _load_json_settings(path)
         settings.update(data)
     return settings
 
