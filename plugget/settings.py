@@ -60,7 +60,6 @@ def _load_json_settings(path: Path) -> dict:
         return {}
 
 
-
 def load_registered_settings() -> dict:
     """Load the registered settings configs"""
     settings = {}
@@ -69,14 +68,13 @@ def load_registered_settings() -> dict:
             logging.warning("Registered path is None")
             continue
         path : Path = Path(path)
-        if not path.suffix.lower() == "json":
-            logging.warning("settings is not a json file, got '{path}' instead")
+        if not path.suffix.lower() == ".json":
+            logging.warning(f"settings is not a json file, got '{path}' instead")
             continue
         if not path.exists():
             logging.warning(f"settings file not found: '{path}'")
             continue
-        try:
-            data = _load_json_settings(path)
+        data = _load_json_settings(path)
         settings.update(data)
     return settings
 
