@@ -24,7 +24,7 @@ try:
     with importlib.resources.path('plugget.resources', 'config.json') as p:
         DEFAULT_PLUGGET_SETTINGS_PATH = Path(p).resolve()
 except Exception as e:
-    logging.error("failed to get default settings path", e)
+    logging.error(f"failed to get default settings path {e}")
     DEFAULT_PLUGGET_SETTINGS_PATH = Path()
 
 
@@ -49,15 +49,23 @@ def _load_json_settings(path: Path) -> dict:
         return {}
 
 
+
 def load_registered_settings() -> dict:
     """Load the registered settings configs"""
     settings = {}
     for path in registered_settings_paths:
-        path = Path(path)
+        if (not path) or (path == ".") or (path == Path()):
+            logging.warning("Registered path is None")
+            continue
+        path : Path = Path(path)
+        if not path.suffix.lower() == "json":
+            logging.warning("settings is not a json file, got '{path}' instead")
+            continue
         if not path.exists():
             logging.warning(f"settings file not found: '{path}'")
             continue
-        data = _load_json_settings(path)
+        try:
+            data = _load_json_settings(path)
         settings.update(data)
     return settings
 
