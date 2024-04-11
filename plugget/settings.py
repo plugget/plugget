@@ -19,13 +19,24 @@ PLUGGET_DIR = Path(os.getenv("APPDATA")) / "plugget"  # todo expose PLUGGET_DIR 
 INSTALLED_DIR = PLUGGET_DIR / "installed"
 INSTALLED_DIR.mkdir(exist_ok=True, parents=True)
 USER_SETTINGS_PATH = PLUGGET_DIR / "settings_plugget.json"
+DEFAULT_PLUGGET_SETTINGS_PATH = Path()
 
 try:
-    with importlib.resources.path('plugget.resources', 'config.json') as p:
-        DEFAULT_PLUGGET_SETTINGS_PATH = Path(p).resolve()
+    files = importlib.resources.files('plugget.resources')
+    p = importlib.resources.as_file(files.joinpath('config.json'))
+    if not p:
+        raise Exception("default settings path is None")
+    DEFAULT_PLUGGET_SETTINGS_PATH = Path(p).resolve()
 except Exception as e:
-    logging.error(f"failed to get default settings path {e}")
-    DEFAULT_PLUGGET_SETTINGS_PATH = Path()
+
+    # maya 2023 hack, when importlib.resources.files fails
+    current_script_path = Path(__file__).resolve()  # ../plugget/settings.py
+    DEFAULT_PLUGGET_SETTINGS_PATH = current_script_path.parent / "resources" / 'config.json'
+
+    if not DEFAULT_PLUGGET_SETTINGS_PATH.exists():
+        raise Exception(f"failed to get default settings path. {e}")
+
+print("DEFAULT_PLUGGET_SETTINGS_PATH", DEFAULT_PLUGGET_SETTINGS_PATH)
 
 
 # get settings for the actions etc, requires unique name for each action
