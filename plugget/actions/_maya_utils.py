@@ -40,7 +40,7 @@ def get_plugin_path():
 def enable_plugin(name, quiet=True):
     """enable a Maya plugin by name"""
     import maya.cmds as cmds
-    cmds.loadPlugin(name, quiet=quiet)  # load the plugin
+    cmds.loadPlugin(name, quiet=quiet)
     cmds.pluginInfo(name, edit=True, autoload=True)  # set autoload on startup
 
 
