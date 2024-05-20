@@ -4,6 +4,7 @@ import shutil
 import bpy  # todo make this optional, so we can run this from outside blender
 from plugget._utils import rmdir
 import addon_utils
+import sys
 
 
 # _target_path = os.environ.get("PLUGGET_BLENDER_TARGET_ADDONS")
@@ -76,6 +77,10 @@ def _install_addon(package, force=False, target=None):
     addon_paths: list[Path] = package.get_content()  # get paths to plugin files in cloned repo
 
     local_addons_dir = target or Path(bpy.utils.script_path_user()) / "addons"
+
+    # add to path if not yet in there. e.g. if first addon install ever.
+    if local_addons_dir not in sys.path:
+        sys.path.append(local_addons_dir)
 
     # copy addons to local addons dir
     # todo filter repo paths
