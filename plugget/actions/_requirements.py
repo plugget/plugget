@@ -2,7 +2,14 @@
 Abstract Plugget action to pip install Python dependencies from requirements.txt.
 """
 
-import py_pip
+try:
+    import py_pip
+except ImportError:
+    # import vendored version, this allows us to install plugget without dependencies
+    # we can then use plugget to update it's own dependencies
+    # TODO add instructions
+    from plugget.vendor import py_pip
+
 import os
 import logging
 from pathlib import Path
@@ -92,12 +99,15 @@ class RequirementsAction:
     @classmethod
     def install(cls, package: "plugget.data.Package", force=False, requirements:list=None, *args, **kwargs):
         print("install requirements to target", cls.target)
-        package.get_content(use_cached=True)
-        cls.setup_py_pip()
-        for req_path in iter_requirements_paths(package):
-            print("requirements.txt found, installing: ", req_path)
-            py_pip.install(requirements=req_path, force=force, upgrade=True)
-            # TODO confirm install worked, atm any crash in py_pip is silently ignored
+        if package:
+            package.get_content(use_cached=True)
+            cls.setup_py_pip()
+            for req_path in iter_requirements_paths(package):
+                print("requirements.txt found, installing: ", req_path)
+                py_pip.install(requirements=req_path, force=force, upgrade=True)
+                # TODO confirm install worked, atm any crash in py_pip is silently ignored
+        else:
+            logging.warning("no package provided to RequirementsAction.install method")
         requirements = requirements or []
         for name in requirements:
             print("installing extra requirement:", name)
