@@ -15,13 +15,18 @@ def rmdir(path):
 
 def install_dependencies(app=None):
     """
-    this allows us to drag and drop plugget in the pythonpath, then run:
+    to simplify setup for non-technical users and avoid a complex pip install,
+    users can copy-paste plugget in a pythonpath folder,
+    then install the dependencies with the following code:
         import plugget
         plugget.install_dependencies(app="maya")
+
+    this assumes the pip module is installed already
     """
+    # todo freezes in maya 2026
+
     import plugget
 
     p = plugget.Package(app=app)  # create a fake package
     requirement_action = p.actions_args_kwargs[0][0]  # get the pip install action with target paths setup for the app
     requirement_action.install(package=None, requirements=["py-pip", "detect-app", "requests"])  # install dependencies
-
