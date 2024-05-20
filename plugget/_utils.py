@@ -36,7 +36,7 @@ def install_pypi(modules: "list[str]", app=None):
 
     try:
         import detect_app
-        app = detect_app.detect_app()
+        app = detect_app.detect_app().id
     except ImportError:
         pass
 
