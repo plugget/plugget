@@ -68,3 +68,28 @@ def update_plugget():
     # upgrade plugget and its dependencies
     for dep in DEPENDENCIES:
         py_pip.install(package_name=dep, upgrade=True)
+
+
+def download_github_repo(repo_url, target_dir, branch=None):
+    import requests
+    import zipfile
+    import io
+
+    branch = branch or "main"
+
+    # download the zip file from the repository URL
+    if repo_url.endswith('/'):
+        repo_url = repo_url[:-1]
+    api_url = f"{repo_url}/archive/refs/heads/{branch}.zip"
+
+    # Send a request to the URL
+    response = requests.get(api_url)
+    if response.status_code == 200:
+        print(f"Successfully downloaded {api_url}")
+    else:
+        raise Exception(f"Failed to download {api_url}: {response.status_code}")
+
+    # Extract the content of the zip file to the temporary directory
+    with zipfile.ZipFile(io.BytesIO(response.content)) as zip_file:
+        zip_file.extractall(path=target_dir)
+        print(f"Repository extracted to temporary directory {target_dir}")

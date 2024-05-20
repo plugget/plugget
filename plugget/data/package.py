@@ -366,6 +366,12 @@ class Package(object):
             # subprocess.run(["git", "checkout", f"tags/{self.repo_tag}"], cwd=target_dir)
             logging.info(["command to run repo_tag:", ["git", "clone", "--depth", "1", "--branch", self.repo_tag], target_dir])
             run_log(["git", "clone", "--depth", "1", "--branch", self.repo_tag,  "--progress", self.repo_url, str(target_dir)])
+        elif "https://github.com" in self.repo_url:
+            # it's faster to download a zip instead of clone the repo
+            # and plugget now works without git installed !
+            import plugget._utils
+            plugget._utils.download_github_repo(self.repo_url, str(target_dir))  # todo support branch and tags
+            print("download ZIP instead of clone")
         else:
             logging.info(["command to run other:", ["git", "clone", "--depth", "1", "--progress", self.repo_url, str(target_dir)]])
             run_log(["git", "clone", "--depth", "1", "--progress", self.repo_url, str(target_dir)])
