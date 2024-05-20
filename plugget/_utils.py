@@ -112,4 +112,8 @@ def download_github_repo(repo_url, target_dir, branch=None):
         for item in extracted_folder.iterdir():
             destination = target_path / item.name
             destination.mkdir(exist_ok=True, parents=True)
-            shutil.move(str(item), str(target_path))
+            try:
+                shutil.move(str(item), str(target_path))
+            except shutil.Error as e:
+                # skip it if path exists. e.g. .github folder is already there
+                pass
