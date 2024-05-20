@@ -2,7 +2,8 @@ import sys
 import subprocess
 import pkgutil
 import os
-import pkg_resources  # todo replace deprecated module
+# import pkg_resources  # todo replace deprecated module
+from importlib.metadata import distribution, PackageNotFoundError
 import importlib
 import logging
 from pathlib import Path
@@ -108,10 +109,16 @@ def get_version(package_name, cached=False) -> str:
 def get_location(package_name: str) -> "str|None":
     # todo cleanup
     def find_package_location(name: str) -> "str|None":
+        # try:
+        #     distribution = pkg_resources.get_distribution(name)
+        #     return distribution.location
+        # except pkg_resources.DistributionNotFound:
+        #     logging.warning(f"Package '{name}' not found.")
+        #     return None
         try:
-            distribution = pkg_resources.get_distribution(name)
-            return distribution.location
-        except pkg_resources.DistributionNotFound:
+            dist = distribution(name)
+            return dist.locate_file('')
+        except PackageNotFoundError:
             logging.warning(f"Package '{name}' not found.")
             return None
 
