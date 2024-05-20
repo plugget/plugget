@@ -74,6 +74,8 @@ def download_github_repo(repo_url, target_dir, branch=None):
     import requests
     import zipfile
     import io
+    from pathlib import Path
+    import shutil
 
     branch = branch or "main"
 
@@ -93,3 +95,20 @@ def download_github_repo(repo_url, target_dir, branch=None):
     with zipfile.ZipFile(io.BytesIO(response.content)) as zip_file:
         zip_file.extractall(path=target_dir)
         print(f"Repository extracted to temporary directory {target_dir}")
+
+    # Identify the extracted folder (assumes there's only one top-level folder in the zip file)
+    target_path = Path(target_dir)
+    extracted_folder = next(target_path.iterdir())
+
+    # Move the contents up one level
+    for item in extracted_folder.iterdir():
+        destination = target_path / item.name
+        if destination.exists():
+            if destination.is_dir():
+                shutil.rmtree(destination)
+            else:
+                destination.unlink()
+        shutil.move(str(item), str(target_path))
+
+    # Remove the now-empty extracted folder
+    shutil.rmtree(extracted_folder)
