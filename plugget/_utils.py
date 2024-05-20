@@ -34,6 +34,12 @@ def install_pypi(modules: "list[str]", app=None):
     # todo freezes in maya 2026
     import plugget
 
+    try:
+        import detect_app
+        app = detect_app.detect_app()
+    except ImportError:
+        pass
+
     p = plugget.Package(app=app)  # create a fake package
     requirement_action = p.actions_args_kwargs[0][0]  # get the pip install action with target paths setup for the app
     requirement_action.install(package=None, requirements=modules)  # install dependencies
