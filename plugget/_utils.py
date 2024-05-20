@@ -3,6 +3,8 @@ util functions for Plugget
 """
 
 import os
+from pathlib import Path
+import shutil
 
 
 DEPENDENCIES = ["plugget", "py-pip", "detect-app", "requests"]
@@ -70,12 +72,24 @@ def update_plugget():
         py_pip.install(package_name=dep, upgrade=True)
 
 
+def move_contents_up_one_level(src_dir):
+    src_path = Path(src_dir)
+    parent_path = src_path.parent
+
+    for item in src_path.iterdir():
+        dest_path = parent_path / item.name
+        if dest_path.exists():
+            if dest_path.is_dir():
+                shutil.rmtree(dest_path)
+            else:
+                dest_path.unlink()
+        shutil.move(str(item), str(parent_path))
+
+
 def download_github_repo(repo_url, target_dir, branch=None):
     import requests
     import zipfile
     import io
-    from pathlib import Path
-    import shutil
     import tempfile
 
     branch = branch or "main"
@@ -104,16 +118,9 @@ def download_github_repo(repo_url, target_dir, branch=None):
         # Identify the extracted folder (assumes there's only one top-level folder in the zip file)
         extracted_folder = next(temp_path.iterdir())
 
-        # Ensure the target directory exists
+        move_contents_up_one_level(extracted_folder)
+
+        # Move the extracted folder to the target directory
         target_path = Path(target_dir)
         target_path.mkdir(parents=True, exist_ok=True)
-
-        # Move the contents up one level
-        for item in extracted_folder.iterdir():
-            destination = target_path / item.name
-            destination.mkdir(exist_ok=True, parents=True)
-            try:
-                shutil.move(str(item), str(target_path))
-            except shutil.Error as e:
-                # skip it if path exists. e.g. .github folder is already there
-                pass
+        shutil.move(str(extracted_folder), str(target_path))
