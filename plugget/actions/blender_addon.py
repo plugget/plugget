@@ -97,6 +97,11 @@ def _install_addon(package, force=False, target=None):
         # if we don't do this the first addon install fails, because of how shutil move works.
         local_addons_dir.mkdir(parents=True, exist_ok=True)
 
+        # check if folder exists already, e.g. if addon is disabled import check will let it pass
+        if not force and (local_addons_dir / addon_path.name).exists():
+            logging.warning(f"Addon '{addon_path.name}' already installed")
+            continue
+            
         # todo replace move with copytree, else we mess with the package's content cache
         shutil.move(str(addon_path), str(local_addons_dir))
 
