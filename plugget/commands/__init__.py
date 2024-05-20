@@ -128,7 +128,10 @@ def _clone_manifest_repos(use_cache=False):
     return source_dirs
 
 
-def _detect_app_id():
+def _detect_app_id() -> str:
+    if settings.APP_ID:
+        logging.warning("overriding detect_app with APP_ID")
+        return settings.APP_ID
     try:
         import detect_app
         app = None
@@ -136,7 +139,7 @@ def _detect_app_id():
             app_found = detect_app.detect_app()
             return app_found.id if app_found else None
     except:
-        None
+        return ""
 
 
 def _print_search_results(packages):

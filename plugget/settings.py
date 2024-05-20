@@ -20,6 +20,8 @@ INSTALLED_DIR = PLUGGET_DIR / "installed"
 INSTALLED_DIR.mkdir(exist_ok=True, parents=True)
 USER_SETTINGS_PATH = PLUGGET_DIR / "settings_plugget.json"
 DEFAULT_PLUGGET_SETTINGS_PATH = Path()
+APP_ID = None  # optional, overrides the detected app id.
+
 
 try:
     files = importlib.resources.files('plugget.resources')
@@ -35,6 +37,7 @@ except Exception as e:
 
     if not DEFAULT_PLUGGET_SETTINGS_PATH.exists():
         raise Exception(f"failed to get default settings path. {e}")
+
 
 print("DEFAULT_PLUGGET_SETTINGS_PATH", DEFAULT_PLUGGET_SETTINGS_PATH)
 
