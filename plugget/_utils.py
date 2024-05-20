@@ -76,6 +76,7 @@ def download_github_repo(repo_url, target_dir, branch=None):
     import io
     from pathlib import Path
     import shutil
+    import tempfile
 
     branch = branch or "main"
 
@@ -91,24 +92,24 @@ def download_github_repo(repo_url, target_dir, branch=None):
     else:
         raise Exception(f"Failed to download {api_url}: {response.status_code}")
 
-    # Extract the content of the zip file to the temporary directory
-    with zipfile.ZipFile(io.BytesIO(response.content)) as zip_file:
-        zip_file.extractall(path=target_dir)
-        print(f"Repository extracted to temporary directory {target_dir}")
+    # Create a temporary directory
+    with tempfile.TemporaryDirectory() as temp_dir:
+        temp_path = Path(temp_dir)
 
-    # Identify the extracted folder (assumes there's only one top-level folder in the zip file)
-    target_path = Path(target_dir)
-    extracted_folder = next(target_path.iterdir())
+        # Extract the content of the zip file to the temporary directory
+        with zipfile.ZipFile(io.BytesIO(response.content)) as zip_file:
+            zip_file.extractall(path=temp_path)
+            print(f"Repository extracted to temporary directory {temp_path}")
 
-    # Move the contents up one level
-    for item in extracted_folder.iterdir():
-        destination = target_path / item.name
-        if destination.exists():
-            if destination.is_dir():
-                shutil.rmtree(destination)
-            else:
-                destination.unlink()
-        shutil.move(str(item), str(target_path))
+        # Identify the extracted folder (assumes there's only one top-level folder in the zip file)
+        extracted_folder = next(temp_path.iterdir())
 
-    # Remove the now-empty extracted folder
-    shutil.rmtree(extracted_folder)
+        # Ensure the target directory exists
+        target_path = Path(target_dir)
+        target_path.mkdir(parents=True, exist_ok=True)
+
+        # Move the contents up one level
+        for item in extracted_folder.iterdir():
+            destination = target_path / item.name
+            destination.mkdir(exist_ok=True, parents=True)
+            shutil.move(str(item), str(target_path))
