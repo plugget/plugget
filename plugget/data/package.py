@@ -11,6 +11,7 @@ import hashlib
 import zlib
 import platform
 import os
+import webbrowser
 
 
 # app plugin / addon: a plugin for a specific app
@@ -81,7 +82,7 @@ class Package(object):
         self.repo_paths: "list[str]" = repo_paths  # subdir(s)
         self.repo_SHA = repo_SHA
         self.repo_tag = repo_tag
-        self.package_url = package_url  # set before self.plugin_name
+        self.package_url = package_url  # set before self.plugin_name # todo AFAIK not used yet
          # self.name = name #or self.plugin_name
         self.docs_url = docs_url
         self._install_actions: "list[str|dict]" = install_actions  # todo default app action
@@ -220,11 +221,14 @@ class Package(object):
 
         # add methods for all apps
         # browse to the plugget manifest in explorer or finder
-        actions += [{"label": "open manifest", "command": lambda p=self: open_folder(p.manifest_path.parent)}]
-        # todo open the installed location
-        # todo open the docs URL
-        # todo open the repo/source URL if any
-
+        actions += [{"label": "📁 local manifest", "command": lambda p=self: open_folder(p.manifest_path.parent)}]
+        if self.is_installed:  # open the installed location
+            actions += [{"label": "📁 installed location", "command": lambda p=self: open_folder(p.package_install_dir)}]
+        if self.docs_url:  # open the docs URL
+            actions += [{"label": "open docs", "command": self.open_docs_URL}]
+        if self.repo_url:  # open the repo/source URL
+            actions += [{"label": "open repo", "command": self.open_repo_URL}]
+        # todo add action to open the manifest url: self.packages_meta
         return actions
 
     def get_stars(self) -> int:
@@ -371,6 +375,12 @@ class Package(object):
         return self._content_paths
         # todo instead of clone can we download the files directly?
         # cant clone to non empty folder, so we need to move files instead. but unreal had permission issues with that
+
+    def open_docs_URL(self):
+        webbrowser.open(self.docs_url)
+
+    def open_repo_URL(self):
+        webbrowser.open(self.repo_url)
 
     def _clone_repo(self, target_dir=None) -> "list[Path]":
         """
