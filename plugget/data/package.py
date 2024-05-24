@@ -64,8 +64,8 @@ class Package(object):
         self.package_url = package_url  # set before self.plugin_name
          # self.name = name #or self.plugin_name
         self.docs_url = docs_url
-        self._install_actions = install_actions  # todo default app action
-        self.actions = actions or []  # todo default app action
+        self._install_actions: "list[str|dict]" = install_actions  # todo default app action
+        self.actions: "list[dict]" = actions or []  # todo default app action
         self.dependencies = dependencies or []  # todo
         # self.id = id or plugin_name  # unique id  # todo for now same as name
         description = ""
