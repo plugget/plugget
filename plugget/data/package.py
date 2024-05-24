@@ -29,7 +29,7 @@ class Package(object):
     def __init__(self, app=None, name=None, display_name=None, plugin_name=None, id=None, version=None,
                  description=None, author=None, repo_url=None, package_url=None, license=None, tags=None,
                  dependencies=None, repo_paths=None, docs_url=None, package_name=None, manifest_path=None,
-                 actions=None, installed_paths=None, repo_SHA=None, repo_tag=None, packages_meta=None, **kwargs):
+                 install_actions=None, actions=None, installed_paths=None, repo_SHA=None, repo_tag=None, packages_meta=None, **kwargs):
         """
         :param app: the application this plugin is for e.g. blender
 
@@ -64,7 +64,8 @@ class Package(object):
         self.package_url = package_url  # set before self.plugin_name
          # self.name = name #or self.plugin_name
         self.docs_url = docs_url
-        self._actions = actions  # todo default app action
+        self._install_actions = install_actions  # todo default app action
+        self.actions = actions or []  # todo default app action
         self.dependencies = dependencies or []  # todo
         # self.id = id or plugin_name  # unique id  # todo for now same as name
         description = ""
@@ -158,11 +159,11 @@ class Package(object):
         return (self.package_install_dir / f"{self.version}.json").exists()
 
     @property
-    def default_actions(self):
+    def default_install_actions(self):
         """get the default action for the app"""
         # to prevent install bugs, ensure the dependencies install before the main plugin/addon
         # so order pip-install actions (requirements) in the list before addon-install actions,
-        DefaultActions = {
+        DefaultInstallActions = {
             "blender": ["blender_requirements", "blender_addon"],
             "max3ds": ["max3ds_requirements", "max3ds_macroscript"],
             "maya": ["maya_requirements", "maya_plugin"],
@@ -170,7 +171,7 @@ class Package(object):
             "unreal": ["unreal_requirements", "unreal_plugin"],
             "substance_painter": ["substance_painter_requirements", "substance_painter_plugin"],
         }
-        actions = DefaultActions.get(self.app)
+        actions = DefaultInstallActions.get(self.app)
         if not actions:
             raise Exception(f"no default action for app '{self.app}'")
         return actions
@@ -196,13 +197,13 @@ class Package(object):
         If the manifest doesn't specify an action, get the default action for the app
         """
         """
-        "actions": [
+        "install_actions": [
             "action_1_name",
             ("action_2_name", {"action_2_kwarg": "value"})
             ]
         """
         # get install action from manifest,w
-        actions_raw = self._actions or self.default_actions
+        actions_raw = self._install_actions or self.default_install_actions
         actions: list = []
         action: "str | list | types.ModuleType" = None
         for action in actions_raw:
@@ -243,7 +244,7 @@ class Package(object):
                     raise Exception(f"action '{action}' not found by name")
 
             # if action is a module, it's the action itself
-            # if inspect.ismodule(self._action):
+            # if inspect.ismodule(self._install_action):
             # if isinstance(action, type(importlib)):  # check if action is of type module
             #     print("action is module", action, type(action), type(importlib))
             #     action_module = action
@@ -285,7 +286,8 @@ class Package(object):
                   'self.repo_SHA': self.repo_SHA,
                   'package_url': self.package_url,
                   'docs_url': self.docs_url,
-                  'actions': self._actions,
+                  'install_actions': self._install_actions,
+                  'actions': self.actions,
                   'dependencies': self.dependencies,
                   'installed_paths': [str(x) for x in self.installed_paths],
                   }
