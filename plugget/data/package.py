@@ -9,6 +9,8 @@ import shutil
 import sys
 import hashlib
 import zlib
+import platform
+import os
 
 
 # app plugin / addon: a plugin for a specific app
@@ -17,6 +19,23 @@ import zlib
 # manifest repo: a repo containing (plugget) package manifests
 
 # the content of a package: plugin or resource
+
+
+def open_folder(path: str):
+    if not os.path.isdir(path):
+        raise NotADirectoryError(f"The path '{path}' is not a directory or does not exist.")
+
+    system_platform = platform.system()
+    if system_platform == "Darwin":  # macOS
+        subprocess.run(["open", path])
+    elif system_platform == "Windows":  # Windows
+        subprocess.run(["explorer", path])
+    elif system_platform == "Linux":  # Linux
+        subprocess.run(["xdg-open", path])
+    else:
+        raise OSError(f"Unsupported operating system: {system_platform}")
+    # todo print output of run
+
 
 class Package(object):
     """
@@ -29,7 +48,8 @@ class Package(object):
     def __init__(self, app=None, name=None, display_name=None, plugin_name=None, id=None, version=None,
                  description=None, author=None, repo_url=None, package_url=None, license=None, tags=None,
                  dependencies=None, repo_paths=None, docs_url=None, package_name=None, manifest_path=None,
-                 install_actions=None, actions=None, installed_paths=None, repo_SHA=None, repo_tag=None, packages_meta=None, **kwargs):
+                 install_actions=None, actions=None, enable_default_actions=True,
+                 installed_paths=None, repo_SHA=None, repo_tag=None, packages_meta=None, **kwargs):
         """
         :param app: the application this plugin is for e.g. blender
 
@@ -65,7 +85,8 @@ class Package(object):
          # self.name = name #or self.plugin_name
         self.docs_url = docs_url
         self._install_actions: "list[str|dict]" = install_actions  # todo default app action
-        self.actions: "list[dict]" = actions or []  # todo default app action
+        self._actions: "list[dict]" = actions or []  # todo default app action
+        self.enable_default_actions = enable_default_actions
         self.dependencies = dependencies or []  # todo
         # self.id = id or plugin_name  # unique id  # todo for now same as name
         description = ""
@@ -103,6 +124,13 @@ class Package(object):
     # @version.setter
     # def version(self, value):
     #     self._version = value
+
+    @property
+    def actions(self):
+        if self.enable_default_actions:
+            return self.default_actions + self._actions
+        else:
+            return self._actions
 
     @property
     def manifest_path(self):
@@ -175,6 +203,29 @@ class Package(object):
         if not install_actions:
             raise Exception(f"no default action for app '{self.app}'")
         return install_actions
+
+
+    @property
+    def default_actions(self):
+        DefaultAppActions = {  # todo
+            # "blender": [
+            #     {
+            #         "label": "enable addon"
+            #     }
+            # ],
+        }
+        actions = DefaultAppActions.get(self.app, [])
+        if not actions:
+            logging.warning(f"no default action for app '{self.app}'")
+
+        # add methods for all apps
+        # browse to the plugget manifest in explorer or finder
+        actions += [{"label": "open manifest", "command": lambda p=self: open_folder(p.manifest_path.parent)}]
+        # todo open the installed location
+        # todo open the docs URL
+        # todo open the repo/source URL if any
+
+        return actions
 
     def get_stars(self) -> int:
         """get the number of stars on the repo"""
@@ -286,7 +337,8 @@ class Package(object):
                   'package_url': self.package_url,
                   'docs_url': self.docs_url,
                   'install_actions': self._install_actions,
-                  'actions': self.actions,
+                  'actions': self._actions,
+                  "enable_default_actions": self.enable_default_actions,
                   'dependencies': self.dependencies,
                   'installed_paths': [str(x) for x in self.installed_paths],
                   }
