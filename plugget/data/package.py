@@ -171,10 +171,10 @@ class Package(object):
             "unreal": ["unreal_requirements", "unreal_plugin"],
             "substance_painter": ["substance_painter_requirements", "substance_painter_plugin"],
         }
-        actions = DefaultInstallActions.get(self.app)
-        if not actions:
+        install_actions = DefaultInstallActions.get(self.app)
+        if not install_actions:
             raise Exception(f"no default action for app '{self.app}'")
-        return actions
+        return install_actions
 
     def get_stars(self) -> int:
         """get the number of stars on the repo"""
@@ -195,8 +195,7 @@ class Package(object):
         """
         Get the plugin's actions & it's action settings, used for install, uninstall.
         If the manifest doesn't specify an action, get the default action for the app
-        """
-        """
+
         "install_actions": [
             "action_1_name",
             ("action_2_name", {"action_2_kwarg": "value"})
@@ -204,7 +203,7 @@ class Package(object):
         """
         # get install action from manifest,w
         actions_raw = self._install_actions or self.default_install_actions
-        actions: list = []
+        install_actions: list = []
         action: "str | list | types.ModuleType" = None
         for action in actions_raw:
             action_name: str = ""
@@ -252,8 +251,8 @@ class Package(object):
             if not action_module:
                 raise Exception(f"action '{action}' not found")
 
-            actions.append((action_module, action_args, action_kwargs))
-        return actions
+            install_actions.append((action_module, action_args, action_kwargs))
+        return install_actions
 
     @classmethod
     def from_json(cls, json_path) -> "plugget.data.package.Package":
