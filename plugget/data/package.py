@@ -184,14 +184,13 @@ class Package(object):
 
     def is_starred(self) -> bool:
         """get the number of stars on the repo"""
-
         import plugget.github
         if self._starred is None:
             self._starred = plugget.github.is_starred(self.repo_url)
         return self._starred
 
     @property
-    def actions_args_kwargs(self) -> "list[tuple[types.ModuleType, list, dict]]":
+    def install_actions_args_kwargs(self) -> "list[tuple[types.ModuleType, list, dict]]":
         """
         Get the plugin's actions & it's action settings, used for install, uninstall.
         If the manifest doesn't specify an action, get the default action for the app
@@ -400,7 +399,7 @@ class Package(object):
             return
 
         action: "types.ModuleType" = None
-        for action, action_args, action_kwargs in self.actions_args_kwargs:
+        for action, action_args, action_kwargs in self.install_actions_args_kwargs:
             # action install implicitly adds to self.install_paths
             action_kwargs.update(kwargs)  # add kwargs to action_kwargs
             action.install(self, *args, force=force, *action_args, **action_kwargs)
@@ -443,7 +442,7 @@ class Package(object):
         self.to_json(installed_manifest_path)
 
     def uninstall(self, dependencies=False, **kwargs) -> None:
-        for action, action_args, action_kwargs in self.actions_args_kwargs:
+        for action, action_args, action_kwargs in self.install_actions_args_kwargs:
             action_kwargs.update(kwargs)
             action.uninstall(self, dependencies=dependencies, *action_args, **action_kwargs)
 

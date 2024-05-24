@@ -43,7 +43,7 @@ def install_pypi(modules: "list[str]", app=None):
         pass
 
     p = plugget.Package(app=app)  # create a fake package
-    requirement_action = p.actions_args_kwargs[0][0]  # get the pip install action with target paths setup for the app
+    requirement_action = p.install_actions_args_kwargs[0][0]  # get the pip install action with target paths setup for the app
     requirement_action.install(package=None, requirements=modules)  # install dependencies
     # todo this could be cleaner
 
@@ -63,7 +63,7 @@ def update_plugget():
     # todo this could be cleaner
     app = detect_app.detect_app()
     p = plugget.Package(app=app)  # create a fake package
-    requirement_action = p.actions_args_kwargs[0][0]  # get the pip install action with target paths setup for the app
+    requirement_action = p.install_actions_args_kwargs[0][0]  # get the pip install action with target paths setup for the app
     py_pip.default_target_path = requirement_action.target
     py_pip.python_interpreter = requirement_action.interpreter
 
