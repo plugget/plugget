@@ -42,7 +42,7 @@ def iter_requirements_paths(package: "plugget.data.Package") -> "Generator[Path]
         else:
             logging.warning(f"expected requirements.txt not found: '{req_path}'")
     if not req_paths:
-        print(f"no requirements.txt paths found")
+        print(f"no requirements.txt paths found in '{package.clone_dir}'")
 
 
 # plugget gets requirements from requirements.txt, because the module is not packaged.
@@ -97,7 +97,7 @@ class RequirementsAction:
         py_pip.python_interpreter = cls.interpreter
 
     @classmethod
-    def install(cls, package: "plugget.data.Package", force=False, requirements:list=None, *args, **kwargs):
+    def install(cls, package: "plugget.data.Package", force=False, requirements: list = None, *args, **kwargs):
         print("install requirements to target", cls.target)
         cls.setup_py_pip()
         if package:
