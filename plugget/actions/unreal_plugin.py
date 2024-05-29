@@ -1,3 +1,5 @@
+import sys
+
 import unreal
 from pathlib import Path
 import shutil
@@ -22,6 +24,17 @@ def install(package: "plugget.data.Package", max_folder=None, **kwargs) -> bool:
     #  but it's not the way it should be done.
     #  this would install 2 plugins, if 2 plugins are in same repo
     #  (e.g. the blendertools github repo from epic contains multiple uplugins)
+
+    # enable on install
+    # search for uplugin files in the plugin folder
+    for uplugin in (plugin_dir / package.package_name).rglob("*.uplugin"):
+        plugin_dir = Path(uplugin).parent
+        py_path = plugin_dir / "Content" / "Python"
+        sys.path.append(str(py_path))  # add to python path
+        startup_script = py_path / "init_unreal.py"
+        if startup_script.exists():
+            print("running plugin startup code", startup_script)
+            exec(startup_script.read_text())
 
     # for sub_path in repo_paths:
     #     print("copying", sub_path, "to", plugin_dir)
