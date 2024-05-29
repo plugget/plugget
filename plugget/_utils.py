@@ -84,6 +84,7 @@ def move_contents_up_one_level(src_dir):
             else:
                 dest_path.unlink()
         shutil.move(str(item), str(parent_path))
+    return parent_path
 
 
 def download_github_repo(repo_url, target_dir, branch=None):
@@ -118,9 +119,16 @@ def download_github_repo(repo_url, target_dir, branch=None):
         # Identify the extracted folder (assumes there's only one top-level folder in the zip file)
         extracted_folder = next(temp_path.iterdir())
 
-        move_contents_up_one_level(extracted_folder)
+        # since the zip contains a folder with branch name, we move everything up one level
+        # python-script-editor/unreal-plugin-python-script-editor-main -> python-script-editor
+        parent_path = move_contents_up_one_level(extracted_folder)
 
         # Move the extracted folder to the target directory
         target_path = Path(target_dir)
         target_path.mkdir(parents=True, exist_ok=True)
-        shutil.move(str(extracted_folder), str(target_path))
+        # move all files in the extracted folder to the target folder
+        for item in parent_path.iterdir():
+            if item.is_dir():
+                shutil.move(str(item), str(target_path / item.name))
+            else:
+                shutil.move(str(item), str(target_path))

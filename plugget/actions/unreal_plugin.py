@@ -15,7 +15,9 @@ def install(package: "plugget.data.Package", max_folder=None, **kwargs) -> bool:
 
     # move it to target folder
     print(f"installing the unreal plugin '{package.package_name}' to '{plugin_dir / package.package_name}'")
-    repo_paths = package.get_content(target_dir=plugin_dir / package.package_name)
+    # todo clean up this hack,
+    #  where we use get content to directly download to the plugin folder instead of a temp folder, and move it
+    repo_paths = package.get_content(target_dir=plugin_dir / package.package_name, use_cached=False)
     # todo cloning directly in plugin dir works since unreal recursively searches for plugins.
     #  but it's not the way it should be done.
     #  this would install 2 plugins, if 2 plugins are in same repo
