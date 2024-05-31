@@ -113,13 +113,16 @@ class RequirementsAction:
             print("installing extra requirement:", name)
             py_pip.install(package_name=name)
 
+
     @classmethod
     def uninstall(cls, package: "plugget.data.Package", dependencies=False, **kwargs):
-        if not dependencies:
-            return
-        cls.setup_py_pip()
-        for req_path in iter_requirements_paths(package):
-            print("requirements.txt found, uninstalling requirements")
-            print("package.clone_dir / p", package.clone_dir / req_path)
-            py_pip.uninstall(requirements=req_path, yes=True)
-            # TODO confirm uninstall worked
+        return
+
+        # if not dependencies:
+        #     return
+        # cls.setup_py_pip()
+        # for req_path in iter_requirements_paths(package):
+        #     print("requirements.txt found, uninstalling requirements")
+        #     print("package.clone_dir / p", package.clone_dir / req_path)
+        #     py_pip.uninstall(requirements=req_path, yes=True)
+        #     # TODO confirm uninstall worked
