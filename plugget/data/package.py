@@ -450,13 +450,13 @@ class Package(object):
     def install(self, force=False, *args, **kwargs) -> None:
         from plugget import commands
 
-        # install should be handled by its parent the packages meta.
-        # since atm we check is installed. not if other versions are installed
-        self.packages_meta.uninstall(self.package_name)
-
         if self.is_installed and not force:
             logging.warning(f"{self.package_name} is already installed")
             return
+
+        # install should be handled by its parent the packages meta.
+        # since atm we check is installed. not if other versions are installed
+        self.packages_meta.uninstall(self.package_name)
 
         action: "types.ModuleType" = None
         for action, action_args, action_kwargs in self.install_actions_args_kwargs:
