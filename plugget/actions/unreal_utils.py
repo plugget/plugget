@@ -4,6 +4,8 @@ by default installs to project, not engine
 """
 from pathlib import Path
 import unreal
+import json
+import sys
 
 
 def _get_interpreter_path():
@@ -35,3 +37,42 @@ def project_plugins_dir():
     project_path = unreal.Paths.project_plugins_dir()
     project_path = unreal.Paths.convert_relative_path_to_full(project_path)
     return Path(project_path)
+
+
+def load_project_file_json():
+    uproject_path = unreal.Paths.get_project_file_path()
+    with open(uproject_path, "r") as file:
+        return json.load(file)
+
+
+def save_project_file_json(data):
+    uproject_path = unreal.Paths.get_project_file_path()
+    with open(uproject_path, "w") as file:
+        json.dump(data, file, indent=4)
+
+
+def enable_plugin(name:str, enable:bool=True):
+    uproject = load_project_file_json()
+    plugins = uproject.get("Plugins", [])
+
+    # check if name is already in plugins
+    for plugin in plugins:
+        if plugin["Name"] == name:
+            plugin["Enabled"] = enable
+            save_project_file_json(uproject)
+            return
+    # else add it
+    plugins.append({"Name": name, "Enabled": enable})
+    save_project_file_json(uproject)
+
+
+def exec_plugin_startup_code(path: Path):
+    # search for uplugin files in the plugin folder
+    for uplugin in (path).rglob("*.uplugin"):
+        plugin_dir = Path(uplugin).parent
+        py_path = plugin_dir / "Content" / "Python"
+        sys.path.append(str(py_path))  # add to python path
+        startup_script = py_path / "init_unreal.py"
+        if startup_script.exists():
+            print("running plugin startup code", startup_script)
+            exec(startup_script.read_text())
