@@ -21,7 +21,7 @@ class _Action(plugget.actions._copy_files.CopyFiles):
 
     @classmethod
     def uninstall(cls, package: "plugget.data.Package", **kwargs) -> bool:
-        plugget.actions.unreal_utils.enable_plugin(package, enable=False)
+        plugget.actions.unreal_utils.enable_plugin(package.package_name, enable=False)
         super().uninstall(package, **kwargs)
 
 
