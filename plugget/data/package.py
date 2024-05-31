@@ -405,28 +405,26 @@ class Package(object):
         target_dir.mkdir(exist_ok=True, parents=True)
 
         def run_log(command, cwd=None) -> int:
-            logging.info("command: '{command}'")
+            logging.info(f"command: '{command}'")
             process = subprocess.Popen(command, cwd=cwd, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
             stdout, stderr = process.communicate()
             try:
                 if stdout:
-                    logging.debug(stdout.decode())
+                    print(stdout.decode())
                 if stderr:
                     logging.error(stderr.decode())
             except Exception as e:
-                logging.error("error printing stdout/stderr: '{e}'")
-                logging.error("stdout: '{stdout}'")
+                logging.error(f"error printing stdout/stderr: '{e}'")
+                logging.error(f"stdout: '{stdout}'")
             return process.returncode
 
         if self.repo_SHA:
             # todo check if repo_SHA is valid
-            logging.info(["command to run repo_SHA:", ["git", "clone", "--depth", "1", "--progress", self.repo_url, str(target_dir)]])
             run_log(["git", "clone", "--depth", "1", "--progress", self.repo_url, str(target_dir)])
             run_log(["git", "fetch", "--depth", "1", "origin", self.repo_SHA], cwd=target_dir)
             run_log(["git", "checkout", self.repo_SHA], cwd=target_dir)
         elif self.repo_tag:
             # subprocess.run(["git", "checkout", f"tags/{self.repo_tag}"], cwd=target_dir)
-            logging.info(["command to run repo_tag:", ["git", "clone", "--depth", "1", "--branch", self.repo_tag], target_dir])
             run_log(["git", "clone", "--depth", "1", "--branch", self.repo_tag,  "--progress", self.repo_url, str(target_dir)])
         elif "https://github.com" in self.repo_url:
             # it's faster to download a zip instead of clone the repo
@@ -435,7 +433,6 @@ class Package(object):
             plugget._utils.download_github_repo(self.repo_url, str(target_dir))  # todo support branch and tags
             print("download ZIP instead of clone")
         else:
-            logging.info(["command to run other:", ["git", "clone", "--depth", "1", "--progress", self.repo_url, str(target_dir)]])
             run_log(["git", "clone", "--depth", "1", "--progress", self.repo_url, str(target_dir)])
 
         # delete .git folder
