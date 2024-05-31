@@ -26,3 +26,16 @@ def get_my_documents() -> Path:
     logging.debug("my documents path:", path)
     return path
     # todo are there other locations for documents?
+
+
+def clash_import_name(name):
+    """check there isn't a py module with the same name as our addon"""
+    try:
+        module = __import__(name)
+        file = module.__file__  # can be None
+        if file and Path(file).exists():  # Path crashes if file is none
+            logging.warning(f"Failed to install addon {name}, a py module with same name exists")
+            return True
+    except ImportError:
+        pass
+    return False

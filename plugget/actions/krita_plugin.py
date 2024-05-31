@@ -5,6 +5,7 @@ import os
 import logging
 from pathlib import Path
 import shutil
+from plugget.actions._utils import clash_import_name
 
 
 # todo merge dupe code with krita pip and blender addon
@@ -31,16 +32,6 @@ else:
 path = Path(path) / "pykrita"
 
 
-def __clash_import_name(name):
-    """check there isn't a py module with the same name as our addon"""
-    try:
-        __import__(name)
-        logging.warning(f"Failed to install addon {name}, a py module with same name exists")
-        return True
-    except ImportError:
-        return False
-
-
 def install(package: "plugget.data.Package", force=False, enable=True, **kwargs) -> bool:  # todo , force=False, enable=True):
     # If the “force” parameter is True, the add-on will be reinstalled, even if it has not been previously removed.
 
@@ -60,7 +51,7 @@ def install(package: "plugget.data.Package", force=False, enable=True, **kwargs)
     for addon_path in addon_paths:
         print(addon_path)
 
-        if __clash_import_name(addon_path.name):
+        if clash_import_name(addon_path.name):
             continue
 
         # new_addon_path.mkdir(parents=True, exist_ok=True)

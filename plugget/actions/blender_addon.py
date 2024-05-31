@@ -5,23 +5,11 @@ import bpy  # todo make this optional, so we can run this from outside blender
 from plugget._utils import rmdir
 import addon_utils
 import sys
+from plugget.actions._utils import clash_import_name
 
 
 # _target_path = os.environ.get("PLUGGET_BLENDER_TARGET_ADDONS")
 # _interpreter_path = os.environ.get("PLUGGET_BLENDER_INTERPRETER")
-
-
-def __clash_import_name(name):
-    """check there isn't a py module with the same name as our addon"""
-    try:
-        module = __import__(name)
-        file = module.__file__  # can be None
-        if file and Path(file).exists():  # Path crashes if file is none
-            logging.warning(f"Failed to install addon {name}, a py module with same name exists")
-            return True
-    except ImportError:
-        pass
-    return False
 
 
 def _get_all_addon_names() -> set[str]:
@@ -90,7 +78,7 @@ def _install_addon(package, force=False, target=None):
 
         if force:
             rmdir(local_addons_dir / addon_path.name)
-        elif __clash_import_name(addon_path.name):
+        elif clash_import_name(addon_path.name):
             logging.warning(f"skipping addon install '{addon_path.name}', clashing py-module already imported")
             continue
 
