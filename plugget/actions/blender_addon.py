@@ -80,7 +80,7 @@ def _install_addon(package, force=False, target=None):
 
     # add to path if not yet in there. e.g. if first addon install ever.
     if local_addons_dir not in sys.path:
-        sys.path.append(local_addons_dir)
+        sys.path.append(str(local_addons_dir))
 
     # copy addons to local addons dir
     # todo filter repo paths
