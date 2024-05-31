@@ -52,6 +52,9 @@ def save_project_file_json(data):
 
 
 def enable_plugin(name:str, enable:bool=True):
+    if not isinstance(name, str):
+        raise TypeError(f"expected str, got {type(name)}")
+
     uproject = load_project_file_json()
     plugins = uproject.get("Plugins", [])
 
