@@ -269,9 +269,25 @@ def uninstall(package_name=None, unimport=True, yes=True, requirements=None):  #
 
     # todo add unimport support if we uninstall from requirements
     try:
+        unimport_modules = []
+        if package_name:
+            unimport_modules.append(package_name)
+        if requirements:
+            for module in iter_packages_in_requirements(requirements):
+                unimport_modules.append(module)
         if unimport:
-            unimport_modules(package_name)
+            for package in unimport_modules:
+                unimport_modules(package)
     except Exception as e:
         logging.warning(f"unimport failed: {e}")
 
     return output, error
+
+
+def iter_packages_in_requirements(path: "str|Path"):
+    data = Path(path).read_text().splitlines()
+    for line in data:
+        line = line.strip()
+        if line.startswith("#"):  # skip comments
+            continue
+        yield line
