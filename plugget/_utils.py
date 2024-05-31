@@ -94,6 +94,7 @@ def download_github_repo(repo_url, target_dir, branch=None):
     import tempfile
 
     branch = branch or "main"
+    # todo older repos use master, main fails here
 
     # download the zip file from the repository URL
     if repo_url.endswith('/'):

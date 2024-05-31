@@ -1,6 +1,7 @@
 import logging
 import os
 from pathlib import Path
+import importlib.metadata
 
 
 def try_except(func):
@@ -26,6 +27,14 @@ def get_my_documents() -> Path:
     logging.debug("my documents path:", path)
     return path
     # todo are there other locations for documents?
+
+
+def is_package_installed(package_name):
+    try:
+        importlib.metadata.version(package_name)
+        return True
+    except importlib.metadata.PackageNotFoundError:
+        return False
 
 
 def clash_import_name(name):

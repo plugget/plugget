@@ -1,6 +1,7 @@
 """
 Abstract Plugget action to pip install Python dependencies from requirements.txt.
 """
+from plugget.actions._utils import is_package_installed
 
 try:
     import py_pip
@@ -13,6 +14,7 @@ except ImportError:
 import os
 import logging
 from pathlib import Path
+import plugget.actions._utils
 
 
 def get_requirements_txt_paths(package: "plugget.data.Package", **kwargs) -> "list[Path]":
@@ -76,13 +78,22 @@ def iter_requirements_paths(package: "plugget.data.Package") -> "Generator[Path]
 #     return requirements
 
 
+# todo move to pypip
+def iter_packages_in_requirements(path: "str|Path"):
+    data = Path(path).read_text().splitlines()
+    for line in data:
+        line = line.strip()
+        if line.startswith("#"):  # skip comments
+            continue
+        yield line
+
+
 class RequirementsAction:
     """
     interpreter: Path to interpreter to use for pip commands
     target: Path to target folder to install dependencies to
     env_var: app name to detect env-variables that override settings, e.g.MAYA -> PLUGGET_MAYA_INTERPRETER
     """
-
     interpreter = None
     target = None
     env_var = None
@@ -100,19 +111,32 @@ class RequirementsAction:
     def install(cls, package: "plugget.data.Package", force=False, requirements: list = None, *args, **kwargs):
         print("install requirements to target", cls.target)
         cls.setup_py_pip()
+
+        requirements = requirements or []
+
         if package:
             package.get_content(use_cached=True)
             for req_path in iter_requirements_paths(package):
-                print("requirements.txt found, installing: ", req_path)
-                py_pip.install(requirements=req_path, force=force, upgrade=True)
-                # TODO confirm install worked, atm any crash in py_pip is silently ignored
-        else:
-            logging.warning("no package provided to RequirementsAction.install method")
-        requirements = requirements or []
-        for name in requirements:
-            print("installing extra requirement:", name)
-            py_pip.install(package_name=name)
+                print("requirements.txt found: ", req_path)
+                for package_name in iter_packages_in_requirements(req_path):
+                    requirements.append(package_name)
 
+        if not (requirements or package):
+            logging.warning("no package provided to RequirementsAction.install method")
+
+        for name in requirements:
+            try:
+                print(f"installing '{name}' from requirements.txt")
+                stdout, error = py_pip.install(package_name=package_name, force=force, upgrade=True)
+                print(stdout.decode())
+            except Exception as e:
+                # this can happen if a package is in use, e.g. PySide
+                # check if package is already installed, if yes we can pass this
+                if plugget.actions._utils.is_package_installed(package_name):
+                    print(f"Error on install package '{package_name}', but is already installed")
+                else:  # if not we error
+                    logging.error(f"failed to install package '{package_name}'")
+                    raise Exception(e)
 
     @classmethod
     def uninstall(cls, package: "plugget.data.Package", dependencies=False, **kwargs):
