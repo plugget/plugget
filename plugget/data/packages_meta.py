@@ -3,22 +3,30 @@ import logging
 
 class PackagesMeta:
     """
-    A collection of different versions of the same package.
-    Any command run on a PackagesMeta instance will attempt to run on the latest package. see self.__getattr__
-    A PackagesMeta instance is returned by plugget.search()
+    A collection of Packages: manifests for different versions of the same package-name.
+
+    Notes:
+    - Any command run on a PackagesMeta instance will attempt to run on the latest package. see self.__getattr__
+    - A PackagesMeta instance is returned by plugget.search()
+
+    Args:
+        active_version: used when the user specifies a version in search
+        packages: list of Package instances
+        manifests_dir: path to the folder containing the package manifests
     """
-    def __init__(self, manifests_dir):
+    def __init__(self, manifests_dir: "pathlib.Path"):
         self.active_version: str = ""  # e.g. '1.0.0', to not install latest by default
-        self._packages_cache: "typing.Dict[str, plugget.data.package.Package]" = {}
-        self.manifests_dir: "pathlib.Path" = manifests_dir
-        # self.manifest_dirs is expected to be set externally,
-        # self.manifest_dirs is not included in init so we can first build it up in a loop
+        self.packages: "list" = self.load_packages(manifests_dir)
+        # self.manifests_dir: "pathlib.Path" = manifests_dir
+
+    def load_packages(self, manifests_dir: "pathlib.Path") -> "list":
         from plugget.data.package import Package
 
-        self.manifests = list(self.manifests_dir.glob("*.json"))
-        self.packages = [Package.from_json(manifest) for manifest in self.manifests]
-        for package in self.packages:
+        manifest_paths = list(manifests_dir.glob("*.json"))
+        packages = [Package.from_json(manifest_path) for manifest_path in manifest_paths]
+        for package in packages:
             package.packages_meta = self
+        return packages
 
     def __repr__(self):
         if self.installed_package:
