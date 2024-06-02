@@ -22,6 +22,9 @@ import webbrowser
 # the content of a package: plugin or resource
 
 
+APP_ID_OVERRIDE = None  # optional, overrides the detected app id.
+
+
 def open_folder(path: str):
     if not os.path.isdir(path):
         raise NotADirectoryError(f"The path '{path}' is not a directory or does not exist.")
@@ -54,35 +57,32 @@ class Package(object):
                  install_actions=None, actions=None, enable_default_actions=True,
                  installed_paths=None, repo_SHA=None, repo_tag=None, packages_meta=None, **kwargs):
         """
-        :param app: the application this plugin is for e.g. blender
-
-        :param name: the name of the plugin e.g. bqt (currently same as display_name)
-        :param display_name: the display name of the plugin e.g. BQT (not used)
-
-        :param plugin_name: the (unique) name of the plugin used by the app e.g. bqt
-        :param id: the unique id of the plugin e.g. bqt (not used)
-
-        :param repo_paths: a list containing the subdirectory of the repo where the plugin is located, this becomes pluginname in blender, can contain multiple paths or files
-
-        :param version: the version of the plugin e.g. 0.1.0, derived from manifest name
+        app: the application this plugin is for e.g. blender
+        name: the name of the plugin e.g. bqt (currently same as display_name)
+        display_name: the display name of the plugin e.g. BQT (not used)
+        plugin_name: the (unique) name of the plugin used by the app e.g. bqt
+        id: the unique id of the plugin e.g. bqt (not used)
+        repo_paths: a list containing the subdirectory of the repo where the plugin is located, this becomes pluginname in blender, can contain multiple paths or files
+        version: the version of the plugin e.g. 0.1.0, derived from manifest name
 
         packages by default load from manifests in a temp folder
         once installed, they are installed in a permanent folder
         """
         if kwargs:
-            logging.warning("Unused kwargs on Package init: '{kwargs}'")
+            logging.warning(f"Unused kwargs on Package init: '{kwargs}'")
 
-        # attributes derived from the manifest path
+        # 1. attributes derived from the manifest path
         self.app = app  # set from app folder containing the manifest, todo currently is app name, swap to app object
         self.package_name = package_name  # set from folder name containing the manifests
         self.version = version  # set from manifest name
-
+        # currently manifest data overrides the above attributes
+        # but currently we dont use both at the same time yet
         self._manifest_path: "Path|None" = None  # path to the manifest file in the plugget package repo
         if manifest_path:
             self.manifest_path = Path(manifest_path)  # set before _set_data_from_manifest_path()
             self._set_data_from_manifest_path()  # populate above attributes to their default values
 
-        # manifest settings
+        # 2. manifest settings
         self.repo_url = repo_url  # set before plugin name
         self.repo_paths: "list[str]" = repo_paths  # subdir(s)
         self.repo_SHA = repo_SHA
@@ -94,7 +94,7 @@ class Package(object):
         self._actions: "list[dict]" = actions or []  # todo default app action
         self.enable_default_actions = enable_default_actions
         self.dependencies = dependencies or []  # todo
-        # self.id = id or plugin_name  # unique id  # todo for now same as name
+        # self.uid = id or plugin_name  # unique id  # todo for now same as name
         description = ""
         # author = ""
         # license = ""
@@ -165,7 +165,7 @@ class Package(object):
 
     @property
     def clone_dir(self):  # keep in sync with package_install_dir
-        """return the path we clone to on install e.g C:/Users/username/AppData/Local/Temp/plugget/bqt/0.1.0"""
+        """ the temp path we clone to on install, e.g C:/Users/username/AppData/Local/Temp/plugget/bqt/0.1.0"""
         if not self._clone_dir:
             # todo atm we calc hash for current app
             #  lets save this path instead, so we can load this data from outside the app
@@ -322,7 +322,7 @@ class Package(object):
 
     @classmethod
     def from_json(cls, json_path) -> "plugget.data.package.Package":
-        """create a plugin from a json file"""
+        """create a Package from a json file"""
         manifest_path = Path(json_path)
 
         with open(json_path, "r") as f:
@@ -401,23 +401,21 @@ class Package(object):
         """
         returns either the files in repo (sparse) or the folder containing the repo
         """
-
-        target_dir = target_dir or self.clone_dir
-        self._clone_dir = target_dir
-        # todo save target_dir in self.clone_dir ?
+        self._clone_dir = target_dir or self.clone_dir
+        # todo if we clone to a diff dir, we should save the package
 
         # clone package repo to temp folder
-        rmdir(target_dir)
+        rmdir(self._clone_dir)
 
-        logging.info(f"cloning '{self.repo_url}' to '{target_dir}'")
+        logging.info(f"cloning '{self.repo_url}' to '{self._clone_dir}'")
         # todo sparse checkout, support multiple entries in self.repo_paths
 
-        # logging.debug(f"cloning {self.repo_url} to {target_dir}")
-        # subprocess.run(["git", "clone", "--depth", "1", "--progress", self.repo_url, str(target_dir)])
+        # logging.debug(f"cloning {self.repo_url} to {self._clone_dir}")
+        # subprocess.run(["git", "clone", "--depth", "1", "--progress", self.repo_url, str(self._clone_dir)])
         # todo this doesnt always print the error, see unreal plugget for example with errors
 
         # ensure target dir exists.
-        target_dir.mkdir(exist_ok=True, parents=True)
+        self._clone_dir.mkdir(exist_ok=True, parents=True)
 
         def run_log(command, cwd=None) -> int:
             logging.info(f"command: '{command}'")
@@ -435,42 +433,44 @@ class Package(object):
 
         if self.repo_SHA:
             # todo check if repo_SHA is valid
-            run_log(["git", "clone", "--depth", "1", "--progress", self.repo_url, str(target_dir)])
-            run_log(["git", "fetch", "--depth", "1", "origin", self.repo_SHA], cwd=target_dir)
-            run_log(["git", "checkout", self.repo_SHA], cwd=target_dir)
+            run_log(["git", "clone", "--depth", "1", "--progress", self.repo_url, str(self._clone_dir)])
+            run_log(["git", "fetch", "--depth", "1", "origin", self.repo_SHA], cwd=self._clone_dir)
+            run_log(["git", "checkout", self.repo_SHA], cwd=self._clone_dir)
         elif self.repo_tag:
-            # subprocess.run(["git", "checkout", f"tags/{self.repo_tag}"], cwd=target_dir)
-            run_log(["git", "clone", "--depth", "1", "--branch", self.repo_tag,  "--progress", self.repo_url, str(target_dir)])
+            # subprocess.run(["git", "checkout", f"tags/{self.repo_tag}"], cwd=self._clone_dir)
+            run_log(["git", "clone", "--depth", "1", "--branch", self.repo_tag,  "--progress", self.repo_url, str(self._clone_dir)])
         elif "https://github.com" in self.repo_url:
             # it's faster to download a zip instead of clone the repo
             # and plugget now works without git installed !
             import plugget._utils
-            plugget._utils.download_github_repo(self.repo_url, str(target_dir))  # todo support branch and tags
+            plugget._utils.download_github_repo(self.repo_url, str(self._clone_dir))  # todo support branch and tags
             print("download ZIP instead of clone")
         else:
-            run_log(["git", "clone", "--depth", "1", "--progress", self.repo_url, str(target_dir)])
+            run_log(["git", "clone", "--depth", "1", "--progress", self.repo_url, str(self._clone_dir)])
 
         # delete .git folder
-        rmdir(target_dir / ".git")
+        rmdir(self._clone_dir / ".git")
 
         # check if target dir contains any files
-        if not any(target_dir.iterdir()):
-            raise Exception(f"Failed to clone repo to {target_dir}")
+        if not any(self._clone_dir.iterdir()):
+            raise Exception(f"Failed to clone repo to {self._clone_dir}")
 
         if self.repo_paths:
-            return [target_dir / p for p in self.repo_paths]
+            return [self._clone_dir / p for p in self.repo_paths]
         else:
-            return [target_dir]
+            return [self._clone_dir]
 
     def install(self, force=False, *args, **kwargs) -> None:
         from plugget import commands
 
+        # todo use packages meta to check if installed
         if self.is_installed and not force:
             logging.warning(f"{self.package_name} is already installed")
             return
 
-        # install should be handled by its parent the packages meta.
-        # since atm we check is installed. not if other versions are installed
+        # uninstall is handled by the packages meta,
+        # because else we only check if this package is installed,
+        # and not if other package versions are installed
         self.packages_meta.uninstall(self.package_name)
 
         action: "types.ModuleType" = None
@@ -547,24 +547,27 @@ def hash_current_app() -> str:
     # todo ensure this doesnt change mid session
     #  error if it does
 
+    if APP_ID_OVERRIDE:
+        return APP_ID_OVERRIDE
+
     sys_exec_path = sys.executable
     crc32_hash = zlib.crc32(sys_exec_path.encode())
     app_id = hex(crc32_hash & 0xFFFFFFFF)[2:]  # Convert to hex and remove the "0x" prefix
     return app_id
 
 
-def update_app_ids_json(app_id, root_folder_path, ) -> None:
-    """
-    add to json file which hash is which path in root folder.
-    """
-    data = {}
-    try:
-        with open('app_versions.json', 'r') as json_file:
-            data = json.load(json_file)
-    except FileNotFoundError:
-        pass
-
-    data[app_id] = root_folder_path
-
-    with open('app_versions.json', 'w') as json_file:
-        json.dump(data, json_file)
+# def update_app_ids_json(app_id, root_folder_path, ) -> None:
+#     """
+#     add to json file which hash is which path in root folder.
+#     """
+#     data = {}
+#     try:
+#         with open('app_versions.json', 'r') as json_file:
+#             data = json.load(json_file)
+#     except FileNotFoundError:
+#         pass
+#
+#     data[app_id] = root_folder_path
+#
+#     with open('app_versions.json', 'w') as json_file:
+#         json.dump(data, json_file)
