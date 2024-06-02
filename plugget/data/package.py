@@ -41,6 +41,8 @@ def open_folder(path: str):
 class Package(object):
     """
     Manifest & package wrapper
+
+    usually created from Package.from_json(json_path), which sets the manifest path
     """
 
     def __repr__(self):
@@ -63,6 +65,9 @@ class Package(object):
         :param repo_paths: a list containing the subdirectory of the repo where the plugin is located, this becomes pluginname in blender, can contain multiple paths or files
 
         :param version: the version of the plugin e.g. 0.1.0, derived from manifest name
+
+        packages by default load from manifests in a temp folder
+        once installed, they are installed in a permanent folder
         """
         if kwargs:
             logging.warning("Unused kwargs on Package init: '{kwargs}'")
@@ -95,7 +100,13 @@ class Package(object):
         # license = ""
         # tags = []
 
+        # 3. package settings
+
         self.installed_paths: set = set() if installed_paths is None else set(installed_paths)   # list of files cloned locally
+        # since self.installed_paths is not present in the downloaded manifest,
+        # we load the attrs from the installed manifest
+        self.load_attrs_from_installed_manifest()
+
         self._starred = None
         self._stars = None
         self._clone_dir = None
@@ -376,6 +387,10 @@ class Package(object):
         # todo instead of clone can we download the files directly?
         # cant clone to non empty folder, so we need to move files instead. but unreal had permission issues with that
 
+    def load_manifest_dict(self, data):
+        for key, value in data.items():
+            setattr(self, key, value)
+
     def open_docs_URL(self):
         webbrowser.open(self.docs_url)
 
@@ -498,8 +513,19 @@ class Package(object):
 
         # save (slightly modified) manifest to installed packages dir
         # todo check if install was successful
-        installed_manifest_path = self.package_install_dir / self.manifest_path.name
+        self.save_installed_manifest()  # save after install, to save the installed dir in the manifest
+
+    def save_installed_manifest(self):
+        installed_manifest_path = self.package_install_dir / f"{self.version}.json"
         self.to_json(installed_manifest_path)
+
+    def load_attrs_from_installed_manifest(self):
+        installed_manifest_path = self.package_install_dir / f"{self.version}.json"
+        print(installed_manifest_path)
+        if installed_manifest_path.exists():
+            with open(installed_manifest_path, "r") as f:
+                json_data = json.load(f)
+            self.load_manifest_dict(json_data)
 
     def uninstall(self, dependencies=False, **kwargs) -> None:
         for action, action_args, action_kwargs in self.install_actions_args_kwargs:
