@@ -521,7 +521,6 @@ class Package(object):
 
     def load_attrs_from_installed_manifest(self):
         installed_manifest_path = self.package_install_dir / f"{self.version}.json"
-        print(installed_manifest_path)
         if installed_manifest_path.exists():
             with open(installed_manifest_path, "r") as f:
                 json_data = json.load(f)
