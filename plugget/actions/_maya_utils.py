@@ -24,8 +24,9 @@ def get_user_scripts_dir() -> Path:
 
 
 def get_maya_version() -> str:
-    import maya.cmds as cmds
-    return cmds.about(version=True)
+    import maya.mel as mel
+    v = mel.eval('getApplicationVersionAsFloat')  # e.g. 2026.0
+    return str(v).split(".")[0]  # e.g. 2026
 
 
 def get_plugin_path():
