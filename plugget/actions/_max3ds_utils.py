@@ -28,6 +28,6 @@ def get_site_packages() -> str:
     #  might be a problem for pth files
 
 
-def get_plugin_path() -> Path:
+def get_plugins_path() -> Path:
     # https://help.autodesk.com/view/MAXDEV/2023/ENU/?guid=packaging_plugins
     return Path(os.environ.get("APPDATA")) / "Autodesk" / "ApplicationPlugins"

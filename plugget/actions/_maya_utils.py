@@ -29,13 +29,18 @@ def get_maya_version() -> str:
     return str(v).split(".")[0]  # e.g. 2026
 
 
-def get_plugin_path():
-    """return the path to the plugin folder"""
-    # todo support other OS
+def get_user_current_maya_version_dir() -> Path:
+    """path to the user's current Maya version folder,
+    e.g. C:\Users\USERNAME\Documents\maya\2026"""
     documents = Path(os.environ.get("USERPROFILE")) / "Documents"
     maya_version = get_maya_version()
-    plugin_path = documents / "maya" / maya_version / "plug-ins"
-    return plugin_path
+    return documents / "maya" / maya_version
+
+
+def get_plugins_path():
+    """return the path to the plugin folder"""
+    # todo support other OS
+    return get_user_current_maya_version_dir() / "plug-ins"
 
 
 def enable_plugin(name, quiet=True):

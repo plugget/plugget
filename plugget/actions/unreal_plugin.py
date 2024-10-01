@@ -6,11 +6,11 @@ import shutil
 
 
 import plugget.actions._copy_files
-import plugget.actions.unreal_utils
+import plugget.actions.unreal_utils as unreal_utils
 
 
 class _Action(plugget.actions._copy_files.CopyFiles):
-    target_dir = plugget.actions.unreal_utils.get_plugin_path()
+    target_dir = unreal_utils.get_plugins_path()
 
     @classmethod
     def install(cls, package: "plugget.data.Package", **kwargs) -> bool:

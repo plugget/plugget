@@ -29,7 +29,7 @@ def project_site_dir() -> Path:
     return Path(content_path) / r"Python\Lib\site-packages"  # 'C:/Users/USER/MyProject/Content/Python/Lib/site-packages'
 
 
-def get_plugin_path() -> Path:
+def get_plugins_path() -> Path:
     return project_plugins_dir()
 
 

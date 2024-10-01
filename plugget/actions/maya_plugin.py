@@ -3,7 +3,7 @@ import plugget.actions._maya_utils
 
 
 class _Action(plugget.actions._copy_files.CopyFiles):
-    target_dir = plugget.actions._maya_utils.get_plugin_path()
+    target_dir = plugget.actions._maya_utils.get_plugins_path()
 
     @classmethod
     def install(cls, package: "plugget.data.Package", **kwargs) -> bool:

@@ -4,6 +4,9 @@ from pathlib import Path
 
 
 class CopyFiles:
+    """
+    generic class to copy files or folders to a target-path
+    """
     target_dir: Path = None
 
     @classmethod

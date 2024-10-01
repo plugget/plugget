@@ -1,9 +1,9 @@
 import plugget.actions._copy_files
-from plugget.actions._max3ds_utils import get_plugin_path
+from plugget.actions._max3ds_utils import get_plugins_path
 
 
 class _Action(plugget.actions._copy_files.CopyFiles):
-    target_dir = get_plugin_path()
+    target_dir = get_plugins_path()
 
     @classmethod
     def install(cls, package: "plugget.data.Package", **kwargs) -> bool:
