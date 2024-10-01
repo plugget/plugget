@@ -43,6 +43,12 @@ def get_plugins_path():
     return get_user_current_maya_version_dir() / "plug-ins"
 
 
+def get_modules_path():
+    """return the path to the modules folder"""
+    # todo support other OS
+    return get_user_current_maya_version_dir() / "modules"
+
+
 def enable_plugin(name, quiet=True):
     """enable a Maya plugin by name"""
     import maya.cmds as cmds
