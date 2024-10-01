@@ -31,7 +31,7 @@ def get_maya_version() -> str:
 
 def get_user_current_maya_version_dir() -> Path:
     """path to the user's current Maya version folder,
-    e.g. C:\Users\USERNAME\Documents\maya\2026"""
+    e.g. C:\\Users\\USERNAME\\Documents\\maya\\2026"""
     documents = Path(os.environ.get("USERPROFILE")) / "Documents"
     maya_version = get_maya_version()
     return documents / "maya" / maya_version
