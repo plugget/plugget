@@ -69,6 +69,11 @@ def enable_plugin(name:str, enable:bool=True):
     save_project_file_json(uproject)
 
 
+def find_plugin_names(path: Path) -> "list[str]":
+# search for uplugin files in the plugin folder
+    return [uplugin.stem for uplugin in (path).rglob("*.uplugin")]
+
+
 def exec_plugin_startup_code(path: Path):
     # search for uplugin files in the plugin folder
     for uplugin in (path).rglob("*.uplugin"):
