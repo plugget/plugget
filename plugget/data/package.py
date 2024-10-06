@@ -144,6 +144,11 @@ class Package(object):
         else:
             return self._actions
 
+    # setter
+    @actions.setter
+    def actions(self, value):
+        self._actions = value
+
     @property
     def manifest_path(self):
         """path to the package manifest, in the temp plugget repo"""
@@ -389,7 +394,10 @@ class Package(object):
 
     def load_manifest_dict(self, data):
         for key, value in data.items():
-            setattr(self, key, value)
+            try:
+                setattr(self, key, value)
+            except Exception as e:
+                logging.error(f"error setting '{key}' to '{value}': {e}")
 
     def open_docs_URL(self):
         webbrowser.open(self.docs_url)
