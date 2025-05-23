@@ -26,6 +26,11 @@ APP_ID_OVERRIDE = None  # optional, overrides the detected app id.
 
 
 def open_folder(path: str):
+    # if path is a file, open the folder containing the file
+    path = Path(path)
+    if path.is_file():
+        path = path.parent
+
     if not os.path.isdir(path):
         raise NotADirectoryError(f"The path '{path}' is not a directory or does not exist.")
 
@@ -237,9 +242,11 @@ class Package(object):
 
         # add methods for all apps
         # browse to the plugget manifest in explorer or finder
-        actions += [{"label": "📁 local manifest", "command": lambda p=self: open_folder(p.manifest_path.parent)}]
+        p: Package
+        actions += [{"label": "📁 cloned plugget manifest", "command": lambda p=self: open_folder(p.manifest_path.parent)}]
         if self.is_installed:  # open the installed location
-            actions += [{"label": "📁 installed location", "command": lambda p=self: open_folder(p.package_install_dir)}]
+            actions += [{"label": "📁 installed plugget manifest", "command": lambda p=self: open_folder(p.package_install_dir)}]
+            actions += [{"label": "📁 installed files", "command": lambda p=self: open_folder(p.installed_paths[0])}]
         if self.docs_url:  # open the docs URL
             actions += [{"label": "open docs", "command": self.open_docs_URL}]
         if self.repo_url:  # open the repo/source URL
