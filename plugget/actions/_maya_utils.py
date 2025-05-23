@@ -2,6 +2,7 @@ import os
 import sys
 from pathlib import Path
 from plugget.actions._utils import try_except
+import logging
 
 
 def get_interpreter_path() -> Path:
@@ -55,7 +56,7 @@ def enable_plugin(name, quiet=True):
     cmds.loadPlugin(name, quiet=quiet)
     cmds.pluginInfo(name, edit=True, autoload=True)  # set autoload on startup
 
-
+@try_except
 def disable_plugin(name):
     """disable a Maya plugin by name"""
     import maya.cmds as cmds
