@@ -196,6 +196,9 @@ def search(name=None, app=None, verbose=True, version=None, use_cache:bool=False
     meta_packages = [PackagesMeta(manifests_dir=manifest_dir) for manifest_dir in manifest_dirs]
 
     if installed:
+        # TODO we dont save installed status to temp anymore
+        # its now in roaming
+
         # this currently checks if isntalled in active app.
         # todo support external querying of installed packages
         meta_packages = [x for x in meta_packages if x.installed_package]
