@@ -8,7 +8,6 @@ try:
 except ImportError:
     # import vendored version, this allows us to install plugget without dependencies
     # we can then use plugget to update it's own dependencies
-    # TODO add instructions
     from plugget.vendor import py_pip
 
 import os
@@ -124,9 +123,9 @@ class RequirementsAction:
         if not (requirements or package):
             logging.warning("no package provided to RequirementsAction.install method")
 
-        for name in requirements:
+        for package_name in requirements:
             try:
-                print(f"installing '{name}' from requirements.txt")
+                print(f"installing '{package_name}' from requirements.txt")
                 stdout, error = py_pip.install(package_name=package_name, force=force, upgrade=True)
                 print(stdout.decode())
             except Exception as e:
