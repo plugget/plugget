@@ -107,7 +107,7 @@ class RequirementsAction:
         py_pip.python_interpreter = cls.interpreter
 
     @classmethod
-    def install(cls, package: "plugget.data.Package", force=False, requirements: list = None, *args, **kwargs):
+    def install(cls, package: "plugget.data.Package" = None, force=False, requirements: list = None, *args, **kwargs):
         print("install requirements to target", cls.target)
         cls.setup_py_pip()
 
