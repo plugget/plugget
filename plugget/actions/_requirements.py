@@ -77,16 +77,6 @@ def iter_requirements_paths(package: "plugget.data.Package") -> "Generator[Path]
 #     return requirements
 
 
-# todo move to pypip
-def iter_packages_in_requirements(path: "str|Path"):
-    data = Path(path).read_text().splitlines()
-    for line in data:
-        line = line.strip()
-        if line.startswith("#"):  # skip comments
-            continue
-        yield line
-
-
 class RequirementsAction:
     """
     interpreter: Path to interpreter to use for pip commands
@@ -117,7 +107,7 @@ class RequirementsAction:
             package.get_content(use_cached=True)
             for req_path in iter_requirements_paths(package):
                 print("requirements.txt found: ", req_path)
-                for package_name in iter_packages_in_requirements(req_path):
+                for package_name in py_pip.iter_packages_in_requirements(req_path):
                     requirements.append(package_name)
 
         if not (requirements or package):
