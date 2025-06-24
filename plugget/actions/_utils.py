@@ -29,7 +29,9 @@ def get_my_documents() -> Path:
     # todo are there other locations for documents?
 
 
+# todo move to py_pip
 def is_package_installed(package_name):
+    """check if a Python package is installed"""
     try:
         importlib.metadata.version(package_name)
         return True
