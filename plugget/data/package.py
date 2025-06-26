@@ -515,7 +515,10 @@ class Package(object):
                     app_name, package_name = result
                 else:
                     raise Exception(f"expected only 1 ':', got {len(result)-1}. Invalid dependency: {d}")
-                package = commands.search(package_name)[0]  # app=app_name, also support python app dependencies
+                packages_found = commands.search(package_name)
+                if not packages_found:
+                    raise Exception(f"dependency '{d}' not found in plugget repo")
+                package = packages_found[0]  # app=app_name, also support python app dependencies
 
             # if the dependency is a dict, it's a package object, e.g. {"name": "my-exporter", "app": "blender"}
             # that's saved in the same manifest file
