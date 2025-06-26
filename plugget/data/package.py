@@ -416,6 +416,10 @@ class Package(object):
         """
         returns either the files in repo (sparse) or the folder containing the repo
         """
+        if not self.repo_url:
+            logging.info(f"skipping repo clone since repo is not set")
+            return []
+
         self._clone_dir = target_dir or self.clone_dir
         # todo if we clone to a diff dir, we should save the package
 
